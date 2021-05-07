@@ -1,16 +1,15 @@
-package Domain
+package domain
 
 import (
-	"github.com/CMedrado/DesafioStone/Store"
+	"github.com/CMedrado/DesafioStone/store"
 	"time"
 )
 
-
-func (a *Store.ArmazenamentoDeContas) CriarConta(name string, cpf string, secret string) {
+func CriarConta(name string, cpf string, secret string) {
 	id := 5
 	created_at := time.Now().Format("02/01/2006 03:03:05")
-	contaNova := Store.Conta{id, name, cpf, secret, 0, created_at}
-	a.armazenamento[id] = contaNova
+	contaNova := store.Conta{id, name, cpf, secret, 0, created_at}
+	store.TransferenciaDoArmazenamento(id, contaNova)
 }
 
 func (a ArmazenamentoDeContas) MostrarSaldo(id int) int {
@@ -19,10 +18,10 @@ func (a ArmazenamentoDeContas) MostrarSaldo(id int) int {
 }
 
 func InicializaConta() *ArmazenamentoDeContas {
-	return &ArmazenamentoDeContas{map[int]Store.Conta{}}
+	return &ArmazenamentoDeContas{map[int]store.Conta{}}
 }
 
 func (a *ArmazenamentoDeContas) ObterContas() []Store.Conta {
-	var contas []Store.Conta
+	var contas []store.Conta
 	return contas
 }

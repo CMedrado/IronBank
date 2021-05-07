@@ -1,11 +1,11 @@
-package HTTP
+package http
 
 import (
-	"github.com/CMedrado/DesafioStone/Domain"
+	"github.com/CMedrado/DesafioStone/domain"
 	"net/http"
 )
 
-func NovoServidorConta(armazenamento Domain.MetodosDeArmazenamento) *ServidorConta{
+func NovoServidorConta(armazenamento domain.MetodosDeArmazenamento) *ServidorConta {
 	s := new(ServidorConta)
 
 	s.armazenamento = armazenamento
@@ -21,8 +21,8 @@ func NovoServidorConta(armazenamento Domain.MetodosDeArmazenamento) *ServidorCon
 }
 
 //func (s *ServidorConta) AçãoSaldo(w http.ResponseWriter, r *http.Request) {
-	//balance := s.armazenamento.MostrarSaldo(conta)
-	//fmt.Fprint(w, balance)
+//balance := s.armazenamento.MostrarSaldo(conta)
+//fmt.Fprint(w, balance)
 //}
 
 func (s *ServidorConta) AçãoMostrarContas(w http.ResponseWriter, r *http.Request) {
@@ -30,4 +30,3 @@ func (s *ServidorConta) AçãoMostrarContas(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("content-type", "application/json")
 	//json.NewDecoder(w).Encode(s.())
 }
-

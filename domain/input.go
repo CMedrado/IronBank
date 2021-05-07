@@ -1,9 +1,9 @@
-package Domain
+package domain
 
-import "github.com/CMedrado/DesafioStone/Store"
+import "github.com/CMedrado/DesafioStone/store"
 
 type MetodosDeArmazenamento interface {
-	Store.ObterContas() []Store.Conta
+	ObterContas() []store.Conta
 	MostrarSaldo(int) int
 	CriarConta(string, string, string)
 }

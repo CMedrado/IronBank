@@ -1,4 +1,4 @@
-package Store
+package store
 
 type Conta struct {
 	ID        int    `json:"id"`
@@ -11,4 +11,8 @@ type Conta struct {
 
 type ArmazenamentoDeContas struct {
 	armazenamento map[int]Conta
+}
+
+func (a *ArmazenamentoDeContas) TransferenciaDoArmazenamento(id int, conta Conta) {
+	a.armazenamento[id] = conta
 }

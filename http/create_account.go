@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (s *ServidorConta) CreatedAccount(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
 	var requestBody CreatedRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 

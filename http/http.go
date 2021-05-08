@@ -2,31 +2,20 @@ package http
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"net/http"
+	"github.com/gorilla/mux.v1.8.0"
 )
 
-func NovoServidorConta(armazenamento domain.MetodosDeArmazenamento) *ServidorConta {
-	s := new(ServidorConta)
+func NewServerAccount(storaged domain.StorageMethods) *ServerAccount {
+	s := new(ServerAccount)
 
-	s.armazenamento = armazenamento
+	s.storaged = storaged
 
-	roteador := http.NewServeMux()
-	//roteador.Handle("/accounts/{id}/balance", http.HandlerFunc(s.AçãoSaldo))
-	roteador.Handle("/accounts", http.HandlerFunc(s.AçãoMostrarContas))
-	roteador.Handle("/accounts/", http.HandlerFunc(s.CreatedAccount))
+	router := mux.NewRouter()
+	router.HandleFunc("/accounts/{id}/balance", s.GetBalance).Methods("GET")
+	router.HandleFunc("/accounts", s.GetAccounts).Methods("GET")
+	router.HandleFunc("/accounts/", s.CreatedAccount).Methods("POST")
 
-	s.Handler = roteador
+	s.Handler = router
 
 	return s
-}
-
-//func (s *ServidorConta) AçãoSaldo(w http.ResponseWriter, r *http.Request) {
-//balance := s.armazenamento.MostrarSaldo(conta)
-//fmt.Fprint(w, balance)
-//}
-
-func (s *ServidorConta) AçãoMostrarContas(w http.ResponseWriter, r *http.Request) {
-
-	w.Header().Set("content-type", "application/json")
-	//json.NewDecoder(w).Encode(s.())
 }

@@ -11,7 +11,7 @@ type CreatedRequest struct {
 	Secret string `json:"secret"`
 }
 
-type ServidorConta struct {
-	armazenamento domain.MetodosDeArmazenamento
+type ServerAccount struct {
+	storaged domain.StorageMethods
 	http.Handler
 }

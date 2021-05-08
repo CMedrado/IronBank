@@ -1,6 +1,6 @@
 package store
 
-type Conta struct {
+type Account struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	CPF       string `json:"cpf"`
@@ -9,10 +9,18 @@ type Conta struct {
 	CreatedAt string `json:"created_at"`
 }
 
-type ArmazenamentoDeContas struct {
-	armazenamento map[int]Conta
+type AccountBalance struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	CPF       string `json:"cpf"`
+	Balance   int    `json:"balance"`
+	CreatedAt string `json:"created_at"`
 }
 
-func (a *ArmazenamentoDeContas) TransferenciaDoArmazenamento(id int, conta Conta) {
-	a.armazenamento[id] = conta
+type StoredAccount struct {
+	storage map[int]Account
+}
+
+type StoredAccountBalance struct {
+	storage map[int]AccountBalance
 }

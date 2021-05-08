@@ -13,7 +13,7 @@ func NovoServidorConta(armazenamento domain.MetodosDeArmazenamento) *ServidorCon
 	roteador := http.NewServeMux()
 	//roteador.Handle("/accounts/{id}/balance", http.HandlerFunc(s.AçãoSaldo))
 	roteador.Handle("/accounts", http.HandlerFunc(s.AçãoMostrarContas))
-	roteador.Handle("/accounts/", http.HandlerFunc(s.AçãoCriarConta))
+	roteador.Handle("/accounts/", http.HandlerFunc(s.CreatedAccount))
 
 	s.Handler = roteador
 

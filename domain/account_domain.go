@@ -11,13 +11,13 @@ func CreatedAccount(name string, cpf string, secret string) (int, error) {
 	id := rand.Intn(10000000)
 	created_at := time.Now().Format("02/01/2006 03:03:05")
 	newAccount := store.Account{id, name, cpf, secret, 0, created_at}
-	store.StoredAccount.TransferredAccount(store.StoredAccount{}, id, newAccount)
+	store.StoredAccount.TransferredAccount(store.StoredAccount{}, cpf, newAccount)
 	return id, CheckedError(cpf)
 }
 
 //GetBalance requests the salary for the Story by sending the ID
-func GetBalance(id int) int {
-	conta := store.StoredAccount{}.TransferredBalance(id)
+func GetBalance(cpf string) int {
+	conta := store.StoredAccount{}.TransferredBalance(cpf)
 	return conta.Balance
 }
 

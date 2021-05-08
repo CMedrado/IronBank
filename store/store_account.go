@@ -9,6 +9,11 @@ type Account struct {
 	CreatedAt string `json:"created_at"`
 }
 
+type Login struct {
+	CPF    string `json:"cpf"`
+	Secret string `json:"secret"`
+}
+
 type StoredAccount struct {
-	storage map[int]Account
+	storage map[string]Account
 }

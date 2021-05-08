@@ -11,7 +11,7 @@ func NewServerAccount(storaged domain.StorageMethods) *ServerAccount {
 	s.storaged = storaged
 
 	router := mux.NewRouter()
-	router.HandleFunc("/accounts/{id}/balance", s.GetBalance).Methods("GET")
+	router.HandleFunc("/accounts/{cpf}/balance", s.GetBalance).Methods("GET")
 	router.HandleFunc("/accounts", s.GetAccounts).Methods("GET")
 	router.HandleFunc("/accounts/", s.CreatedAccount).Methods("POST")
 

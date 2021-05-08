@@ -5,7 +5,6 @@ import (
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/gorilla/mux.v1.8.0"
 	"net/http"
-	"strconv"
 )
 
 func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
@@ -27,8 +26,7 @@ func (s *ServerAccount) GetAccounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *ServerAccount) GetBalance(w http.ResponseWriter, r *http.Request) {
-	aux := mux.Vars(r)["id"]
-	id, _ := strconv.Atoi(aux)
-	balance := domain.GetBalance(id)
+	cpf := mux.Vars(r)["cpf"]
+	balance := domain.GetBalance(cpf)
 	json.NewEncoder(w).Encode(balance)
 }

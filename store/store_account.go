@@ -15,5 +15,11 @@ type Login struct {
 }
 
 type StoredAccount struct {
-	storage map[string]Account
+	accountStorage map[string]Account
+}
+
+var accountStorage = make(map[string]Account)
+
+func NewStoredAccount() *StoredAccount {
+	return &StoredAccount{accountStorage}
 }

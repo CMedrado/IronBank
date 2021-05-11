@@ -1,14 +1,5 @@
 package domain
 
-import (
-	"errors"
-)
-
-var (
-	ErrInvalidSecret = errors.New("given secret is invalid")
-	ErrInvalidCPF    = errors.New("given cpf is invalid")
-)
-
 //func AuthenticatedLogin(cpf, secret string) (bool, error, int) {
 //	newlogin := store.Login{cpf,secret}
 //	account := store.StoredAccount{}.CheckLogin(cpf)

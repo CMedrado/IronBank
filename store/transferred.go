@@ -1,21 +1,17 @@
 package store
 
-func (a *StoredAccount) TransferredAccount(cpf string, conta Account) {
-	a.storage[cpf] = conta
+func (a *StoredAccount) TransferredAccount(conta Account) {
+	accountStorage[conta.CPF] = conta
 }
 
 func (a StoredAccount) TransferredBalance(cpf string) Account {
-	conta := a.storage[cpf]
-	return conta
+	return accountStorage[cpf]
 }
 
 func (a StoredAccount) TransferredAccounts() map[string]Account {
-	accounts := a.storage
-	return accounts
+	return accountStorage
 }
 
 func (a StoredAccount) CheckLogin(cpf string) Account {
-	account := a.storage[cpf]
-
-	return account
+	return accountStorage[cpf]
 }

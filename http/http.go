@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/mux.v1.8.0"
 )
 
-func NewServerAccount(storaged domain.StorageMethods) *ServerAccount {
+func NewServerAccount(storaged domain.MethodsDomain) *ServerAccount {
 	s := new(ServerAccount)
 
 	s.storaged = storaged

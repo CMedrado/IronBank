@@ -27,6 +27,6 @@ func (s *ServerAccount) GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 func (s *ServerAccount) GetBalance(w http.ResponseWriter, r *http.Request) {
 	cpf := mux.Vars(r)["cpf"]
-	balance := domain.GetBalance(cpf)
+	balance, _ := domain.GetBalance(cpf)
 	json.NewEncoder(w).Encode(balance)
 }

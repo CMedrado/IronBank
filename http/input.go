@@ -12,6 +12,6 @@ type CreatedRequest struct {
 }
 
 type ServerAccount struct {
-	storaged domain.StorageMethods
+	storaged domain.MethodsDomain
 	http.Handler
 }

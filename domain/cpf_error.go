@@ -6,9 +6,12 @@ import (
 )
 
 var (
-	ErrInvalidConta  = errors.New("given account is invalid")
-	ErrInvalidSecret = errors.New("given secret is invalid")
-	ErrInvalidCPF    = errors.New("given cpf is invalid")
+	ErrInvalidConta   = errors.New("given account is invalid")
+	ErrInvalidSecret  = errors.New("given secret is invalid")
+	ErrInvalidCPF     = errors.New("given cpf is invalid")
+	ErrWithoutBalance = errors.New("account without balance")
+	ErrInvalidToken   = errors.New("given token is invalid")
+	ErrInvalidID      = errors.New("given id is invalid")
 )
 
 func CheckedError(cpf string) error {
@@ -30,6 +33,27 @@ func CheckedError(cpf string) error {
 func CheckConta(account store.Account) error {
 	if (account == store.Account{}) {
 		return ErrInvalidConta
+	}
+	return nil
+}
+
+func CheckBalance(person1 store.Account, amount int) error {
+	if person1.Balance < amount {
+		return ErrWithoutBalance
+	}
+	return nil
+}
+
+func CheckLogin(login store.Login) error {
+	if (login == store.Login{}) {
+		return ErrInvalidToken
+	}
+	return nil
+}
+
+func CheckID(transfer store.Transfer) error {
+	if (transfer == store.Transfer{}) {
+		return ErrInvalidID
 	}
 	return nil
 }

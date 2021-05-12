@@ -28,8 +28,9 @@ func GetBalance(cpf string) (int, error) {
 	err := CheckConta(conta)
 	if err != nil {
 		return 0, err
+	} else {
+		return conta.Balance, nil
 	}
-	return conta.Balance, nil
 }
 
 //GetAccounts s

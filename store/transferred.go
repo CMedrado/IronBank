@@ -16,16 +16,20 @@ func (a StoredAccount) CheckLogin(cpf string) Account {
 	return accountStorage[cpf]
 }
 
-func (a *StoredLogin) CreatedLogin(token int, cpf string, secret string) {
-	accountLogin[token] = Login{cpf, secret, token}
-}
-
 func (a StoredLogin) GetLogin(token int) Login {
 	return accountLogin[token]
 }
 
-func (a StoredTransfer) GetTransfers() map[int]map[int]Transfer {
-	return accountTransfer
+func (a *StoredToken) CreatedToken(id int, token int) {
+	accountToken[id] = Token{token, id}
+}
+
+func (a *StoredToken) GetTokenID(id int) Token {
+	return accountToken[id]
+}
+
+func (a StoredTransferTwo) GetTransfers(accountOriginID int) map[int]Transfer {
+	return accountTransferTwo[accountOriginID]
 }
 
 func (a StoredAccount) UpdateBalance(person1, person2 Account) {
@@ -33,6 +37,6 @@ func (a StoredAccount) UpdateBalance(person1, person2 Account) {
 	accountStorage[person2.CPF] = person2
 }
 
-func (a StoredTransfer) CreatedTransfer(transfer Transfer) {
-	accountTransfer[transfer.ID][transfer.AccountOriginID] = transfer
+func (a StoredTransferTwo) CreatedTransfer(transfer Transfer) {
+	accountTransferTwo[transfer.AccountOriginID][transfer.ID] = transfer
 }

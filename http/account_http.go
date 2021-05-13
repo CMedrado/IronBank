@@ -2,9 +2,16 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/store"
 	"github.com/gorilla/mux.v1.8.0"
 	"net/http"
+)
+
+var (
+	accountStorage = store.NewStoredAccount()
+	accountUseCase = domain.AccountUsecase{Store: accountStorage}
 )
 
 func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
@@ -13,20 +20,47 @@ func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	idAccount, err := domain.CreatedAccount(requestBody.Name, requestBody.CPF, requestBody.Secret)
+	idAccount, err := accountUseCase.CreateAccount(requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
 
-	json.NewEncoder(w).Encode(idAccount)
+	if err != nil {
+		switch err {
+		case errors.New("given cpf is invalid"):
+			w.WriteHeader(http.StatusUnauthorized)
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		return
+	}
+
+	response := CreatedRequest{ID: idAccount}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+
+	json.NewEncoder(w).Encode(response)
 }
 
 func (s *ServerAccount) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
-	json.NewEncoder(w).Encode(domain.GetAccounts())
+	json.NewEncoder(w).Encode(accountUseCase.GetAccounts())
 }
 
 func (s *ServerAccount) GetBalance(w http.ResponseWriter, r *http.Request) {
 	cpf := mux.Vars(r)["cpf"]
-	balance, _ := domain.GetBalance(cpf)
-	json.NewEncoder(w).Encode(balance)
+	response, err := accountUseCase.GetBalance(cpf)
+
+	if err != nil {
+		switch err {
+		case errors.New("given account is invalid"):
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		return
+	}
+
+	w.Header().Set("content-type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

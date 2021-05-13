@@ -4,39 +4,50 @@ import (
 	"github.com/CMedrado/DesafioStone/store"
 )
 
-func GetTransfers(id int) []store.Transfer {
-	transferMethod := store.StoredTransfer{}
-	transfers := transferMethod.GetTransfers()
+func (auc AccountUsecase) GetTransfers(accountOriginID int, token int) ([]store.Transfer, error) {
+	transfers := auc.Transfer.GetTransfers(accountOriginID)
+	tokenStore := auc.Token.GetTokenID(accountOriginID)
 	var transfer []store.Transfer
-	transerr := transfers[id]
-	for _, a := range transfers[id] {
+
+	err := CheckID(token, accountOriginID, tokenStore)
+	if err != nil {
+		return transfer, err
+	}
+
+	for _, a := range transfers {
 		transfer = append(transfer, a)
 	}
 
-	return transfer
+	return transfer, nil
 }
 
-func MakeTransfers(accountOriginID int, cpfDestination string, amount int) error {
-	accountsMethods := store.StoredAccount{}
-	loginMethod := store.StoredLogin{}
-	loginTransfer := store.StoredTransfer{}
-	login := loginMethod.GetLogin(accountOriginID)
-	person1 := accountsMethods.TransferredBalance(login.CPF)
-	person2 := accountsMethods.TransferredBalance(cpfDestination)
-	err := CheckLogin(login)
+func (auc AccountUsecase) MakeTransfers(accountOriginID int, token int, accountDestinationID int, amount int) (error, int) {
+	tokenStore := auc.Token.GetTokenID(accountOriginID)
+
+	err := CheckID(token, accountOriginID, tokenStore)
 	if err != nil {
-		return err
+		return err, 0
 	}
+
+	accountOrigin := auc.SearchID(accountOriginID)
+	accountDestination := auc.SearchID(accountDestinationID)
+
+	person1 := auc.Store.TransferredBalance(accountOrigin.CPF)
+	person2 := auc.Store.TransferredBalance(accountDestination.CPF)
+
 	err = CheckBalance(person1, amount)
 	if err != nil {
-		return err
+		return err, 0
 	}
+
 	person1.Balance = person1.Balance - amount
 	person2.Balance = person2.Balance + amount
-	accountsMethods.UpdateBalance(person1, person2)
-	accountOriginID = Random()
-	createdAt := CreatedAt()
-	transfer := store.Transfer{person1.ID, accountOriginID, cpfDestination, amount, createdAt}
-	loginTransfer.CreatedTransfer(transfer)
-	return nil
+
+	auc.Store.UpdateBalance(person1, person2)
+
+	id := Random()
+	transfer := store.Transfer{id, accountOriginID, accountDestinationID, amount, CreatedAt()}
+	auc.Transfer.CreatedTransfer(transfer)
+
+	return nil, id
 }

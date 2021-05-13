@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrInvalidConta   = errors.New("given account is invalid")
+	ErrInvalidAccount = errors.New("given account is invalid")
 	ErrInvalidSecret  = errors.New("given secret is invalid")
 	ErrInvalidCPF     = errors.New("given cpf is invalid")
 	ErrWithoutBalance = errors.New("account without balance")
@@ -30,9 +30,9 @@ func CheckedError(cpf string) error {
 	return nil
 }
 
-func CheckConta(account store.Account) error {
+func CheckAccount(account store.Account) error {
 	if (account == store.Account{}) {
-		return ErrInvalidConta
+		return ErrInvalidAccount
 	}
 	return nil
 }
@@ -44,16 +44,29 @@ func CheckBalance(person1 store.Account, amount int) error {
 	return nil
 }
 
-func CheckLogin(login store.Login) error {
-	if (login == store.Login{}) {
-		return ErrInvalidToken
+func CheckLogin(account store.Account, newlogin store.Login) error {
+
+	if account.CPF != newlogin.CPF {
+		return ErrInvalidCPF
+	}
+	if account.Secret != newlogin.Secret {
+		return ErrInvalidSecret
 	}
 	return nil
 }
 
-func CheckID(transfer store.Transfer) error {
-	if (transfer == store.Transfer{}) {
+//func CheckTransfer(transfer store.Transfer) error {
+//	if (transfer[id] == store.Transfer{}) {
+//		return ErrInvalidID
+//	}
+//	return nil
+//}
+
+func CheckID(token int, accountOriginID int, tokenStore store.Token) error {
+	if tokenStore.AccountOriginID != accountOriginID {
 		return ErrInvalidID
+	} else if tokenStore.Token != token || tokenStore.Token == 0 {
+		return ErrInvalidToken
 	}
 	return nil
 }

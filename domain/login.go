@@ -1,21 +1,23 @@
 package domain
 
 import (
+	"crypto/sha256"
 	"github.com/CMedrado/DesafioStone/store"
-	"math/rand"
 )
 
-func AuthenticatedLogin(cpf, secret string) (bool, error, int) {
-	newlogin := store.Login{cpf, secret, 0}
-	account := store.StoredAccount{}.CheckLogin(cpf)
-	if account.CPF != newlogin.CPF {
-		return false, ErrInvalidCPF, 0
+func (auc AccountUsecase) AuthenticatedLogin(cpf, secret string) (error, int) {
+	secretHash := sha256.Sum256([]byte(secret))
+	newLogin := store.Login{cpf, secretHash}
+	account := auc.Store.CheckLogin(cpf)
+
+	err := CheckLogin(account, newLogin)
+	if err != nil {
+		return err, 0
 	}
-	if account.Secret != newlogin.Secret {
-		return false, ErrInvalidSecret, 0
-	}
-	token := rand.Intn(10000000)
-	storelogin := store.StoredLogin{}
-	storelogin.CreatedLogin(token, cpf, secret)
-	return true, nil, token
+
+	token := Random()
+	id := auc.Store.TransferredAccounts()
+	auc.Token.CreatedToken(id[cpf].ID, token)
+
+	return nil, token
 }

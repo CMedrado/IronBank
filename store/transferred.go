@@ -47,3 +47,11 @@ func (a *StoredTransferTwo) CreatedTransferTwo(transfer Transfer, id int) {
 	s := storedTransfer.CreatedTransfer(transfer)
 	accountTransferTwo[id] = s
 }
+
+func (a StoredAccount) VoltaCPF(cpf string) int {
+	return accountStorage[cpf].ID
+}
+
+func (a StoredToken) VoltaToken(id int) int {
+	return accountToken[id].Token
+}

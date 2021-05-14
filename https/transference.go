@@ -50,6 +50,8 @@ func (s *ServerAccount) MakeTransfers(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotAcceptable)
 		case errors.New("account without balance"):
 			w.WriteHeader(http.StatusPaymentRequired)
+		case errors.New("ErrInvalidToken"):
+			w.WriteHeader(http.StatusUnauthorized)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}

@@ -15,7 +15,7 @@ type AccountUsecase struct {
 func (auc *AccountUsecase) CreateAccount(name string, cpf string, secret string, balance uint) (int, error) {
 	err := CheckedError(cpf)
 	if err != nil {
-		return 0, ErrInvalidCPF
+		return 0, err
 	} else {
 		id := Random()
 		secretHash := Hash(secret)

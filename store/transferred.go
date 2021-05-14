@@ -1,7 +1,7 @@
 package store
 
-func (a *StoredAccount) TransferredAccount(conta Account) {
-	accountStorage[conta.CPF] = conta
+func (a *StoredAccount) TransferredAccount(account Account) {
+	accountStorage[account.CPF] = account
 }
 
 func (a StoredAccount) TransferredBalance(cpf string) Account {
@@ -28,8 +28,8 @@ func (a *StoredToken) GetTokenID(id int) Token {
 	return accountToken[id]
 }
 
-func (a StoredTransferTwo) GetTransfers(accountOriginID int) map[int]Transfer {
-	return accountTransferTwo[accountOriginID]
+func (a *StoredTransferTwo) GetTransfers(s int) map[int]Transfer {
+	return accountTransferTwo[s].accountTransfer
 }
 
 func (a StoredAccount) UpdateBalance(person1, person2 Account) {
@@ -37,6 +37,13 @@ func (a StoredAccount) UpdateBalance(person1, person2 Account) {
 	accountStorage[person2.CPF] = person2
 }
 
-func (a StoredTransferTwo) CreatedTransfer(transfer Transfer) {
-	accountTransferTwo[transfer.AccountOriginID][transfer.ID] = transfer
+func (a *StoredTransfer) CreatedTransfer(transfer Transfer) StoredTransfer {
+	accountTransfer[transfer.ID] = transfer
+	return StoredTransfer{accountTransfer: accountTransfer}
+}
+
+func (a *StoredTransferTwo) CreatedTransferTwo(transfer Transfer, id int) {
+	storedTransfer := StoredTransfer{}
+	s := storedTransfer.CreatedTransfer(transfer)
+	accountTransferTwo[id] = s
 }

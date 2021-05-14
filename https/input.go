@@ -1,4 +1,4 @@
-package http
+package https
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
@@ -10,7 +10,7 @@ type CreatedRequest struct {
 	Name    string `json:"name"`
 	CPF     string `json:"cpf"`
 	Secret  string `json:"secret"`
-	Balance int    `json:"balance"`
+	Balance uint   `json:"balance"`
 }
 
 type LoginRequest struct {
@@ -24,11 +24,11 @@ type TokenRequest struct {
 }
 
 type TransfersRequest struct {
-	Token                int `json:"token"`
-	AccountOriginID      int `json:"account_origin_id"`
-	AccountDestinationID int `json:"account_destination_id"`
-	Amount               int `json:"amount"`
-	ID                   int `json:"id"`
+	Token                int  `json:"token"`
+	AccountOriginID      int  `json:"account_origin_id"`
+	AccountDestinationID int  `json:"account_destination_id"`
+	Amount               uint `json:"amount"`
+	ID                   int  `json:"id"`
 }
 
 type ServerAccount struct {

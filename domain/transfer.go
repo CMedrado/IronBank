@@ -14,23 +14,40 @@ func (auc AccountUsecase) GetTransfers(accountOriginID int, token int) ([]store.
 		return transfer, err
 	}
 
-	for _, a := range transfers {
-		transfer = append(transfer, a)
+	for m, a := range transfers {
+		if transfers[m].AccountDestinationID == accountOriginID {
+			transfer = append(transfer, a)
+		}
 	}
 
 	return transfer, nil
 }
 
-func (auc AccountUsecase) MakeTransfers(accountOriginID int, token int, accountDestinationID int, amount int) (error, int) {
-	tokenStore := auc.Token.GetTokenID(accountOriginID)
+func (auc AccountUsecase) MakeTransfers(accountOriginID int, token int, accountDestinationID int, amount uint) (error, int) {
+	err := CheckAmount(amount)
 
-	err := CheckID(token, accountOriginID, tokenStore)
 	if err != nil {
 		return err, 0
 	}
 
-	accountOrigin := auc.SearchID(accountOriginID)
-	accountDestination := auc.SearchID(accountDestinationID)
+	tokenStore := auc.Token.GetTokenID(accountOriginID)
+
+	err = CheckID(token, accountOriginID, tokenStore)
+	if err != nil {
+		return err, 0
+	}
+
+	accountOrigin, err := auc.SearchID(accountOriginID)
+
+	if err != nil {
+		return err, 0
+	}
+
+	accountDestination, err := auc.SearchID(accountDestinationID)
+
+	if err != nil {
+		return err, 0
+	}
 
 	person1 := auc.Store.TransferredBalance(accountOrigin.CPF)
 	person2 := auc.Store.TransferredBalance(accountDestination.CPF)
@@ -46,8 +63,9 @@ func (auc AccountUsecase) MakeTransfers(accountOriginID int, token int, accountD
 	auc.Store.UpdateBalance(person1, person2)
 
 	id := Random()
-	transfer := store.Transfer{id, accountOriginID, accountDestinationID, amount, CreatedAt()}
-	auc.Transfer.CreatedTransfer(transfer)
+	createdAt := CreatedAt()
+	transfer := store.Transfer{id, accountOriginID, accountDestinationID, amount, createdAt}
+	auc.Transfer.CreatedTransferTwo(transfer, accountDestinationID)
 
 	return nil, id
 }

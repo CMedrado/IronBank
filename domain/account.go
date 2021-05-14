@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"crypto/sha256"
 	"github.com/CMedrado/DesafioStone/store"
 )
 
@@ -13,22 +12,22 @@ type AccountUsecase struct {
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *AccountUsecase) CreateAccount(name string, cpf string, secret string, balance int) (int, error) {
+func (auc *AccountUsecase) CreateAccount(name string, cpf string, secret string, balance uint) (int, error) {
 	err := CheckedError(cpf)
 	if err != nil {
 		return 0, ErrInvalidCPF
 	} else {
 		id := Random()
-		secretHash := sha256.Sum256([]byte(secret))
+		secretHash := Hash(secret)
 		cpf = CpfReplace(cpf)
-		newAccount := store.Account{id, name, cpf, secretHash, 0, CreatedAt()}
+		newAccount := store.Account{id, name, cpf, secretHash, balance, CreatedAt()}
 		auc.Store.TransferredAccount(newAccount)
 		return id, err
 	}
 }
 
 //GetBalance requests the salary for the Story by sending the ID
-func (auc *AccountUsecase) GetBalance(cpf string) (int, error) {
+func (auc *AccountUsecase) GetBalance(cpf string) (uint, error) {
 	cpf = CpfReplace(cpf)
 	conta := auc.Store.TransferredBalance(cpf)
 	err := CheckAccount(conta)

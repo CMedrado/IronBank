@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"crypto/sha1"
-	"fmt"
+	"crypto/md5"
+	"encoding/hex"
 	"github.com/CMedrado/DesafioStone/store"
 	"math/rand"
 	"strings"
@@ -17,28 +17,30 @@ func Random() int {
 	return rand.Intn(100000000)
 }
 
-func (auc AccountUsecase) SearchID(id int) store.Account {
+func (auc AccountUsecase) SearchID(id int) (store.Account, error) {
 	accounts := auc.Store.TransferredAccounts()
 	account := store.Account{}
+
 	for _, a := range accounts {
 		if a.ID == id {
 			account = a
 		}
 	}
 
-	return account
+	err := CheckExistID(account)
+
+	return account, err
 }
 
 func CpfReplace(cpf string) string {
 	cpfReplace := strings.Replace(cpf, ".", "", 2)
-	cpfReplace = strings.Replace(cpf, "-", "", 1)
+	cpfReplace = strings.Replace(cpfReplace, "-", "", 1)
 	return cpfReplace
 }
 
-func hash(b []byte) string {
-	h := sha1.New()
-	h.Write(b)
-	sum := h.Sum(nil)
-	armored := fmt.Sprintf("%x", sum)
-	return armored
+func Hash(secret string) string {
+	secretHash := md5.New()
+	secretHash.Write([]byte(secret))
+	secretHashFinal := hex.EncodeToString(secretHash.Sum(nil))
+	return secretHashFinal
 }

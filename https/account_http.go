@@ -1,11 +1,11 @@
-package http
+package https
 
 import (
 	"encoding/json"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/CMedrado/DesafioStone/store"
-	"github.com/gorilla/mux.v1.8.0"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 

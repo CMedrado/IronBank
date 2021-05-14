@@ -12,6 +12,7 @@ var (
 	ErrWithoutBalance = errors.New("account without balance")
 	ErrInvalidToken   = errors.New("given token is invalid")
 	ErrInvalidID      = errors.New("given id is invalid")
+	ErrInvalidAmount  = errors.New("given amount is invalid")
 )
 
 func CheckedError(cpf string) error {
@@ -37,7 +38,7 @@ func CheckAccount(account store.Account) error {
 	return nil
 }
 
-func CheckBalance(person1 store.Account, amount int) error {
+func CheckBalance(person1 store.Account, amount uint) error {
 	if person1.Balance < amount {
 		return ErrWithoutBalance
 	}
@@ -67,6 +68,20 @@ func CheckID(token int, accountOriginID int, tokenStore store.Token) error {
 		return ErrInvalidID
 	} else if tokenStore.Token != token || tokenStore.Token == 0 {
 		return ErrInvalidToken
+	}
+	return nil
+}
+
+func CheckExistID(account store.Account) error {
+	if (account == store.Account{}) {
+		return ErrInvalidID
+	}
+	return nil
+}
+
+func CheckAmount(amount uint) error {
+	if amount <= 0 {
+		return ErrInvalidAmount
 	}
 	return nil
 }

@@ -1,8 +1,8 @@
-package http
+package https
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/gorilla/mux.v1.8.0"
+	"github.com/gorilla/mux"
 )
 
 func NewServerAccount(storaged domain.MethodsDomain) *ServerAccount {

@@ -20,8 +20,7 @@ type Login struct {
 }
 
 type Token struct {
-	Token           int `json:"token"`
-	AccountOriginID int `json:"accountoriginid"`
+	Token string `json:"token"`
 }
 
 type Transfer struct {

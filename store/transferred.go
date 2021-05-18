@@ -20,8 +20,8 @@ func (a StoredLogin) GetLogin(token int) Login {
 	return accountLogin[token]
 }
 
-func (a *StoredToken) CreatedToken(id int, token int) {
-	accountToken[id] = Token{token, id}
+func (a *StoredToken) CreatedToken(id int, token string) {
+	accountToken[id] = Token{token}
 }
 
 func (a *StoredToken) GetTokenID(id int) Token {
@@ -52,6 +52,6 @@ func (a StoredAccount) VoltaCPF(cpf string) int {
 	return accountStorage[cpf].ID
 }
 
-func (a StoredToken) VoltaToken(id int) int {
+func (a StoredToken) VoltaToken(id int) string {
 	return accountToken[id].Token
 }

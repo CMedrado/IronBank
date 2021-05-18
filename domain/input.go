@@ -4,11 +4,11 @@ import "github.com/CMedrado/DesafioStone/store"
 
 type MethodsDomain interface {
 	GetAccounts() []store.Account
-	GetBalance(string) (uint, error)
+	GetBalance(int) (uint, error)
 	CreateAccount(string, string, string, uint) (int, error)
-	AuthenticatedLogin(string, string) (error, int)
-	GetTransfers(int, int) ([]store.Transfer, error)
-	MakeTransfers(int, int, int, uint) (error, int)
+	AuthenticatedLogin(string, string) (error, string)
+	GetTransfers(string) ([]store.Transfer, error)
+	MakeTransfers(string, int, uint) (error, int)
 }
 
 //type MethodsStore interface {

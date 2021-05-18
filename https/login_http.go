@@ -2,7 +2,6 @@ package https
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
@@ -18,10 +17,10 @@ func (s *ServerAccount) AuthenticatedLogin(w http.ResponseWriter, r *http.Reques
 	err, token := accountUseCase.AuthenticatedLogin(requestBody.CPF, requestBody.Secret)
 
 	if err != nil {
-		switch err {
-		case errors.New("given cpf is invalid"):
+		switch err.Error() {
+		case "given cpf is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
-		case errors.New("given secret is invalid"):
+		case "given secret is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
 		default:
 			w.WriteHeader(http.StatusBadRequest)

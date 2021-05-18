@@ -4,18 +4,25 @@ import (
 	"github.com/CMedrado/DesafioStone/store"
 )
 
-func (auc AccountUsecase) GetTransfers(accountOriginID int, token int) ([]store.Transfer, error) {
-	transfers := auc.Transfer.GetTransfers(accountOriginID)
-	tokenStore := auc.Token.GetTokenID(accountOriginID)
+func (auc AccountUsecase) GetTransfers(token string) ([]store.Transfer, error) {
 	var transfer []store.Transfer
+	accountOriginID := DecoderToken(token)
+	transfers := auc.Transfer.GetTransfers(accountOriginID)
+	_, err := auc.SearchID(accountOriginID)
 
-	err := CheckID(token, accountOriginID, tokenStore)
+	if err != nil {
+		return transfer, err
+	}
+
+	accountToken := auc.Token.GetTokenID(accountOriginID)
+	err = CheckToken(token, accountToken)
+
 	if err != nil {
 		return transfer, err
 	}
 
 	for m, a := range transfers {
-		if transfers[m].AccountDestinationID == accountOriginID {
+		if transfers[m].AccountOriginID == accountOriginID {
 			transfer = append(transfer, a)
 		}
 	}
@@ -23,21 +30,22 @@ func (auc AccountUsecase) GetTransfers(accountOriginID int, token int) ([]store.
 	return transfer, nil
 }
 
-func (auc AccountUsecase) MakeTransfers(accountOriginID int, token int, accountDestinationID int, amount uint) (error, int) {
+func (auc AccountUsecase) MakeTransfers(token string, accountDestinationID int, amount uint) (error, int) {
 	err := CheckAmount(amount)
 
 	if err != nil {
 		return err, 0
 	}
 
-	tokenStore := auc.Token.GetTokenID(accountOriginID)
+	accountOriginID := DecoderToken(token)
+	accountOrigin, err := auc.SearchID(accountOriginID)
 
-	err = CheckID(token, accountOriginID, tokenStore)
 	if err != nil {
 		return err, 0
 	}
 
-	accountOrigin, err := auc.SearchID(accountOriginID)
+	accountToken := auc.Token.GetTokenID(accountOriginID)
+	err = CheckToken(token, accountToken)
 
 	if err != nil {
 		return err, 0

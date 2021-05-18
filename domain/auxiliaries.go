@@ -2,9 +2,11 @@ package domain
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"github.com/CMedrado/DesafioStone/store"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -43,4 +45,12 @@ func Hash(secret string) string {
 	secretHash.Write([]byte(secret))
 	secretHashFinal := hex.EncodeToString(secretHash.Sum(nil))
 	return secretHashFinal
+}
+
+func DecoderToken(token string) int {
+	tokeDecode, _ := base64.StdEncoding.DecodeString(token)
+	idString := strings.Split(string(tokeDecode), ":")
+	idInt, _ := strconv.Atoi(idString[3])
+
+	return idInt
 }

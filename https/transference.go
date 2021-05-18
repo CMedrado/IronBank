@@ -2,26 +2,19 @@ package https
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
 func (s *ServerAccount) GetTransfers(w http.ResponseWriter, r *http.Request) {
-	var requestBody TokenRequest
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	token := r.Header.Get("Authorization:")
+
+	Transfers, err := accountUseCase.GetTransfers(token)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	Transfers, err := accountUseCase.GetTransfers(requestBody.AccountOriginID, requestBody.Token)
-
-	if err != nil {
-		switch err {
-		case errors.New("given id is invalid"):
+		switch err.Error() {
+		case "given id is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
-		case errors.New("given token is invalid"):
+		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
@@ -30,28 +23,32 @@ func (s *ServerAccount) GetTransfers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(Transfers)
 }
 
 func (s *ServerAccount) MakeTransfers(w http.ResponseWriter, r *http.Request) {
 	var requestBody TransfersRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	token := r.Header.Get("Authorization:")
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err, id := accountUseCase.MakeTransfers(requestBody.AccountOriginID, requestBody.Token, requestBody.AccountDestinationID, requestBody.Amount)
+	err, id := accountUseCase.MakeTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
 
 	if err != nil {
-		switch err {
-		case errors.New("given id is invalid"):
+		switch err.Error() {
+		case "given id is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
-		case errors.New("account without balance"):
+		case "account without balance":
 			w.WriteHeader(http.StatusPaymentRequired)
-		case errors.New("ErrInvalidToken"):
+		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
+		case "given amount is invalid":
+			w.WriteHeader(http.StatusPaymentRequired)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}

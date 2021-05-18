@@ -6,41 +6,33 @@ import (
 )
 
 var (
-	ErrInvalidAccount = errors.New("given account is invalid")
-	ErrInvalidSecret  = errors.New("given secret is invalid")
-	ErrInvalidCPF     = errors.New("given cpf is invalid")
-	ErrWithoutBalance = errors.New("account without balance")
-	ErrInvalidToken   = errors.New("given token is invalid")
-	ErrInvalidID      = errors.New("given id is invalid")
-	ErrInvalidAmount  = errors.New("given amount is invalid")
+	errInvalidSecret  = errors.New("given secret is invalid")
+	errInvalidCPF     = errors.New("given cpf is invalid")
+	errWithoutBalance = errors.New("account without balance")
+	errInvalidToken   = errors.New("given token is invalid")
+	errInvalidID      = errors.New("given id is invalid")
+	errInvalidAmount  = errors.New("given amount is invalid")
 )
 
 func CheckedError(cpf string) error {
 
 	if len(cpf) != 11 && len(cpf) != 14 {
-		return ErrInvalidCPF
+		return errInvalidCPF
 	}
 
 	if len(cpf) == 14 {
 		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
 			return nil
 		} else {
-			return ErrInvalidCPF
+			return errInvalidCPF
 		}
-	}
-	return nil
-}
-
-func CheckAccount(account store.Account) error {
-	if (account == store.Account{}) {
-		return ErrInvalidAccount
 	}
 	return nil
 }
 
 func CheckBalance(person1 store.Account, amount uint) error {
 	if person1.Balance < amount {
-		return ErrWithoutBalance
+		return errWithoutBalance
 	}
 	return nil
 }
@@ -48,40 +40,31 @@ func CheckBalance(person1 store.Account, amount uint) error {
 func CheckLogin(account store.Account, newlogin store.Login) error {
 
 	if account.CPF != newlogin.CPF {
-		return ErrInvalidCPF
+		return errInvalidCPF
 	}
 	if account.Secret != newlogin.Secret {
-		return ErrInvalidSecret
+		return errInvalidSecret
 	}
 	return nil
 }
 
-//func CheckTransfer(transfer store.Transfer) error {
-//	if (transfer[id] == store.Transfer{}) {
-//		return ErrInvalidID
-//	}
-//	return nil
-//}
-
-func CheckID(token int, accountOriginID int, tokenStore store.Token) error {
-	if tokenStore.AccountOriginID != accountOriginID {
-		return ErrInvalidID
-	} else if tokenStore.Token != token || tokenStore.Token == 0 {
-		return ErrInvalidToken
+func CheckToken(token string, tokens store.Token) error {
+	if token != tokens.Token {
+		return errInvalidToken
 	}
 	return nil
 }
 
 func CheckExistID(account store.Account) error {
 	if (account == store.Account{}) {
-		return ErrInvalidID
+		return errInvalidID
 	}
 	return nil
 }
 
 func CheckAmount(amount uint) error {
 	if amount <= 0 {
-		return ErrInvalidAmount
+		return errInvalidAmount
 	}
 	return nil
 }

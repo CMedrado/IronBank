@@ -19,14 +19,14 @@ type LoginRequest struct {
 }
 
 type TokenRequest struct {
-	Token           int `json:"token"`
-	AccountOriginID int `json:"account_origin_id"`
+	Token           string `json:"token"`
+	AccountOriginID int    `json:"accountoriginid"`
 }
 
 type TransfersRequest struct {
+	AccountOriginID      int  `json:"accountoriginid"`
 	Token                int  `json:"token"`
-	AccountOriginID      int  `json:"account_origin_id"`
-	AccountDestinationID int  `json:"account_destination_id"`
+	AccountDestinationID int  `json:"accountdestinationid"`
 	Amount               uint `json:"amount"`
 	ID                   int  `json:"id"`
 }

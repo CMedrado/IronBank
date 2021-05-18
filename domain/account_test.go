@@ -83,30 +83,30 @@ func TestCreateAccount(t *testing.T) {
 func TestGetBalance(t *testing.T) {
 	tt := []struct {
 		name    string
-		in      string
+		in      int
 		wantErr bool
 		want    uint
 	}{
 		{
 			name:    "should successfully get balance with formatted CPF",
-			in:      "081.313.910-43",
+			in:      982,
 			wantErr: false,
 			want:    5000,
 		},
 		{
 			name:    "should successfully get balance with unformatted CPF",
-			in:      "384.531.620-93",
+			in:      981,
 			wantErr: false,
 			want:    6000,
 		},
 		{
 			name:    "should unsuccessfully get balance when CPF is invalid",
-			in:      "398.176200-26",
+			in:      398 - 6,
 			wantErr: true,
 		},
 		{
 			name:    "should unsuccessfully get balance when dont exist account",
-			in:      "062.136.280-37",
+			in:      06237,
 			wantErr: true,
 		},
 	}

@@ -83,8 +83,8 @@ func TestAuthenticatedLogin(t *testing.T) {
 				t.Error("wanted err but got nil")
 			}
 
-			if gotToken == 0 && !testCase.wantErr && gotErr != nil {
-				t.Errorf("expected an Token but got %d", gotToken)
+			if gotToken == "" && !testCase.wantErr && gotErr != nil {
+				t.Errorf("expected an Token but got %s", gotToken)
 			}
 		})
 	}

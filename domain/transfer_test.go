@@ -1,26 +1,21 @@
 package domain
 
 import (
+	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
 
 type CreateTransferInput struct {
 	AccountOriginID      int
-	Token                int
+	Token                string
 	AccountDestinationID int
 	Amount               uint
-}
-
-type CreateTransfersInput struct {
-	ID                   int
-	AccountOriginID      int
-	AccountDestinationID int
-	Amount               uint
-	CreatedAt            string
 }
 
 func TestMakeTransfers(t *testing.T) {
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 19727887"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 19727887"))
 	tt := []struct {
 		name    string
 		in      CreateTransferInput
@@ -29,28 +24,16 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should successfully transfer amount",
 			in: CreateTransferInput{
-				AccountOriginID:      98498081,
-				Token:                27131847,
+				Token:                msg,
 				AccountDestinationID: 19727887,
 				Amount:               300,
 			},
 			wantErr: false,
 		},
 		{
-			name: "should unsuccessfully transfer amount when there is no account origin id",
-			in: CreateTransferInput{
-				AccountOriginID:      98498761,
-				Token:                27131847,
-				AccountDestinationID: 19727887,
-				Amount:               300,
-			},
-			wantErr: true,
-		},
-		{
 			name: "should unsuccessfully transfer amount when there is wrong token",
 			in: CreateTransferInput{
-				AccountOriginID:      98498081,
-				Token:                27131807,
+				Token:                msgs,
 				AccountDestinationID: 19727887,
 				Amount:               300,
 			},
@@ -59,8 +42,7 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is no account destination id",
 			in: CreateTransferInput{
-				AccountOriginID:      98498081,
-				Token:                27131847,
+				Token:                msg,
 				AccountDestinationID: 19727807,
 				Amount:               300,
 			},
@@ -69,8 +51,7 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is too slow",
 			in: CreateTransferInput{
-				AccountOriginID:      98498081,
-				Token:                27131847,
+				Token:                msg,
 				AccountDestinationID: 19727807,
 				Amount:               0,
 			},
@@ -79,8 +60,7 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is greater than the balance",
 			in: CreateTransferInput{
-				AccountOriginID:      98498081,
-				Token:                27131847,
+				Token:                msg,
 				AccountDestinationID: 19727807,
 				Amount:               5200,
 			},
@@ -102,9 +82,9 @@ func TestMakeTransfers(t *testing.T) {
 
 			usecase.Store.TransferredAccount(listAccount)
 			usecase.Store.TransferredAccount(listAccounts)
-			usecase.Token.CreatedToken(98498081, 27131847)
+			usecase.Token.CreatedToken(19727887, msg)
 
-			gotErr, gotTransfer := usecase.MakeTransfers(testCase.in.AccountOriginID, testCase.in.Token, testCase.in.AccountDestinationID, testCase.in.Amount)
+			gotErr, gotTransfer := usecase.MakeTransfers(testCase.in.Token, testCase.in.AccountDestinationID, testCase.in.Amount)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -122,6 +102,9 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 98498081"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 98498081"))
+
 	tt := []struct {
 		name    string
 		in      CreateTransferInput
@@ -131,25 +114,15 @@ func TestMakeGetTransfers(t *testing.T) {
 		{
 			name: "should successfully get transfers",
 			in: CreateTransferInput{
-				AccountOriginID: 98498081,
-				Token:           27131847,
+				Token: msg,
 			},
 			wantErr: false,
 			want:    []store.Transfer{{6410694, 98498081, 19727887, 200, "13/05/2021 09:09:16"}, {47278511, 98498081, 19727887, 500, "13/05/2021 09:09:16"}},
 		},
 		{
-			name: "should unsuccessfully get transfers when there is no account origin id",
-			in: CreateTransferInput{
-				AccountOriginID: 98498981,
-				Token:           27131847,
-			},
-			wantErr: true,
-		},
-		{
 			name: "should unsuccessfully get transfer when there is wrong token",
 			in: CreateTransferInput{
-				AccountOriginID: 98498981,
-				Token:           27131047,
+				Token: msgs,
 			},
 			wantErr: true,
 		},
@@ -173,11 +146,11 @@ func TestMakeGetTransfers(t *testing.T) {
 
 			usecase.Store.TransferredAccount(listAccount)
 			usecase.Store.TransferredAccount(listAccounts)
-			usecase.Token.CreatedToken(98498081, 27131847)
+			usecase.Token.CreatedToken(98498081, msg)
 			usecase.Transfer.CreatedTransferTwo(listTransfer, 98498081)
 			usecase.Transfer.CreatedTransferTwo(listTransfers, 98498081)
 
-			_, gotErr := usecase.GetTransfers(testCase.in.AccountOriginID, testCase.in.Token)
+			_, gotErr := usecase.GetTransfers(testCase.in.Token)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)

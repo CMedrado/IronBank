@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/CMedrado/DesafioStone/https"
 	"github.com/CMedrado/DesafioStone/store"
@@ -57,65 +58,39 @@ func TestNewServerAccount(t *testing.T) {
 			response: http.StatusAccepted,
 		},
 		{
-			name:         "should successfully get balance with formatted CPF",
-			method:       "GET",
-			path:         "/accounts/081.313.910-43/balance",
-			response:     http.StatusAccepted,
-			responsebody: `5000`,
-		},
-		{
-			name:         "should successfully get balance with unformatted CPF",
-			method:       "GET",
-			path:         "/accounts/38453162093/balance",
-			response:     http.StatusAccepted,
-			responsebody: `6000`,
-		},
-		{
-			name:     "should unsuccessfully get balance when CPF is invalid",
-			method:   "GET",
-			path:     "/accounts/384.53162-093/balance",
-			response: http.StatusBadRequest,
-		},
-		{
-			name:     "should unsuccessfully get balance when dont exist account",
-			method:   "GET",
-			path:     "/accounts/062.136.280-37/balance",
-			response: http.StatusBadRequest,
-		},
-		{
 			name:     "should successfully authenticated login with formatted CPF",
 			method:   "POST",
 			path:     "/login",
-			body:     `{"cpf:": "08131391043", "Secret": "tatatal"}`,
+			body:     `{"cpf": "08131391043", "Secret": "tatatal"}`,
 			response: http.StatusAccepted,
 		},
 		{
 			name:     "should successfully authenticated login with unformatted CPF",
 			method:   "POST",
 			path:     "/login",
-			body:     `{"cpf:": "38453162093", "Secret": "jax"}`,
+			body:     `{"cpf": "38453162093", "Secret": "jax"}`,
 			response: http.StatusAccepted,
 		},
 		{
 			name:     "should unsuccessfully authenticated login when CPF is invalid",
 			method:   "POST",
 			path:     "/login",
-			body:     `{"cpf:": "384531620.93", "Secret": "jax"}`,
+			body:     `{"cpf": "384531620.93", "Secret": "jax"}`,
 			response: http.StatusNotAcceptable,
 		},
 		{
 			name:     "should unsuccessfully authenticated login when cpf is not registered",
 			method:   "POST",
 			path:     "/login",
-			body:     `{"cpf:": "38453162793", "Secret": "jax"}`,
+			body:     `{"cpf": "38453162793", "Secret": "jax"}`,
 			response: http.StatusNotAcceptable,
 		},
 		{
 			name:     "should unsuccessfully authenticated login when secret is not correct",
 			method:   "POST",
 			path:     "/login",
-			body:     `{"cpf:": "081.313.910-43", "Secret": "call"}`,
-			response: http.StatusNotAcceptable,
+			body:     `{"cpf": "081.313.910-43", "Secret": "call"}`,
+			response: http.StatusUnauthorized,
 		},
 	}
 
@@ -140,10 +115,10 @@ func TestNewServerAccount(t *testing.T) {
 	firstID := armazenamento.Store.VoltaCPF("38453162093")
 	secondID := armazenamento.Store.VoltaCPF("08131391043")
 	firstToken := armazenamento.Token.VoltaToken(firstID)
-	firstIDSTring := strconv.Itoa(firstID)
+	firstIDString := strconv.Itoa(firstID)
 	secondIDString := strconv.Itoa(secondID)
-	firstTokenString := strconv.Itoa(firstToken)
-
+	secondToken := "03/02/2000 03:05:55:" + strconv.Itoa(secondID)
+	secondTokenD := base64.StdEncoding.EncodeToString([]byte(secondToken))
 	secondtt := []struct {
 		name         string
 		method       string
@@ -151,75 +126,95 @@ func TestNewServerAccount(t *testing.T) {
 		body         string
 		response     int
 		responsebody string
+		lib          bool
 	}{
 		{
-			name:     "should successfully transfer amount",
-			method:   "POST",
-			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString + `"accountdestinationid":` + secondIDString + `"amount": 500`,
-			response: http.StatusAccepted,
+			name:         "should successfully get balance with formatted CPF",
+			method:       "GET",
+			path:         "/accounts/" + firstIDString + "/balance",
+			response:     http.StatusAccepted,
+			responsebody: `{"balance": 5000}`,
+		},
+		{
+			name:         "should successfully get balance with unformatted CPF",
+			method:       "GET",
+			path:         "/accounts/" + secondIDString + "/balance",
+			response:     http.StatusAccepted,
+			responsebody: `{"balance":6000}`,
+		},
+		{
+			name:     "should unsuccessfully get balance when CPF is invalid",
+			method:   "GET",
+			path:     "/accounts/3848/balance",
+			response: http.StatusBadRequest,
+		},
+		{
+			name:     "should unsuccessfully get balance when dont exist account",
+			method:   "GET",
+			path:     "/accounts/398-6/balance",
+			response: http.StatusBadRequest,
 		},
 		{
 			name:     "should successfully transfer amount",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString + `"accountdestinationid":` + secondIDString + `"amount": 300`,
+			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 500}`,
 			response: http.StatusAccepted,
+			lib:      true,
 		},
 		{
-			name:     "should unsuccessfully transfer amount when there is no account origin id",
+			name:     "should successfully transfer amount",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid": "98498761", "token":` + firstTokenString + `"accountdestinationid":` + secondIDString + `"amount": 300`,
-			response: http.StatusNotAcceptable,
+			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 300}`,
+			response: http.StatusAccepted,
+			lib:      true,
 		},
 		{
 			name:     "should unsuccessfully transfer amount when there is wrong token",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token": 27131807 ,"accountdestinationid":` + secondIDString + `"amount": 300`,
+			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 300}`,
 			response: http.StatusUnauthorized,
+			lib:      false,
 		},
 		{
 			name:     "should unsuccessfully transfer amount when there is no account destination id",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString + `"accountdestinationid":19727807, "amount": 300`,
+			body:     `{"accountdestinationid":19727807, "amount": 300}`,
 			response: http.StatusNotAcceptable,
+			lib:      true,
 		},
 		{
 			name:     "should unsuccessfully transfer amount when the amount is too slow",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString + `"accountdestinationid":` + secondIDString + `"amount": 0`,
+			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 0}`,
 			response: http.StatusPaymentRequired,
+			lib:      true,
 		},
 		{
 			name:     "should unsuccessfully transfer amount when the amount is greater than the balance",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString + `"accountdestinationid":` + secondIDString + `"amount": 9000`,
+			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 9000}`,
 			response: http.StatusPaymentRequired,
+			lib:      true,
 		},
 		{
-			name:   "should successfully get transfers",
-			method: "GET",
-			path:   "/transfers",
-			body:   `"accountoriginid":` + firstIDSTring + `"token":` + firstTokenString,
-		},
-		{
-			name:     "should unsuccessfully get transfers when there is no account origin id",
+			name:     "should successfully get transfers",
 			method:   "GET",
 			path:     "/transfers",
-			body:     `"accountoriginid":98498981, "token":` + firstTokenString,
-			response: http.StatusNotAcceptable,
+			response: http.StatusAccepted,
+			lib:      true,
 		},
 		{
 			name:     "should unsuccessfully get transfer when there is wrong token",
 			method:   "GET",
 			path:     "/transfers",
-			body:     `"accountoriginid":` + firstIDSTring + `"token":27131047`,
 			response: http.StatusUnauthorized,
+			lib:      false,
 		},
 	}
 	for _, tc := range secondtt {
@@ -227,6 +222,13 @@ func TestNewServerAccount(t *testing.T) {
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			respondeRecorder := httptest.NewRecorder()
+
+			if tc.lib == true {
+				request.Header.Add("Authorization:", firstToken)
+			}
+			if tc.lib == false {
+				request.Header.Add("Authorization:", secondTokenD)
+			}
 
 			servidor.ServeHTTP(respondeRecorder, request)
 

@@ -4,11 +4,12 @@ import (
 	"github.com/CMedrado/DesafioStone/store"
 )
 
-func (auc AccountUsecase) GetTransfers(token string) ([]store.Transfer, error) {
+// GetTransfers returns all account transfers
+func (auc AccountUseCase) GetTransfers(token string) ([]store.Transfer, error) {
 	var transfer []store.Transfer
 	accountOriginID := DecoderToken(token)
 	transfers := auc.Transfer.GetTransfers(accountOriginID)
-	_, err := auc.SearchID(accountOriginID)
+	_, err := auc.SearchAccount(accountOriginID)
 
 	if err != nil {
 		return transfer, err
@@ -30,7 +31,8 @@ func (auc AccountUsecase) GetTransfers(token string) ([]store.Transfer, error) {
 	return transfer, nil
 }
 
-func (auc AccountUsecase) MakeTransfers(token string, accountDestinationID int, amount uint) (error, int) {
+// CreateTransfers create and transfers, returns the id of the created transfer
+func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int, amount uint) (error, int) {
 	err := CheckAmount(amount)
 
 	if err != nil {
@@ -38,7 +40,7 @@ func (auc AccountUsecase) MakeTransfers(token string, accountDestinationID int, 
 	}
 
 	accountOriginID := DecoderToken(token)
-	accountOrigin, err := auc.SearchID(accountOriginID)
+	accountOrigin, err := auc.SearchAccount(accountOriginID)
 
 	if err != nil {
 		return err, 0
@@ -51,14 +53,14 @@ func (auc AccountUsecase) MakeTransfers(token string, accountDestinationID int, 
 		return err, 0
 	}
 
-	accountDestination, err := auc.SearchID(accountDestinationID)
+	accountDestination, err := auc.SearchAccount(accountDestinationID)
 
 	if err != nil {
 		return err, 0
 	}
 
-	person1 := auc.Store.TransferredBalance(accountOrigin.CPF)
-	person2 := auc.Store.TransferredBalance(accountDestination.CPF)
+	person1 := auc.Store.GetBalance(accountOrigin.CPF)
+	person2 := auc.Store.GetBalance(accountDestination.CPF)
 
 	err = CheckBalance(person1, amount)
 	if err != nil {
@@ -72,8 +74,8 @@ func (auc AccountUsecase) MakeTransfers(token string, accountDestinationID int, 
 
 	id := Random()
 	createdAt := CreatedAt()
-	transfer := store.Transfer{id, accountOriginID, accountDestinationID, amount, createdAt}
-	auc.Transfer.CreatedTransferTwo(transfer, accountDestinationID)
+	transfer := store.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
+	auc.Transfer.PostTransferID(transfer, accountDestinationID)
 
 	return nil, id
 }

@@ -6,28 +6,29 @@ import (
 	"strconv"
 )
 
-func (auc AccountUsecase) AuthenticatedLogin(cpf, secret string) (error, string) {
-	secretHash := Hash(secret)
+// AuthenticatedLogin authenticates the account and returns a token
+func (auc AccountUseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
+	secretHash := CreateHash(secret)
 
-	err := CheckedError(cpf)
+	err := CheckCPF(cpf)
 	cpf = CpfReplace(cpf)
 	if err != nil {
 		return err, ""
 	}
 
-	newLogin := store.Login{cpf, secretHash}
-	account := auc.Store.CheckLogin(cpf)
+	newLogin := store.Login{CPF: cpf, Secret: secretHash}
+	account := auc.Store.GetAccountCPF(cpf)
 
 	err = CheckLogin(account, newLogin)
 	if err != nil {
 		return err, ""
 	}
 
-	id := auc.Store.TransferredAccounts()
+	id := auc.Store.GetAccounts()
 	now := CreatedAt()
 	token := now + ":" + strconv.Itoa(id[cpf].ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
-	auc.Token.CreatedToken(id[cpf].ID, encoded)
+	auc.Token.PostToken(id[cpf].ID, encoded)
 
 	return nil, encoded
 }

@@ -5,11 +5,10 @@ import (
 	"net/http"
 )
 
-func (s *ServerAccount) GetTransfers(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization:")
 
 	Transfers, err := accountUseCase.GetTransfers(token)
-
 	if err != nil {
 		switch err.Error() {
 		case "given id is invalid":
@@ -27,7 +26,7 @@ func (s *ServerAccount) GetTransfers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Transfers)
 }
 
-func (s *ServerAccount) MakeTransfers(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) {
 	var requestBody TransfersRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	token := r.Header.Get("Authorization:")
@@ -37,7 +36,7 @@ func (s *ServerAccount) MakeTransfers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, id := accountUseCase.MakeTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
+	err, id := accountUseCase.CreateTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
 
 	if err != nil {
 		switch err.Error() {

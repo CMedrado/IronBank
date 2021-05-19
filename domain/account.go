@@ -4,31 +4,31 @@ import (
 	"github.com/CMedrado/DesafioStone/store"
 )
 
-type AccountUsecase struct {
+type AccountUseCase struct {
 	Store    *store.StoredAccount
 	Login    *store.StoredLogin
 	Token    *store.StoredToken
-	Transfer *store.StoredTransferTwo
+	Transfer *store.StoredTransferID
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *AccountUsecase) CreateAccount(name string, cpf string, secret string, balance uint) (int, error) {
-	err := CheckedError(cpf)
+func (auc *AccountUseCase) CreateAccount(name string, cpf string, secret string, balance uint) (int, error) {
+	err := CheckCPF(cpf)
 	if err != nil {
 		return 0, err
 	} else {
 		id := Random()
-		secretHash := Hash(secret)
+		secretHash := CreateHash(secret)
 		cpf = CpfReplace(cpf)
-		newAccount := store.Account{id, name, cpf, secretHash, balance, CreatedAt()}
-		auc.Store.TransferredAccount(newAccount)
+		newAccount := store.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: CreatedAt()}
+		auc.Store.PostAccount(newAccount)
 		return id, err
 	}
 }
 
 //GetBalance requests the salary for the Story by sending the ID
-func (auc *AccountUsecase) GetBalance(id int) (uint, error) {
-	account, err := auc.SearchID(id)
+func (auc *AccountUseCase) GetBalance(id int) (uint, error) {
+	account, err := auc.SearchAccount(id)
 
 	if err != nil {
 		return 0, err
@@ -38,9 +38,9 @@ func (auc *AccountUsecase) GetBalance(id int) (uint, error) {
 
 }
 
-//GetAccounts s
-func (auc *AccountUsecase) GetAccounts() []store.Account {
-	accounts := auc.Store.TransferredAccounts()
+//GetAccounts returns all API accounts
+func (auc *AccountUseCase) GetAccounts() []store.Account {
+	accounts := auc.Store.GetAccounts()
 	var account []store.Account
 
 	for _, a := range accounts {

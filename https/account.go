@@ -11,13 +11,13 @@ import (
 
 var (
 	accountStorage  = store.NewStoredAccount()
-	accountTransfer = store.NewStoredTransferTwo()
+	accountTransfer = store.NewStoredTransferID()
 	accountToken    = store.NewStoredToked()
 	accountLogin    = store.NewStoredLogin()
-	accountUseCase  = domain.AccountUsecase{accountStorage, accountLogin, accountToken, accountTransfer}
+	accountUseCase  = domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
 )
 
-func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	var requestBody CreatedRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
@@ -45,13 +45,13 @@ func (s *ServerAccount) CreatedAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (s *ServerAccount) GetAccounts(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(accountUseCase.GetAccounts())
 }
 
-func (s *ServerAccount) GetBalance(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	IntID, _ := strconv.Atoi(id)
 	response, err := accountUseCase.GetBalance(IntID)

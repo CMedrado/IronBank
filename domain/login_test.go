@@ -60,18 +60,18 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{982, "Lucas", "08131391043", Hash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{981, "Rafael", "38453162093", Hash("call"), 6000, "06/01/2020"}
+			listAccount := store.Account{982, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"}
+			listAccounts := store.Account{981, "Rafael", "38453162093", CreateHash("call"), 6000, "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			usecase := AccountUsecase{
+			usecase := AccountUseCase{
 				Store: accountStorage,
 				Token: accountToken,
 			}
 
-			usecase.Store.TransferredAccount(listAccount)
-			usecase.Store.TransferredAccount(listAccounts)
+			usecase.Store.PostAccount(listAccount)
+			usecase.Store.PostAccount(listAccounts)
 
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret)
 

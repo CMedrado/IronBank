@@ -2,9 +2,9 @@ package store
 
 var accountStorage = make(map[string]Account)
 var accountLogin = make(map[int]Login)
-var accountTransferTwo = make(map[int]StoredTransfer)
+var accountTransferID = make(map[int]StoredTransferAccountID)
 var accountToken = make(map[int]Token)
-var accountTransfer = make(map[int]Transfer)
+var accountTransferAccountID = make(map[int]Transfer)
 
 type Account struct {
 	ID        int    `json:"id"`
@@ -25,18 +25,18 @@ type Token struct {
 
 type Transfer struct {
 	ID                   int    `json:"id"`
-	AccountOriginID      int    `json:"accountoriginid"`
-	AccountDestinationID int    `json:"accountdestinationid"`
+	AccountOriginID      int    `json:"account_origin_id"`
+	AccountDestinationID int    `json:"account_destination_id"`
 	Amount               uint   `json:"amount"`
 	CreatedAt            string `json:"created_at"`
 }
 
-type StoredTransfer struct {
-	accountTransfer map[int]Transfer
+type StoredTransferAccountID struct {
+	accountTransferAccountID map[int]Transfer
 }
 
-type StoredTransferTwo struct {
-	accountTransferTwo map[int]StoredTransfer
+type StoredTransferID struct {
+	accountTransferID map[int]StoredTransferAccountID
 }
 
 type StoredLogin struct {
@@ -59,14 +59,14 @@ func NewStoredLogin() *StoredLogin {
 	return &StoredLogin{accountLogin}
 }
 
-func NewStoredTransferTwo() *StoredTransferTwo {
-	return &StoredTransferTwo{accountTransferTwo}
+func NewStoredTransferID() *StoredTransferID {
+	return &StoredTransferID{accountTransferID}
 }
 
 func NewStoredToked() *StoredToken {
 	return &StoredToken{accountToken}
 }
 
-func NewStoredTransfer() *StoredTransfer {
-	return &StoredTransfer{accountTransfer}
+func NewStoredTransferAccountID() *StoredTransferAccountID {
+	return &StoredTransferAccountID{accountTransferAccountID}
 }

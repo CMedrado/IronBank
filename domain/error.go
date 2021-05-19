@@ -14,7 +14,8 @@ var (
 	errInvalidAmount  = errors.New("given amount is invalid")
 )
 
-func CheckedError(cpf string) error {
+// CheckCPF checks if the cpf exists and returns nil if not, it returns an error
+func CheckCPF(cpf string) error {
 
 	if len(cpf) != 11 && len(cpf) != 14 {
 		return errInvalidCPF
@@ -30,6 +31,7 @@ func CheckedError(cpf string) error {
 	return nil
 }
 
+// CheckBalance checks if the account has a balance and returns nil if not, it returns an error
 func CheckBalance(person1 store.Account, amount uint) error {
 	if person1.Balance < amount {
 		return errWithoutBalance
@@ -37,17 +39,19 @@ func CheckBalance(person1 store.Account, amount uint) error {
 	return nil
 }
 
-func CheckLogin(account store.Account, newlogin store.Login) error {
+// CheckLogin Checks if the cpf and secret ar correct and returns nil if not, it returns an error
+func CheckLogin(account store.Account, newLogin store.Login) error {
 
-	if account.CPF != newlogin.CPF {
+	if account.CPF != newLogin.CPF {
 		return errInvalidCPF
 	}
-	if account.Secret != newlogin.Secret {
+	if account.Secret != newLogin.Secret {
 		return errInvalidSecret
 	}
 	return nil
 }
 
+// CheckToken checks if the token is correct and returns nil if not, it returns an error
 func CheckToken(token string, tokens store.Token) error {
 	if token != tokens.Token {
 		return errInvalidToken
@@ -55,6 +59,7 @@ func CheckToken(token string, tokens store.Token) error {
 	return nil
 }
 
+// CheckExistID checks if the id exists and returns nil if not, it returns an error
 func CheckExistID(account store.Account) error {
 	if (account == store.Account{}) {
 		return errInvalidID
@@ -62,6 +67,7 @@ func CheckExistID(account store.Account) error {
 	return nil
 }
 
+// CheckAmount checks if the amount is valid and returns nil if not, it returns an error
 func CheckAmount(amount uint) error {
 	if amount <= 0 {
 		return errInvalidAmount

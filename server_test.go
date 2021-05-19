@@ -15,11 +15,11 @@ import (
 
 func TestNewServerAccount(t *testing.T) {
 
-	accountTransfer := store.NewStoredTransferTwo()
+	accountTransfer := store.NewStoredTransferID()
 	accountToken := store.NewStoredToked()
 	accountLogin := store.NewStoredLogin()
 	accountStorage := store.NewStoredAccount()
-	armazenamento := domain.AccountUsecase{accountStorage, accountLogin, accountToken, accountTransfer}
+	armazenamento := domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
 	servidor := https.NewServerAccount(&armazenamento)
 
 	tt := []struct {
@@ -112,9 +112,9 @@ func TestNewServerAccount(t *testing.T) {
 		})
 	}
 
-	firstID := armazenamento.Store.VoltaCPF("38453162093")
-	secondID := armazenamento.Store.VoltaCPF("08131391043")
-	firstToken := armazenamento.Token.VoltaToken(firstID)
+	firstID := armazenamento.Store.ReturnCPF("38453162093")
+	secondID := armazenamento.Store.ReturnCPF("08131391043")
+	firstToken := armazenamento.Token.ReturnToken(firstID)
 	firstIDString := strconv.Itoa(firstID)
 	secondIDString := strconv.Itoa(secondID)
 	secondToken := "03/02/2000 03:05:55:" + strconv.Itoa(secondID)
@@ -158,7 +158,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should successfully transfer amount",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 500}`,
+			body:     `{"account_destination_id":` + secondIDString + `,"amount": 500}`,
 			response: http.StatusAccepted,
 			lib:      true,
 		},
@@ -166,7 +166,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should successfully transfer amount",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 300}`,
+			body:     `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
 			response: http.StatusAccepted,
 			lib:      true,
 		},
@@ -174,7 +174,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should unsuccessfully transfer amount when there is wrong token",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 300}`,
+			body:     `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
 			response: http.StatusUnauthorized,
 			lib:      false,
 		},
@@ -182,7 +182,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should unsuccessfully transfer amount when there is no account destination id",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":19727807, "amount": 300}`,
+			body:     `{"account_destination_id":19727807, "amount": 300}`,
 			response: http.StatusNotAcceptable,
 			lib:      true,
 		},
@@ -190,7 +190,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should unsuccessfully transfer amount when the amount is too slow",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 0}`,
+			body:     `{"account_destination_id":` + secondIDString + `,"amount": 0}`,
 			response: http.StatusPaymentRequired,
 			lib:      true,
 		},
@@ -198,7 +198,7 @@ func TestNewServerAccount(t *testing.T) {
 			name:     "should unsuccessfully transfer amount when the amount is greater than the balance",
 			method:   "POST",
 			path:     "/transfers",
-			body:     `{"accountdestinationid":` + secondIDString + `,"amount": 9000}`,
+			body:     `{"account_destination_id":` + secondIDString + `,"amount": 9000}`,
 			response: http.StatusPaymentRequired,
 			lib:      true,
 		},

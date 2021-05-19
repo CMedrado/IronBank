@@ -57,7 +57,7 @@ func TestCreateAccount(t *testing.T) {
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
 			accountStorage := store.NewStoredAccount()
-			usecase := AccountUsecase{
+			usecase := AccountUseCase{
 				Store: accountStorage,
 			}
 
@@ -117,11 +117,11 @@ func TestGetBalance(t *testing.T) {
 			listAccounts := store.Account{981, "Rafael", "38453162093", "call", 6000, "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
-			usecase := AccountUsecase{
+			usecase := AccountUseCase{
 				Store: accountStorage,
 			}
-			usecase.Store.TransferredAccount(listAccount)
-			usecase.Store.TransferredAccount(listAccounts)
+			usecase.Store.PostAccount(listAccount)
+			usecase.Store.PostAccount(listAccounts)
 			//test
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 
@@ -150,12 +150,12 @@ func TestGetBalance(t *testing.T) {
 //		{
 //			name:    "should successfully get accounts",
 //			wantErr: false,
-//			want:    CreateAccountTestInput{982, "Lucas", "08131391043", Hash("lixo"), 5000, "06/01/2020"},
+//			want:    CreateAccountTestInput{982, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"},
 //		},
 //		{
 //			name:    "should successfully get balance with unformatted CPF",
 //			wantErr: false,
-//			want:    CreateAccountTestInput{981,"Rafael","38453162093",Hash("call"),6000, "06/01/2020"},
+//			want:    CreateAccountTestInput{981,"Rafael","38453162093",CreateHash("call"),6000, "06/01/2020"},
 //		},
 //	}
 //}

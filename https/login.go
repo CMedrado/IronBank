@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (s *ServerAccount) AuthenticatedLogin(w http.ResponseWriter, r *http.Request) {
+func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	var requestBody LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 

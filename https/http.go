@@ -5,18 +5,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewServerAccount(storaged domain.MethodsDomain) *ServerAccount {
+func NewServerAccount(storage domain.MethodsDomain) *ServerAccount {
 	s := new(ServerAccount)
 
-	s.storage = storaged
+	s.storage = storage
 
 	router := mux.NewRouter()
-	router.HandleFunc("/accounts/{id}/balance", s.GetBalance).Methods("GET")
-	router.HandleFunc("/accounts", s.GetAccounts).Methods("GET")
-	router.HandleFunc("/accounts/", s.CreatedAccount).Methods("POST")
-	router.HandleFunc("/login", s.AuthenticatedLogin).Methods("POST")
-	router.HandleFunc("/transfers", s.GetTransfers).Methods("GET")
-	router.HandleFunc("/transfers", s.MakeTransfers).Methods("POST")
+	router.HandleFunc("/accounts/{id}/balance", s.handleBalance).Methods("GET")
+	router.HandleFunc("/accounts", s.handleAccounts).Methods("GET")
+	router.HandleFunc("/accounts/", s.processAccount).Methods("POST")
+	router.HandleFunc("/login", s.processLogin).Methods("POST")
+	router.HandleFunc("/transfers", s.handleTransfers).Methods("GET")
+	router.HandleFunc("/transfers", s.processTransfer).Methods("POST")
 
 	s.Handler = router
 

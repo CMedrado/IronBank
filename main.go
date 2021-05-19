@@ -9,11 +9,11 @@ import (
 )
 
 func main() {
-	accountTransfer := store.NewStoredTransferTwo()
+	accountTransfer := store.NewStoredTransferID()
 	accountToken := store.NewStoredToked()
 	accountLogin := store.NewStoredLogin()
 	accountStorage := store.NewStoredAccount()
-	accounStorage := domain.AccountUsecase{accountStorage, accountLogin, accountToken, accountTransfer}
+	accounStorage := domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
 	servidor := https.NewServerAccount(&accounStorage)
 
 	if err := http.ListenAndServe(":5000", servidor); err != nil {

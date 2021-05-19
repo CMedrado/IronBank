@@ -54,7 +54,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	response := TransfersRequest{ID: id}
+	response := TransferResponse{ID: id}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 

@@ -18,7 +18,7 @@ var (
 )
 
 func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
-	var requestBody CreatedRequest
+	var requestBody CreateRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := CreatedRequest{ID: idAccount}
+	response := CreateResponse{ID: idAccount}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 

@@ -5,12 +5,15 @@ import (
 	"net/http"
 )
 
-type CreatedRequest struct {
-	ID      int    `json:"id"`
+type CreateRequest struct {
 	Name    string `json:"name"`
 	CPF     string `json:"cpf"`
 	Secret  string `json:"secret"`
 	Balance uint   `json:"balance"`
+}
+
+type CreateResponse struct {
+	ID int `json:"id"`
 }
 
 type LoginRequest struct {
@@ -18,7 +21,7 @@ type LoginRequest struct {
 	Secret string `json:"secret"`
 }
 
-type TokenRequest struct {
+type TokenResponse struct {
 	Token string `json:"token"`
 }
 
@@ -27,7 +30,10 @@ type TransfersRequest struct {
 	Token                int  `json:"token"`
 	AccountDestinationID int  `json:"account_destination_id"`
 	Amount               uint `json:"amount"`
-	ID                   int  `json:"id"`
+}
+
+type TransferResponse struct {
+	ID int `json:"id"`
 }
 
 type ServerAccount struct {

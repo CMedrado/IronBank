@@ -28,7 +28,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := TokenRequest{Token: token}
+	response := TokenResponse{Token: token}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 

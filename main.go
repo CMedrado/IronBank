@@ -13,10 +13,10 @@ func main() {
 	accountToken := store.NewStoredToked()
 	accountLogin := store.NewStoredLogin()
 	accountStorage := store.NewStoredAccount()
-	accounStorage := domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
-	servidor := https.NewServerAccount(&accounStorage)
+	accountUseCase := domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
+	server := https.NewServerAccount(&accountUseCase)
 
-	if err := http.ListenAndServe(":5000", servidor); err != nil {
+	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatal("could not hear on port 5000 ")
 	}
 }

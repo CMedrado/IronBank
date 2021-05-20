@@ -75,7 +75,7 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 	id := Random()
 	createdAt := CreatedAt()
 	transfer := store.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
-	auc.Transfer.PostTransferID(transfer, accountDestinationID)
+	auc.Transfer.PostTransferID(transfer, accountOriginID)
 
 	return nil, id
 }

@@ -11,7 +11,7 @@ import (
 
 var (
 	accountStorage  = store.NewStoredAccount()
-	accountTransfer = store.NewStoredTransferID()
+	accountTransfer = store.NewStoredTransferAccountID()
 	accountToken    = store.NewStoredToked()
 	accountLogin    = store.NewStoredLogin()
 	accountUseCase  = domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
@@ -54,7 +54,7 @@ func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	IntID, _ := strconv.Atoi(id)
-	response, err := accountUseCase.GetBalance(IntID)
+	balance, err := accountUseCase.GetBalance(IntID)
 
 	if err != nil {
 		switch err.Error() {
@@ -65,7 +65,7 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
+	response := BalanceResponse{Balance: balance}
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(response)

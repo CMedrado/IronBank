@@ -16,6 +16,10 @@ type CreateResponse struct {
 	ID int `json:"id"`
 }
 
+type BalanceResponse struct {
+	Balance uint `json:"balance"`
+}
+
 type LoginRequest struct {
 	CPF    string `json:"cpf"`
 	Secret string `json:"secret"`
@@ -39,4 +43,8 @@ type TransferResponse struct {
 type ServerAccount struct {
 	storage domain.MethodsDomain
 	http.Handler
+}
+
+type Errors struct {
+	errors string `json:"errors"`
 }

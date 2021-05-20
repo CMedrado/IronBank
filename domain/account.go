@@ -8,7 +8,7 @@ type AccountUseCase struct {
 	Store    *store.StoredAccount
 	Login    *store.StoredLogin
 	Token    *store.StoredToken
-	Transfer *store.StoredTransferID
+	Transfer *store.StoredTransferAccountID
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at

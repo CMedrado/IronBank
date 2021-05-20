@@ -47,7 +47,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
 		case "given amount is invalid":
-			w.WriteHeader(http.StatusPaymentRequired)
+			w.WriteHeader(http.StatusBadRequest)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}

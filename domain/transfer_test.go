@@ -102,10 +102,10 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
-	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 98498081"))
-	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 98498081"))
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00:98498081"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00:98498081"))
 
-	tt := []struct {
+	var tt = []struct {
 		name    string
 		in      CreateTransferInput
 		wantErr bool
@@ -117,7 +117,7 @@ func TestMakeGetTransfers(t *testing.T) {
 				Token: msg,
 			},
 			wantErr: false,
-			want:    []store.Transfer{{6410694, 98498081, 19727887, 200, "13/05/2021 09:09:16"}, {47278511, 98498081, 19727887, 500, "13/05/2021 09:09:16"}},
+			want:    []store.Transfer{{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}, {ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}},
 		},
 		{
 			name: "should unsuccessfully get transfer when there is wrong token",
@@ -127,7 +127,6 @@ func TestMakeGetTransfers(t *testing.T) {
 			wantErr: true,
 		},
 	}
-
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
 			listAccount := store.Account{19727887, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"}
@@ -137,7 +136,7 @@ func TestMakeGetTransfers(t *testing.T) {
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			accountTransfer := store.NewStoredTransferID()
+			accountTransfer := store.NewStoredTransferAccountID()
 			usecase := AccountUseCase{
 				Store:    accountStorage,
 				Token:    accountToken,
@@ -150,7 +149,7 @@ func TestMakeGetTransfers(t *testing.T) {
 			usecase.Transfer.PostTransferID(listTransfer, 98498081)
 			usecase.Transfer.PostTransferID(listTransfers, 98498081)
 
-			_, gotErr := usecase.GetTransfers(testCase.in.Token)
+			testss, gotErr := usecase.GetTransfers(testCase.in.Token)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -158,6 +157,9 @@ func TestMakeGetTransfers(t *testing.T) {
 
 			if testCase.wantErr && gotErr == nil {
 				t.Error("wanted err but got nil")
+			}
+			if &testCase.want != &testss {
+				t.Errorf("unexpected error, wantErr=%v; gotErr=%v", testCase.want, testss)
 			}
 		})
 	}

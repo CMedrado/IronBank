@@ -6,13 +6,14 @@ import (
 )
 
 var (
-	errInvalidSecret  = errors.New("given secret is invalid")
-	errInvalidCPF     = errors.New("given cpf is invalid")
-	errWithoutBalance = errors.New("account without balance")
-	errInvalidToken   = errors.New("given token is invalid")
-	errInvalidID      = errors.New("given id is invalid")
-	errInvalidAmount  = errors.New("given amount is invalid")
-	//errInvalidAccount = errors.New("given account is invalid")
+	errInvalidSecret        = errors.New("given secret is invalid")
+	errInvalidCPF           = errors.New("given cpf is invalid")
+	errWithoutBalance       = errors.New("given account without balance")
+	errInvalidToken         = errors.New("given token is invalid")
+	errInvalidID            = errors.New("given id is invalid")
+	errInvalidAmount        = errors.New("given amount is invalid")
+	errInvalidDestinationID = errors.New("given account destination id is invalid")
+	errSameAccount          = errors.New("given account is the same as the account destination")
 )
 
 // CheckCPF checks if the cpf exists and returns nil if not, it returns an error

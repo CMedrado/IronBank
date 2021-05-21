@@ -44,16 +44,19 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
-		case "given id is invalid":
+		case "given account destination id is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "account without balance":
+		case "given account without balance":
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given amount is invalid":
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
+		case "given account is the same as the account destination":
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:

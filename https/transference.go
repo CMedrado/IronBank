@@ -15,7 +15,7 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given token is invalid":
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)

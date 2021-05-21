@@ -33,7 +33,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given the balance amount is invalid":
-			w.WriteHeader(http.StatusNotAcceptable)
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given cpf is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)

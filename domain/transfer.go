@@ -59,7 +59,7 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 		return err, 0
 	}
 
-	CheckExistDestinationID(accountDestination)
+	err = CheckExistDestinationID(accountDestination)
 	if err != nil {
 		return err, 0
 	}

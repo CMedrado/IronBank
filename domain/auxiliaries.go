@@ -21,7 +21,7 @@ func Random() int {
 	return rand.Intn(100000000)
 }
 
-// SearchAccount returns the account via the received ID and an error if the account does not exist
+// SearchAccount returns the account via the received ID
 func (auc AccountUseCase) SearchAccount(id int) store.Account {
 	accounts := auc.Store.GetAccounts()
 	account := store.Account{}

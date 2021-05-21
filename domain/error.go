@@ -77,6 +77,7 @@ func CheckAmount(amount uint) error {
 	return nil
 }
 
+// CheckCompareID Compare two IDs to see if they are the same and returns nil if not, it returns an error
 func CheckCompareID(accountOriginID, accountDestinationID int) error {
 	if accountOriginID == accountDestinationID {
 		return errSameAccount
@@ -84,6 +85,7 @@ func CheckCompareID(accountOriginID, accountDestinationID int) error {
 	return nil
 }
 
+// CheckExistDestinationID checks if the destination id exists and returns nil if not, it returns an error
 func CheckExistDestinationID(account store.Account) error {
 	if (account == store.Account{}) {
 		return errInvalidDestinationID

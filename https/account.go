@@ -33,7 +33,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given cpf is invalid":
-			w.WriteHeader(http.StatusUnauthorized)
+			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
@@ -65,7 +65,7 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given id is invalid":
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)

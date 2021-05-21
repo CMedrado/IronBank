@@ -15,7 +15,7 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given token is invalid":
-			w.WriteHeader(http.StatusUnauthorized)
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
@@ -34,7 +34,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	token := r.Header.Get("Authorization")
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "account without balance":
-			w.WriteHeader(http.StatusPaymentRequired)
+			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)

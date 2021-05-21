@@ -15,13 +15,17 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err, token := accountUseCase.AuthenticatedLogin(requestBody.CPF, requestBody.Secret)
+	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
+		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given cpf is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
+			json.NewEncoder(w).Encode(ErrJson)
 		case "given secret is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -29,7 +33,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := TokenResponse{Token: token}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusAccepted)
 
 	json.NewEncoder(w).Encode(response)

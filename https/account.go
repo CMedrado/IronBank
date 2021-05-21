@@ -48,7 +48,8 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(accountUseCase.GetAccounts())
+	response := GetAccountsResponse{Accounts: accountUseCase.GetAccounts()}
+	json.NewEncoder(w).Encode(response)
 }
 
 func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {

@@ -9,12 +9,14 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 	token := r.Header.Get("Authorization")
 
 	Transfers, err := accountUseCase.GetTransfers(token)
+	w.Header().Set("content-type", "application/json")
+
 	if err != nil {
+		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
-		case "given id is invalid":
-			w.WriteHeader(http.StatusNotAcceptable)
 		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -37,17 +39,23 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	}
 
 	err, id := accountUseCase.CreateTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
+	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
+		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given id is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
+			json.NewEncoder(w).Encode(ErrJson)
 		case "account without balance":
 			w.WriteHeader(http.StatusPaymentRequired)
+			json.NewEncoder(w).Encode(ErrJson)
 		case "given token is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrJson)
 		case "given amount is invalid":
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -55,7 +63,6 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response := TransferResponse{ID: id}
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 
 	json.NewEncoder(w).Encode(response)

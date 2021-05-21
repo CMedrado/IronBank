@@ -9,14 +9,9 @@ func (auc AccountUseCase) GetTransfers(token string) ([]store.Transfer, error) {
 	var transfer []store.Transfer
 	accountOriginID := DecoderToken(token)
 	transfers := auc.Transfer.GetTransfers(accountOriginID)
-	_, err := auc.SearchAccount(accountOriginID)
-
-	if err != nil {
-		return transfer, err
-	}
-
 	accountToken := auc.Token.GetTokenID(accountOriginID)
-	err = CheckToken(token, accountToken)
+
+	err := CheckToken(token, accountToken)
 
 	if err != nil {
 		return transfer, err

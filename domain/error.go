@@ -12,6 +12,7 @@ var (
 	errInvalidToken   = errors.New("given token is invalid")
 	errInvalidID      = errors.New("given id is invalid")
 	errInvalidAmount  = errors.New("given amount is invalid")
+	//errInvalidAccount = errors.New("given account is invalid")
 )
 
 // CheckCPF checks if the cpf exists and returns nil if not, it returns an error

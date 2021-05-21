@@ -40,6 +40,14 @@ type TransferResponse struct {
 	ID int `json:"id"`
 }
 
+type GetTransfersResponse struct {
+	Transfers []store.Transfer `json:"transfers"`
+}
+
+type GetAccountsResponse struct {
+	Accounts []store.Account `json:"accounts"`
+}
+
 type ServerAccount struct {
 	storage domain.MethodsDomain
 	http.Handler

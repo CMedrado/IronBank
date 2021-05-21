@@ -22,7 +22,7 @@ func Random() int {
 }
 
 // SearchAccount returns the account via the received ID and an error if the account does not exist
-func (auc AccountUseCase) SearchAccount(id int) (store.Account, error) {
+func (auc AccountUseCase) SearchAccount(id int) store.Account {
 	accounts := auc.Store.GetAccounts()
 	account := store.Account{}
 
@@ -32,9 +32,7 @@ func (auc AccountUseCase) SearchAccount(id int) (store.Account, error) {
 		}
 	}
 
-	err := CheckExistID(account)
-
-	return account, err
+	return account
 }
 
 // CpfReplace returns the CPF received in a single format

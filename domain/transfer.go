@@ -35,12 +35,7 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 	}
 
 	accountOriginID := DecoderToken(token)
-	accountOrigin, err := auc.SearchAccount(accountOriginID)
-
-	if err != nil {
-		return err, 0
-	}
-
+	accountOrigin := auc.SearchAccount(accountOriginID)
 	accountToken := auc.Token.GetTokenID(accountOriginID)
 	err = CheckToken(token, accountToken)
 
@@ -53,6 +48,8 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 	if err != nil {
 		return err, 0
 	}
+
+	accountDestination := auc.SearchAccount(accountDestinationID)
 
 	person1 := auc.Store.GetBalance(accountOrigin.CPF)
 	person2 := auc.Store.GetBalance(accountDestination.CPF)

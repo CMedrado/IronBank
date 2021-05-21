@@ -54,7 +54,7 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 	person1 := auc.Store.GetBalance(accountOrigin.CPF)
 	person2 := auc.Store.GetBalance(accountDestination.CPF)
 
-	err = CheckBalance(person1, amount)
+	err = CheckAccountBalance(person1, amount)
 	if err != nil {
 		return err, 0
 	}

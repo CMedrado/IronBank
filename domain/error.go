@@ -93,3 +93,11 @@ func CheckExistDestinationID(account store.Account) error {
 	}
 	return nil
 }
+
+// CheckBalance checks if the balance exists and returns nil if not, it returns an error
+func CheckBalance(balance int) error {
+	if balance <= 0 {
+		return errBalanceAbsent
+	}
+	return nil
+}

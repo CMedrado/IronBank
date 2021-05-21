@@ -16,14 +16,17 @@ func (auc *AccountUseCase) CreateAccount(name string, cpf string, secret string,
 	err := CheckCPF(cpf)
 	if err != nil {
 		return 0, err
-	} else {
-		id := Random()
-		secretHash := CreateHash(secret)
-		cpf = CpfReplace(cpf)
-		newAccount := store.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: CreatedAt()}
-		auc.Store.PostAccount(newAccount)
-		return id, err
 	}
+	err = CheckBalance(balance)
+	if err != nil {
+		return 0, err
+	}
+	id := Random()
+	secretHash := CreateHash(secret)
+	cpf = CpfReplace(cpf)
+	newAccount := store.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: CreatedAt()}
+	auc.Store.PostAccount(newAccount)
+	return id, err
 }
 
 //GetBalance requests the salary for the Story by sending the ID

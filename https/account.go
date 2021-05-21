@@ -27,11 +27,14 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idAccount, err := accountUseCase.CreateAccount(requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
+	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
+		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
 		case "given cpf is invalid":
 			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -39,7 +42,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := CreateResponse{ID: idAccount}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusAccepted)
 
 	json.NewEncoder(w).Encode(response)
@@ -56,18 +59,20 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	IntID, _ := strconv.Atoi(id)
 	balance, err := accountUseCase.GetBalance(IntID)
+	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
+		ErrJson := Errors{Errors: err.Error()}
 		switch err.Error() {
-		case "given account is invalid":
+		case "given id is invalid":
 			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
 		default:
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return
 	}
 	response := BalanceResponse{Balance: balance}
-	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(response)
 }

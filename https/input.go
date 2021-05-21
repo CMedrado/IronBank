@@ -2,6 +2,7 @@ package https
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/store"
 	"net/http"
 )
 
@@ -54,5 +55,5 @@ type ServerAccount struct {
 }
 
 type Errors struct {
-	errors string `json:"errors"`
+	Errors string `json:"errors"`
 }

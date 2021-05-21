@@ -23,9 +23,9 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Set("content-type", "application/json")
+	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(Transfers)
+	json.NewEncoder(w).Encode(response)
 }
 
 func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) {

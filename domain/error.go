@@ -76,3 +76,17 @@ func CheckAmount(amount uint) error {
 	}
 	return nil
 }
+
+func CheckCompareID(accountOriginID, accountDestinationID int) error {
+	if accountOriginID == accountDestinationID {
+		return errSameAccount
+	}
+	return nil
+}
+
+func CheckExistDestinationID(account store.Account) error {
+	if (account == store.Account{}) {
+		return errInvalidDestinationID
+	}
+	return nil
+}

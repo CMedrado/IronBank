@@ -48,7 +48,7 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 		return err, 0
 	}
 
-	accountDestination, err := auc.SearchAccount(accountDestinationID)
+	err = CheckCompareID(accountOriginID, accountDestinationID)
 
 	if err != nil {
 		return err, 0
@@ -58,6 +58,11 @@ func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int
 	person2 := auc.Store.GetBalance(accountDestination.CPF)
 
 	err = CheckBalance(person1, amount)
+	if err != nil {
+		return err, 0
+	}
+
+	CheckExistDestinationID(accountDestination)
 	if err != nil {
 		return err, 0
 	}

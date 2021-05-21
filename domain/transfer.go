@@ -27,7 +27,7 @@ func (auc AccountUseCase) GetTransfers(token string) ([]store.Transfer, error) {
 }
 
 // CreateTransfers create and transfers, returns the id of the created transfer
-func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int, amount uint) (error, int) {
+func (auc AccountUseCase) CreateTransfers(token string, accountDestinationID int, amount int) (error, int) {
 	err := CheckAmount(amount)
 
 	if err != nil {

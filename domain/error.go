@@ -33,8 +33,8 @@ func CheckCPF(cpf string) error {
 	return nil
 }
 
-// CheckBalance checks if the account has a balance and returns nil if not, it returns an error
-func CheckBalance(person1 store.Account, amount uint) error {
+// CheckAccountBalance checks if the account has a balance and returns nil if not, it returns an error
+func CheckAccountBalance(person1 store.Account, amount int) error {
 	if person1.Balance < amount {
 		return errWithoutBalance
 	}
@@ -70,7 +70,7 @@ func CheckExistID(account store.Account) error {
 }
 
 // CheckAmount checks if the amount is valid and returns nil if not, it returns an error
-func CheckAmount(amount uint) error {
+func CheckAmount(amount int) error {
 	if amount <= 0 {
 		return errInvalidAmount
 	}

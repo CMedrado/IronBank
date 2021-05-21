@@ -10,7 +10,7 @@ type CreateRequest struct {
 	Name    string `json:"name"`
 	CPF     string `json:"cpf"`
 	Secret  string `json:"secret"`
-	Balance uint   `json:"balance"`
+	Balance int    `json:"balance"`
 }
 
 type CreateResponse struct {
@@ -18,7 +18,7 @@ type CreateResponse struct {
 }
 
 type BalanceResponse struct {
-	Balance uint `json:"balance"`
+	Balance int `json:"balance"`
 }
 
 type LoginRequest struct {
@@ -31,10 +31,10 @@ type TokenResponse struct {
 }
 
 type TransfersRequest struct {
-	AccountOriginID      int  `json:"account_origin_id"`
-	Token                int  `json:"token"`
-	AccountDestinationID int  `json:"account_destination_id"`
-	Amount               uint `json:"amount"`
+	AccountOriginID      int `json:"account_origin_id"`
+	Token                int `json:"token"`
+	AccountDestinationID int `json:"account_destination_id"`
+	Amount               int `json:"amount"`
 }
 
 type TransferResponse struct {

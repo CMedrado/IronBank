@@ -10,7 +10,7 @@ type CreateTransferInput struct {
 	AccountOriginID      int
 	Token                string
 	AccountDestinationID int
-	Amount               uint
+	Amount               int
 }
 
 func TestMakeTransfers(t *testing.T) {

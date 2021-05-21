@@ -10,7 +10,7 @@ type CreateAccountTestInput struct {
 	Name      string
 	CPF       string
 	Secret    string
-	Balance   uint
+	Balance   int
 	CreatedAt string
 }
 
@@ -20,7 +20,7 @@ func TestCreateAccount(t *testing.T) {
 		name    string                 //Nome do teste
 		in      CreateAccountTestInput //Entrada da Função
 		wantErr bool                   //Pra dizer se espera ou não um err
-		want    uint
+		want    int
 	}{
 		{
 			name: "should successfully create an account with formatted CPF",
@@ -85,7 +85,7 @@ func TestGetBalance(t *testing.T) {
 		name    string
 		in      int
 		wantErr bool
-		want    uint
+		want    int
 	}{
 		{
 			name:    "should successfully get balance with formatted CPF",

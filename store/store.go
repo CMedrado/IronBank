@@ -11,7 +11,7 @@ type Account struct {
 	Name      string `json:"name"`
 	CPF       string `json:"cpf"`
 	Secret    string `json:"secret"`
-	Balance   uint   `json:"balance"`
+	Balance   int    `json:"balance"`
 	CreatedAt string `json:"created_at"`
 }
 type Login struct {
@@ -27,7 +27,7 @@ type Transfer struct {
 	ID                   int    `json:"id"`
 	AccountOriginID      int    `json:"account_origin_id"`
 	AccountDestinationID int    `json:"account_destination_id"`
-	Amount               uint   `json:"amount"`
+	Amount               int    `json:"amount"`
 	CreatedAt            string `json:"created_at"`
 }
 

@@ -12,7 +12,7 @@ type AccountUseCase struct {
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *AccountUseCase) CreateAccount(name string, cpf string, secret string, balance uint) (int, error) {
+func (auc *AccountUseCase) CreateAccount(name string, cpf string, secret string, balance int) (int, error) {
 	err := CheckCPF(cpf)
 	if err != nil {
 		return 0, err
@@ -27,7 +27,7 @@ func (auc *AccountUseCase) CreateAccount(name string, cpf string, secret string,
 }
 
 //GetBalance requests the salary for the Story by sending the ID
-func (auc *AccountUseCase) GetBalance(id int) (uint, error) {
+func (auc *AccountUseCase) GetBalance(id int) (int, error) {
 	account := auc.SearchAccount(id)
 	err := CheckExistID(account)
 

@@ -14,7 +14,7 @@ var (
 	accountTransfer = store.NewStoredTransferAccountID()
 	accountToken    = store.NewStoredToked()
 	accountLogin    = store.NewStoredLogin()
-	accountUseCase  = domain.AccountUseCase{accountStorage, accountLogin, accountToken, accountTransfer}
+	accountUseCase  = domain.AccountUseCase{Store: accountStorage, Login: accountLogin, Token: accountToken, Transfer: accountTransfer}
 )
 
 func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {

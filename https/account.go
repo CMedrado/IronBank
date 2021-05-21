@@ -30,7 +30,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		ErrJson := Errors{Errors: err.Error()}
+		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given cpf is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)
@@ -62,7 +62,7 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
-		ErrJson := Errors{Errors: err.Error()}
+		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given id is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)

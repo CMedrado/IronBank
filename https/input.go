@@ -54,6 +54,6 @@ type ServerAccount struct {
 	http.Handler
 }
 
-type Errors struct {
+type ErrorsResponse struct {
 	Errors string `json:"errors"`
 }

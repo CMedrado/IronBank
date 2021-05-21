@@ -18,7 +18,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
-		ErrJson := Errors{Errors: err.Error()}
+		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given cpf is invalid":
 			w.WriteHeader(http.StatusNotAcceptable)

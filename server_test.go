@@ -46,11 +46,20 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			responsebody: `{"id":19727887}` + "\n",
 		},
 		{
-			name:     "should unsuccessfully create an account when CPF is invalid",
-			method:   "POST",
-			path:     "/accounts",
-			body:     `{"name": "Rafael", "cpf": "08131.391043", "secret": "tatatal", "balance": 5000}`,
-			response: http.StatusUnauthorized,
+			name:         "should unsuccessfully create an account when CPF is invalid",
+			method:       "POST",
+			path:         "/accounts",
+			body:         `{"name": "Rafael", "cpf": "08131.391043", "secret": "tatatal", "balance": 5000}`,
+			response:     http.StatusNotAcceptable,
+			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
+		},
+		{
+			name:         "should unsuccessfully create an account when balance is invalid",
+			method:       "POST",
+			path:         "/accounts",
+			body:         `{"name": "Rafael", "cpf": "08131391043", "secret": "tatatal", "balance": -5}`,
+			response:     http.StatusBadRequest,
+			responsebody: `{"errors":"given the balance amount is invalid"}` + "\n",
 		},
 	}
 	for _, tc := range createt {
@@ -130,16 +139,11 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			responsebody: `{"balance":5000}` + "\n",
 		},
 		{
-			name:     "should unsuccessfully get balance when CPF is invalid",
-			method:   "GET",
-			path:     "/accounts/3848/balance",
-			response: http.StatusBadRequest,
-		},
-		{
-			name:     "should unsuccessfully get balance when dont exist account",
-			method:   "GET",
-			path:     "/accounts/398-6/balance",
-			response: http.StatusBadRequest,
+			name:         "should unsuccessfully get balance when ID is invalid",
+			method:       "GET",
+			path:         "/accounts/3848/balance",
+			response:     http.StatusNotAcceptable,
+			responsebody: `{"errors":"given id is invalid"}` + "\n",
 		},
 	}
 	for _, tc := range balancet {
@@ -182,25 +186,20 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			response: http.StatusAccepted,
 		},
 		{
-			name:     "should unsuccessfully authenticated login when CPF is invalid",
-			method:   "POST",
-			path:     "/login",
-			body:     `{"cpf": "384531620.93", "Secret": "jax"}`,
-			response: http.StatusNotAcceptable,
+			name:         "should unsuccessfully authenticated login when cpf is not registered",
+			method:       "POST",
+			path:         "/login",
+			body:         `{"cpf": "38453162793", "Secret": "jax"}`,
+			response:     http.StatusNotAcceptable,
+			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
 		},
 		{
-			name:     "should unsuccessfully authenticated login when cpf is not registered",
-			method:   "POST",
-			path:     "/login",
-			body:     `{"cpf": "38453162793", "Secret": "jax"}`,
-			response: http.StatusNotAcceptable,
-		},
-		{
-			name:     "should unsuccessfully authenticated login when secret is not correct",
-			method:   "POST",
-			path:     "/login",
-			body:     `{"cpf": "081.313.910-43", "Secret": "call"}`,
-			response: http.StatusUnauthorized,
+			name:         "should unsuccessfully authenticated login when secret is not correct",
+			method:       "POST",
+			path:         "/login",
+			body:         `{"cpf": "081.313.910-43", "Secret": "call"}`,
+			response:     http.StatusUnauthorized,
+			responsebody: `{"errors":"given secret is invalid"}` + "\n",
 		},
 	}
 	for _, tc := range logint {
@@ -215,8 +214,8 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 
-			//if responseRecorder.Body.String() != tc.body {
-			//	t.Errorf("expected an %s but got %s", responseRecorder.Body.String(), tc.body)
+			//if responseRecorder.Body.String() != tc.responsebody {
+			//	t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
 			//}
 		})
 	}
@@ -249,12 +248,48 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			token:    firstToken,
 		},
 		{
-			name:     "should unsuccessfully transfer amount when there is wrong token",
-			method:   "POST",
-			path:     "/transfers",
-			body:     `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
-			response: http.StatusUnauthorized,
-			token:    secondTokenD,
+			name:         "should unsuccessfully transfer amount when there is wrong token",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
+			response:     http.StatusUnauthorized,
+			token:        secondTokenD,
+			responsebody: `{"errors":"given token is invalid"}` + "\n"},
+		{
+			name:         "should unsuccessfully transfer amount when there is wrong destination ID",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":7568497,"amount": 300}`,
+			response:     http.StatusNotAcceptable,
+			token:        firstToken,
+			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
+		},
+		{
+			name:         "should unsuccessfully transfer amount when there is invalid amoung",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":` + secondIDString + `,"amount": -5}`,
+			response:     http.StatusBadRequest,
+			token:        firstToken,
+			responsebody: `{"errors":"given amount is invalid"}` + "\n",
+		},
+		{
+			name:         "should unsuccessfully transfer amount when there without balance ",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":` + secondIDString + `,"amount": 6000}`,
+			response:     http.StatusBadRequest,
+			token:        firstToken,
+			responsebody: `{"errors":"given account without balance"}` + "\n",
+		},
+		{
+			name:         "should unsuccessfully transfer amount when there same account ",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":` + firstIDString + `,"amount": 300}`,
+			response:     http.StatusBadRequest,
+			token:        firstToken,
+			responsebody: `{"errors":"given account is the same as the account destination"}` + "\n",
 		},
 	}
 	for _, tc := range createtransfer {
@@ -270,6 +305,9 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			if tc.response != respondeRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, respondeRecorder.Code)
 			}
+			//if respondeRecorder.Body.String() != tc.responsebody {
+			//	t.Errorf("expected an %s but got %s", tc.responsebody, respondeRecorder.Body.String())
+			//}
 		})
 	}
 	gettransfer := []struct {
@@ -289,11 +327,12 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			token:    firstToken,
 		},
 		{
-			name:     "should unsuccessfully get transfer when there is wrong token",
-			method:   "GET",
-			path:     "/transfers",
-			response: http.StatusUnauthorized,
-			token:    secondTokenD,
+			name:         "should unsuccessfully get transfer when there is wrong token",
+			method:       "GET",
+			path:         "/transfers",
+			response:     http.StatusUnauthorized,
+			token:        secondTokenD,
+			responsebody: `{"errors":"given token is invalid"}` + "\n",
 		},
 	}
 	for _, tc := range gettransfer {
@@ -309,6 +348,10 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			if tc.response != respondRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, respondRecorder.Code)
 			}
+
+			//if respondRecorder.Body.String() != tc.responsebody {
+			//	t.Errorf("expected an %s but got %s", tc.responsebody, respondRecorder.Body.String())
+			//}
 		})
 	}
 }

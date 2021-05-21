@@ -14,6 +14,7 @@ var (
 	errInvalidAmount        = errors.New("given amount is invalid")
 	errInvalidDestinationID = errors.New("given account destination id is invalid")
 	errSameAccount          = errors.New("given account is the same as the account destination")
+	errBalanceAbsent        = errors.New("given the balance amount is invalid")
 )
 
 // CheckCPF checks if the cpf exists and returns nil if not, it returns an error

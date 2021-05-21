@@ -214,9 +214,9 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 
-			//if responseRecorder.Body.String() != tc.responsebody {
-			//	t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
-			//}
+			if responseRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
+				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
+			}
 		})
 	}
 	firstToken := armazenamento.Token.ReturnToken(firstID)
@@ -305,9 +305,9 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			if tc.response != respondeRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, respondeRecorder.Code)
 			}
-			//if respondeRecorder.Body.String() != tc.responsebody {
-			//	t.Errorf("expected an %s but got %s", tc.responsebody, respondeRecorder.Body.String())
-			//}
+			if respondeRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
+				t.Errorf("expected an %s but got %s", tc.responsebody, respondeRecorder.Body.String())
+			}
 		})
 	}
 	gettransfer := []struct {
@@ -349,9 +349,9 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, respondRecorder.Code)
 			}
 
-			//if respondRecorder.Body.String() != tc.responsebody {
-			//	t.Errorf("expected an %s but got %s", tc.responsebody, respondRecorder.Body.String())
-			//}
+			if respondRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
+				t.Errorf("expected an %s but got %s", tc.responsebody, respondRecorder.Body.String())
+			}
 		})
 	}
 }

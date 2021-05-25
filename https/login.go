@@ -34,7 +34,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 
 	response := TokenResponse{Token: token}
 
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(response)
 }

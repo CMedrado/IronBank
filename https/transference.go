@@ -24,7 +24,7 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response := GetTransfersResponse{Transfers: Transfers}
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -66,7 +66,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response := TransferResponse{ID: id}
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusCreated)
 
 	json.NewEncoder(w).Encode(response)
 }

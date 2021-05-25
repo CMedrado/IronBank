@@ -13,7 +13,7 @@ func (auc AccountUseCase) AuthenticatedLogin(cpf, secret string) (error, string)
 	err := CheckCPF(cpf)
 	cpf = CpfReplace(cpf)
 	if err != nil {
-		return err, ""
+		return ErrLogin, ""
 	}
 
 	newLogin := store.Login{CPF: cpf, Secret: secretHash}
@@ -21,7 +21,7 @@ func (auc AccountUseCase) AuthenticatedLogin(cpf, secret string) (error, string)
 
 	err = CheckLogin(account, newLogin)
 	if err != nil {
-		return err, ""
+		return ErrLogin, ""
 	}
 
 	id := auc.Store.GetAccounts()

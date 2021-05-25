@@ -20,10 +20,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
-		case "given cpf is invalid":
-			w.WriteHeader(http.StatusNotAcceptable)
-			json.NewEncoder(w).Encode(ErrJson)
-		case "given secret is invalid":
+		case "given secret or CPF are incorrect":
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:

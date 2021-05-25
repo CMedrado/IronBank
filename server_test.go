@@ -30,20 +30,18 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 		responsebody string
 	}{
 		{
-			name:         "Should successfully create an account with formatted CPF",
-			method:       "POST",
-			path:         "/accounts",
-			body:         `{"name": "Rafael", "cpf": "081.313.910-43", "secret": "tatatal", "balance": 5000}`,
-			response:     http.StatusAccepted,
-			responsebody: `{"id":98498081}` + "\n",
+			name:     "Should successfully create an account with formatted CPF",
+			method:   "POST",
+			path:     "/accounts",
+			body:     `{"name": "Rafael", "cpf": "081.313.910-43", "secret": "tatatal", "balance": 5000}`,
+			response: http.StatusCreated,
 		},
 		{
-			name:         "should successfully create an account with unformatted CPF",
-			method:       "POST",
-			path:         "/accounts",
-			body:         `{"name": "Lucas", "cpf": "38453162093", "secret": "jax", "balance": 3000}`,
-			response:     http.StatusAccepted,
-			responsebody: `{"id":19727887}` + "\n",
+			name:     "should successfully create an account with unformatted CPF",
+			method:   "POST",
+			path:     "/accounts",
+			body:     `{"name": "Lucas", "cpf": "38453162093", "secret": "jax", "balance": 3000}`,
+			response: http.StatusCreated,
 		},
 		{
 			name:         "should unsuccessfully create an account when CPF is invalid",
@@ -74,7 +72,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 
-			if responseRecorder.Body.String() != tc.responsebody {
+			if responseRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
 				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
 			}
 		})
@@ -91,7 +89,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			name:         "should successfully get accounts",
 			method:       "GET",
 			path:         "/accounts",
-			response:     http.StatusAccepted,
+			response:     http.StatusOK,
 			responsebody: `[{"id":98498081,"name":"Rafael","cpf":"08131391043","secret":"3467e121a1a109628e0a5b0cebba361b","balance":5000,"created_at":"19/05/2021 11:11:40"},{"id":19727887,"name":"Lucas","cpf":"38453162093","secret":"7e65a9b554bbc9817aa049ce38c84a72","balance":3000,"created_at":"19/05/2021 10:10:12"}]` + "\n",
 		},
 	}
@@ -125,18 +123,16 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 		responsebody string
 	}{
 		{
-			name:         "should successfully get balance with formatted CPF",
-			method:       "GET",
-			path:         "/accounts/" + firstIDString + "/balance",
-			response:     http.StatusAccepted,
-			responsebody: `{"balance":3000}` + "\n",
+			name:     "should successfully get balance with formatted CPF",
+			method:   "GET",
+			path:     "/accounts/" + firstIDString + "/balance",
+			response: http.StatusOK,
 		},
 		{
-			name:         "should successfully get balance with unformatted CPF",
-			method:       "GET",
-			path:         "/accounts/" + secondIDString + "/balance",
-			response:     http.StatusAccepted,
-			responsebody: `{"balance":5000}` + "\n",
+			name:     "should successfully get balance with unformatted CPF",
+			method:   "GET",
+			path:     "/accounts/" + secondIDString + "/balance",
+			response: http.StatusOK,
 		},
 		{
 			name:         "should unsuccessfully get balance when ID is invalid",
@@ -158,7 +154,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 
-			if responseRecorder.Body.String() != tc.responsebody {
+			if responseRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
 				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
 			}
 		})
@@ -176,22 +172,22 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			method:   "POST",
 			path:     "/login",
 			body:     `{"cpf": "08131391043", "Secret": "tatatal"}`,
-			response: http.StatusAccepted,
+			response: http.StatusOK,
 		},
 		{
 			name:     "should successfully authenticated login with unformatted CPF",
 			method:   "POST",
 			path:     "/login",
 			body:     `{"cpf": "38453162093", "Secret": "jax"}`,
-			response: http.StatusAccepted,
+			response: http.StatusOK,
 		},
 		{
 			name:         "should unsuccessfully authenticated login when cpf is not registered",
 			method:       "POST",
 			path:         "/login",
 			body:         `{"cpf": "38453162793", "Secret": "jax"}`,
-			response:     http.StatusNotAcceptable,
-			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
+			response:     http.StatusUnauthorized,
+			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully authenticated login when secret is not correct",
@@ -199,7 +195,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			path:         "/login",
 			body:         `{"cpf": "081.313.910-43", "Secret": "call"}`,
 			response:     http.StatusUnauthorized,
-			responsebody: `{"errors":"given secret is invalid"}` + "\n",
+			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
 		},
 	}
 	for _, tc := range logint {
@@ -236,7 +232,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			method:   "POST",
 			path:     "/transfers",
 			body:     `{"account_destination_id":` + secondIDString + `,"amount": 500}`,
-			response: http.StatusAccepted,
+			response: http.StatusCreated,
 			token:    firstToken,
 		},
 		{
@@ -244,7 +240,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			method:   "POST",
 			path:     "/transfers",
 			body:     `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
-			response: http.StatusAccepted,
+			response: http.StatusCreated,
 			token:    firstToken,
 		},
 		{
@@ -265,7 +261,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
 		{
-			name:         "should unsuccessfully transfer amount when there is invalid amoung",
+			name:         "should unsuccessfully transfer amount when there is invalid amount",
 			method:       "POST",
 			path:         "/transfers",
 			body:         `{"account_destination_id":` + secondIDString + `,"amount": -5}`,
@@ -323,7 +319,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			name:     "should successfully get transfers",
 			method:   "GET",
 			path:     "/transfers",
-			response: http.StatusAccepted,
+			response: http.StatusOK,
 			token:    firstToken,
 		},
 		{

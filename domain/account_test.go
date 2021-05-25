@@ -140,22 +140,3 @@ func TestGetBalance(t *testing.T) {
 		})
 	}
 }
-
-//func TestGetAccounts (t *testing.T) {
-//	tt := []struct{
-//		name    string
-//		wantErr bool
-//		want	CreateAccountTestInput
-//	}{
-//		{
-//			name:    "should successfully get accounts",
-//			wantErr: false,
-//			want:    CreateAccountTestInput{982, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"},
-//		},
-//		{
-//			name:    "should successfully get balance with unformatted CPF",
-//			wantErr: false,
-//			want:    CreateAccountTestInput{981,"Rafael","38453162093",CreateHash("call"),6000, "06/01/2020"},
-//		},
-//	}
-//}

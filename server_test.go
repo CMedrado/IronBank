@@ -52,12 +52,27 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
 		},
 		{
+			name:         "should unsuccessfully create an account when CPF is invalid",
+			method:       "POST",
+			path:         "/accounts",
+			body:         `{"name": "Rafael", "cpf": "08131.391.0-43", "secret": "tatatal", "balance": 5000}`,
+			response:     http.StatusNotAcceptable,
+			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
+		},
+		{
 			name:         "should unsuccessfully create an account when balance is invalid",
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Rafael", "cpf": "08131391043", "secret": "tatatal", "balance": -5}`,
 			response:     http.StatusBadRequest,
 			responsebody: `{"errors":"given the balance amount is invalid"}` + "\n",
+		},
+		{
+			name:     "should unsuccessfully create an account when json is invalid",
+			method:   "POST",
+			path:     "/accounts",
+			body:     `{"ne" "Lucas", "cpf" "38453162093", "secret""jax", "balance" 3000}`,
+			response: http.StatusBadRequest,
 		},
 	}
 	for _, tc := range createt {
@@ -190,12 +205,27 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
 		},
 		{
+			name:         "should unsuccessfully create an account when CPF is invalid",
+			method:       "POST",
+			path:         "/login",
+			body:         `{"cpf": "384531.62793", "Secret": "jax"}`,
+			response:     http.StatusUnauthorized,
+			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
+		},
+		{
 			name:         "should unsuccessfully authenticated login when secret is not correct",
 			method:       "POST",
 			path:         "/login",
 			body:         `{"cpf": "081.313.910-43", "Secret": "call"}`,
 			response:     http.StatusUnauthorized,
 			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
+		},
+		{
+			name:     "should unsuccessfully authenticated login when json is invalid",
+			method:   "POST",
+			path:     "/login",
+			body:     `{"Secret" "jax"}`,
+			response: http.StatusBadRequest,
 		},
 	}
 	for _, tc := range logint {
@@ -286,6 +316,14 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 			response:     http.StatusBadRequest,
 			token:        firstToken,
 			responsebody: `{"errors":"given account is the same as the account destination"}` + "\n",
+		},
+		{
+			name:     "should unsuccessfully transfer amount when json is invalid",
+			method:   "POST",
+			path:     "/transfers",
+			body:     `{"account"0}`,
+			response: http.StatusBadRequest,
+			token:    firstToken,
 		},
 	}
 	for _, tc := range createtransfer {

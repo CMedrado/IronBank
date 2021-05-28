@@ -34,7 +34,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 	token := r.Header.Get("Authorization")
 
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

@@ -16,9 +16,9 @@ func (a StoredAccount) GetAccountCPF(cpf string) Account {
 	return accountStorage[cpf]
 }
 
-func (a StoredLogin) GetLogin(token int) Login {
-	return accountLogin[token]
-}
+//func (a StoredLogin) GetLogin(token int) Login {
+//	return accountLogin[token]
+//}
 
 func (a *StoredToken) PostToken(id int, token string) {
 	accountToken[id] = Token{Token: token}

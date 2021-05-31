@@ -2,6 +2,8 @@ package https
 
 import (
 	"encoding/json"
+	"github.com/CMedrado/DesafioStone/domain"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -21,6 +23,12 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given secret or CPF are incorrect":
+			log.WithFields(log.Fields{
+				"module": "https",
+				"method": "processLogin",
+				"type":   http.StatusUnauthorized,
+				"time":   domain.CreatedAt(),
+			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
 		default:
@@ -28,6 +36,14 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	log.WithFields(log.Fields{
+		"module":         "https",
+		"method":         "processLogin",
+		"type":           http.StatusOK,
+		"time":           domain.CreatedAt(),
+		"response_token": token,
+	}).Info("balance handled sucessfully!")
 
 	response := TokenResponse{Token: token}
 

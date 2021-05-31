@@ -13,7 +13,9 @@ import (
 
 // CreatedAt returns the current date and time
 func CreatedAt() string {
-	return time.Now().Format("02/01/2006 03:03:05")
+	loc, _ := time.LoadLocation("America/Sao_Paulo")
+	utc := time.Now().In(loc).Format("02/01/2006 15:04:05")
+	return utc
 }
 
 // Random returns a random number

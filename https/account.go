@@ -33,20 +33,14 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given the balance amount is invalid":
-			log.WithFields(log.Fields{
-				"module": "https",
-				"method": "processAccount",
-				"type":   http.StatusBadRequest,
-				"time":   domain.CreatedAt(),
+			l.WithFields(log.Fields{
+				"type": http.StatusBadRequest,
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given cpf is invalid":
-			log.WithFields(log.Fields{
-				"module": "https",
-				"method": "processAccount",
-				"type":   http.StatusNotAcceptable,
-				"time":   domain.CreatedAt(),
+			l.WithFields(log.Fields{
+				"type": http.StatusNotAcceptable,
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
@@ -58,13 +52,10 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 
 	response := CreateResponse{ID: idAccount}
 
-	log.WithFields(log.Fields{
-		"module": "https",
-		"method": "processAccount",
-		"type":   http.StatusCreated,
-		"id":     response,
-		"time":   domain.CreatedAt(),
-	}).Info("account created sucessfully!")
+	l.WithFields(log.Fields{
+		"type":       http.StatusCreated,
+		"request_id": response,
+	}).Info("account created successfully!")
 
 	w.WriteHeader(http.StatusCreated)
 
@@ -75,7 +66,7 @@ func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	response := GetAccountsResponse{Accounts: accountUseCase.GetAccounts()}
-	log.WithFields(log.Fields{
+	s.logger.WithFields(log.Fields{
 		"module": "https",
 		"method": "handleAccounts",
 		"type":   http.StatusOK,
@@ -90,16 +81,18 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	balance, err := accountUseCase.GetBalance(IntID)
 	w.Header().Set("content-type", "application/json")
 
+	l := s.logger.WithFields(log.Fields{
+		"module": "https",
+		"method": "handleBalance",
+	})
+
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given id is invalid":
-			log.WithFields(log.Fields{
-				"module":     "https",
-				"method":     "handleBalance",
+			l.WithFields(log.Fields{
 				"type":       http.StatusNotAcceptable,
 				"request_id": id,
-				"time":       domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
@@ -108,9 +101,7 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	log.WithFields(log.Fields{
-		"module":     "https",
-		"method":     "handleBalance",
+	l.WithFields(log.Fields{
 		"type":       http.StatusOK,
 		"request_id": id,
 		"time":       domain.CreatedAt(),

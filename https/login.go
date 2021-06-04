@@ -19,15 +19,18 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	err, token := accountUseCase.AuthenticatedLogin(requestBody.CPF, requestBody.Secret)
 	w.Header().Set("Content-Type", "application/json")
 
+	l := s.logger.WithFields(log.Fields{
+		"module": "https",
+		"method": "processLogin",
+	})
+
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given secret or CPF are incorrect":
-			log.WithFields(log.Fields{
-				"module": "https",
-				"method": "processLogin",
-				"type":   http.StatusUnauthorized,
-				"time":   domain.CreatedAt(),
+			l.WithFields(log.Fields{
+				"type": http.StatusUnauthorized,
+				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
@@ -37,9 +40,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"module":         "https",
-		"method":         "processLogin",
+	l.WithFields(log.Fields{
 		"type":           http.StatusOK,
 		"time":           domain.CreatedAt(),
 		"response_token": token,

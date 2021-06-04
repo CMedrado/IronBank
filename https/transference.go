@@ -13,15 +13,18 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 	Transfers, err := accountUseCase.GetTransfers(token)
 	w.Header().Set("content-type", "application/json")
 
+	l := s.logger.WithFields(log.Fields{
+		"module": "https",
+		"method": "handleTransfers",
+	})
+
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given token is invalid":
-			log.WithFields(log.Fields{
-				"module": "https",
-				"method": "handleTransfers",
-				"type":   http.StatusUnauthorized,
-				"time":   domain.CreatedAt(),
+			l.WithFields(log.Fields{
+				"type": http.StatusUnauthorized,
+				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
@@ -30,11 +33,9 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
-	log.WithFields(log.Fields{
-		"module": "https",
-		"method": "handleTransfers",
-		"type":   http.StatusOK,
-		"time":   domain.CreatedAt(),
+	l.WithFields(log.Fields{
+		"type": http.StatusOK,
+		"time": domain.CreatedAt(),
 	}).Info("balance handled sucessfully!")
 	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusOK)
@@ -51,6 +52,11 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	l := s.logger.WithFields(log.Fields{
+		"module": "https",
+		"method": "processTransfer",
+	})
+
 	err, id := accountUseCase.CreateTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -58,9 +64,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
 		case "given account destination id is invalid":
-			log.WithFields(log.Fields{
-				"module":        "https",
-				"method":        "processTransfer",
+			l.WithFields(log.Fields{
 				"type":          http.StatusNotAcceptable,
 				"time":          domain.CreatedAt(),
 				"request_token": token,
@@ -68,9 +72,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given account without balance":
-			log.WithFields(log.Fields{
-				"module":        "https",
-				"method":        "processTransfer",
+			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
 				"request_token": token,
@@ -78,18 +80,14 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given token is invalid":
-			log.WithFields(log.Fields{
-				"module": "https",
-				"method": "processTransfer",
-				"type":   http.StatusUnauthorized,
-				"time":   domain.CreatedAt(),
+			l.WithFields(log.Fields{
+				"type": http.StatusUnauthorized,
+				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given amount is invalid":
-			log.WithFields(log.Fields{
-				"module":        "https",
-				"method":        "processTransfer",
+			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
 				"request_token": token,
@@ -97,9 +95,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		case "given account is the same as the account destination":
-			log.WithFields(log.Fields{
-				"module":        "https",
-				"method":        "processTransfer",
+			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
 				"request_token": token,
@@ -112,9 +108,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"module":     "https",
-		"method":     "handleTransfers",
+	l.WithFields(log.Fields{
 		"type":       http.StatusCreated,
 		"time":       domain.CreatedAt(),
 		"request_id": id,

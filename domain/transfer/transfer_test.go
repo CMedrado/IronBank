@@ -3,7 +3,6 @@ package transfer
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
@@ -72,19 +71,19 @@ func TestMakeTransfers(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{19727887, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{98498081, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
+			listAccount := store.Account{ID: 19727887, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store.Account{ID: 98498081, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			usecase := account.UseCase{
-				Store: accountStorage,
-				Token: accountToken,
+			usecase := UseCase{
+				StoredAccount: accountStorage,
+				StoredToken:   accountToken,
 			}
 
-			usecase.Store.PostAccount(listAccount)
-			usecase.Store.PostAccount(listAccounts)
-			usecase.Token.PostToken(19727887, msg)
+			usecase.StoredAccount.PostAccount(listAccount)
+			usecase.StoredAccount.PostAccount(listAccounts)
+			usecase.StoredToken.PostToken(19727887, msg)
 
 			gotErr, gotTransfer := usecase.CreateTransfers(testCase.in.Token, testCase.in.AccountDestinationID, testCase.in.Amount)
 
@@ -131,25 +130,25 @@ func TestMakeGetTransfers(t *testing.T) {
 	}
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{19727887, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{98498081, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
-			listTransfer := store.Transfer{47278511, 98498081, 19727887, 500, "13/05/2021 09:09:16"}
-			listTransfers := store.Transfer{6410694, 98498081, 19727887, 200, "13/05/2021 09:09:16"}
+			listAccount := store.Account{ID: 19727887, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store.Account{ID: 98498081, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+			listTransfer := store.Transfer{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}
+			listTransfers := store.Transfer{ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
 			accountTransfer := store.NewStoredTransferAccountID()
-			usecase := account.UseCase{
-				Store:    accountStorage,
-				Token:    accountToken,
-				Transfer: accountTransfer,
+			usecase := UseCase{
+				StoredAccount:  accountStorage,
+				StoredToken:    accountToken,
+				StoredTransfer: accountTransfer,
 			}
 
-			usecase.Store.PostAccount(listAccount)
-			usecase.Store.PostAccount(listAccounts)
-			usecase.Token.PostToken(98498081, msg)
-			usecase.Transfer.PostTransferID(listTransfer, 98498081)
-			usecase.Transfer.PostTransferID(listTransfers, 98498081)
+			usecase.StoredAccount.PostAccount(listAccount)
+			usecase.StoredAccount.PostAccount(listAccounts)
+			usecase.StoredToken.PostToken(98498081, msg)
+			usecase.StoredTransfer.PostTransferID(listTransfer, 98498081)
+			usecase.StoredTransfer.PostTransferID(listTransfers, 98498081)
 
 			testss, gotErr := usecase.GetTransfers(testCase.in.Token)
 

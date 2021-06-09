@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
-	"github.com/CMedrado/DesafioStone/store"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -21,20 +20,6 @@ func CreatedAt() string {
 // Random returns a random number
 func Random() int {
 	return rand.Intn(100000000)
-}
-
-// SearchAccount returns the account via the received ID
-func (auc AccountUseCase) SearchAccount(id int) store.Account {
-	accounts := auc.Store.GetAccounts()
-	account := store.Account{}
-
-	for _, a := range accounts {
-		if a.ID == id {
-			account = a
-		}
-	}
-
-	return account
 }
 
 // CpfReplace returns the CPF received in a single format

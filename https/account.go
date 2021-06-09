@@ -2,7 +2,7 @@ package https
 
 import (
 	"encoding/json"
-	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -15,13 +15,16 @@ var (
 	accountTransfer = store.NewStoredTransferAccountID()
 	accountToken    = store.NewStoredToked()
 	accountLogin    = store.NewStoredLogin()
-	accountUseCase  = domain.AccountUseCase{Store: accountStorage, Login: accountLogin, Token: accountToken, Transfer: accountTransfer}
+	accountUseCase  = account.UseCase{StoredAccount: accountStorage}
 )
 
 func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	var requestBody CreateRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
-
+	l := s.logger.WithFields(log.Fields{
+		"module": "https",
+		"method": "processAccount",
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -70,8 +73,7 @@ func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 		"module": "https",
 		"method": "handleAccounts",
 		"type":   http.StatusOK,
-		"time":   domain.CreatedAt(),
-	}).Info("accounts handled sucessfully!")
+	}).Info("accounts handled successfully!")
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -104,8 +106,7 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	l.WithFields(log.Fields{
 		"type":       http.StatusOK,
 		"request_id": id,
-		"time":       domain.CreatedAt(),
-	}).Info("balance handled sucessfully!")
+	}).Info("balance handled successfully!")
 	response := BalanceResponse{Balance: balance}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)

@@ -1,6 +1,8 @@
-package domain
+package login
 
 import (
+	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
@@ -60,12 +62,12 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{982, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{981, "Rafael", "38453162093", CreateHash("call"), 6000, "06/01/2020"}
+			listAccount := store.Account{982, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
+			listAccounts := store.Account{981, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			usecase := AccountUseCase{
+			usecase := account.UseCase{
 				Store: accountStorage,
 				Token: accountToken,
 			}

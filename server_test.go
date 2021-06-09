@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
-	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/https"
 	"github.com/CMedrado/DesafioStone/store"
 	"net/http"
@@ -18,7 +18,7 @@ func TestNewServerAccount(t *testing.T) { // Fazer
 	accountToken := store.NewStoredToked()
 	accountLogin := store.NewStoredLogin()
 	accountStorage := store.NewStoredAccount()
-	armazenamento := domain.AccountUseCase{Store: accountStorage, Login: accountLogin, Token: accountToken, Transfer: accountTransfer}
+	armazenamento := account.UseCase{Store: accountStorage, Login: accountLogin, Token: accountToken, Transfer: accountTransfer}
 	servidor := https.NewServerAccount(&armazenamento)
 
 	createt := []struct {

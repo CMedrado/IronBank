@@ -1,4 +1,4 @@
-package domain
+package transfer
 
 import "github.com/CMedrado/DesafioStone/store"
 

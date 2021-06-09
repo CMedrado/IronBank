@@ -2,7 +2,6 @@ package login
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
@@ -67,13 +66,13 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			usecase := account.UseCase{
-				Store: accountStorage,
-				Token: accountToken,
+			usecase := UseCase{
+				StoredAccount: accountStorage,
+				StoredToken:   accountToken,
 			}
 
-			usecase.Store.PostAccount(listAccount)
-			usecase.Store.PostAccount(listAccounts)
+			usecase.StoredAccount.PostAccount(listAccount)
+			usecase.StoredAccount.PostAccount(listAccounts)
 
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret)
 

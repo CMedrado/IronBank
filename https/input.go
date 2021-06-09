@@ -3,6 +3,7 @@ package https
 import (
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/CMedrado/DesafioStone/store"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -50,7 +51,11 @@ type GetAccountsResponse struct {
 }
 
 type ServerAccount struct {
-	storage domain.MethodsDomain
+	account  domain.AccountRepository
+	login    domain.LoginRepository
+	transfer domain.TransferRepository
+	logger   *logrus.Entry
+
 	http.Handler
 }
 

@@ -3,9 +3,10 @@ package https
 import (
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
-func NewServerAccount(storage domain.MethodsDomain) *ServerAccount {
+func NewServerAccount(account domain.AccountRepository, login domain.LoginRepository, transfer domain.TransferRepository, logger *log.Entry) *ServerAccount {
 	s := new(ServerAccount)
 
 	s.storage = storage

@@ -33,7 +33,7 @@ func TestCreateAccount(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "should successfully create an account with unformatted CPF",
+			name: "should successfully create an account with unformulated CPF",
 			in: CreateAccountTestInput{
 				Name:    "Lucas",
 				CPF:     "38453162093",
@@ -94,7 +94,7 @@ func TestGetBalance(t *testing.T) {
 			want:    5000,
 		},
 		{
-			name:    "should successfully get balance with unformatted CPF",
+			name:    "should successfully get balance with unformulated CPF",
 			in:      981,
 			wantErr: false,
 			want:    6000,

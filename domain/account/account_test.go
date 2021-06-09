@@ -1,4 +1,4 @@
-package domain
+package account
 
 import (
 	"github.com/CMedrado/DesafioStone/store"
@@ -57,8 +57,8 @@ func TestCreateAccount(t *testing.T) {
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
 			accountStorage := store.NewStoredAccount()
-			usecase := AccountUseCase{
-				Store: accountStorage,
+			usecase := UseCase{
+				StoredAccount: accountStorage,
 			}
 
 			//test
@@ -113,15 +113,15 @@ func TestGetBalance(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{982, "Lucas", "08131391043", "lixo", 5000, "06/01/2020"}
-			listAccounts := store.Account{981, "Rafael", "38453162093", "call", 6000, "06/01/2020"}
+			listAccount := store.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: "lixo", Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: "call", Balance: 6000, CreatedAt: "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
-			usecase := AccountUseCase{
-				Store: accountStorage,
+			usecase := UseCase{
+				StoredAccount: accountStorage,
 			}
-			usecase.Store.PostAccount(listAccount)
-			usecase.Store.PostAccount(listAccounts)
+			usecase.StoredAccount.PostAccount(listAccount)
+			usecase.StoredAccount.PostAccount(listAccounts)
 			//test
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 

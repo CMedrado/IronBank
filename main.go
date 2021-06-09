@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/domain/account"
 	https "github.com/CMedrado/DesafioStone/https"
 	"github.com/CMedrado/DesafioStone/store"
 	"github.com/sirupsen/logrus"

@@ -1,7 +1,9 @@
-package domain
+package transfer
 
 import (
 	"encoding/base64"
+	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
@@ -70,12 +72,12 @@ func TestMakeTransfers(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{19727887, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{98498081, "Rafael", "38453162093", CreateHash("call"), 6000, "06/01/2020"}
+			listAccount := store.Account{19727887, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
+			listAccounts := store.Account{98498081, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
-			usecase := AccountUseCase{
+			usecase := account.UseCase{
 				Store: accountStorage,
 				Token: accountToken,
 			}
@@ -129,15 +131,15 @@ func TestMakeGetTransfers(t *testing.T) {
 	}
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{19727887, "Lucas", "08131391043", CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{98498081, "Rafael", "38453162093", CreateHash("call"), 6000, "06/01/2020"}
+			listAccount := store.Account{19727887, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
+			listAccounts := store.Account{98498081, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
 			listTransfer := store.Transfer{47278511, 98498081, 19727887, 500, "13/05/2021 09:09:16"}
 			listTransfers := store.Transfer{6410694, 98498081, 19727887, 200, "13/05/2021 09:09:16"}
 
 			accountStorage := store.NewStoredAccount()
 			accountToken := store.NewStoredToked()
 			accountTransfer := store.NewStoredTransferAccountID()
-			usecase := AccountUseCase{
+			usecase := account.UseCase{
 				Store:    accountStorage,
 				Token:    accountToken,
 				Transfer: accountTransfer,

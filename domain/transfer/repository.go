@@ -3,6 +3,7 @@ package transfer
 import "github.com/CMedrado/DesafioStone/store"
 
 type TransferRepository interface {
-	GetTransfers(string) ([]store.Transfer, error)
-	CreateTransfers(string, int, int) (error, int)
+	GetTransfers(accountOriginID int) map[int]store.Transfer
+	PostTransferAccountID(transfer store.Transfer) store.StoredTransferID
+	PostTransferID(transfer store.Transfer, id int)
 }

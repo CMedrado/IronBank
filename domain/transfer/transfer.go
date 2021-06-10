@@ -2,12 +2,11 @@ package transfer
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/domain/account"
 	"github.com/CMedrado/DesafioStone/store"
 )
 
 type UseCase struct {
-	StoredAccount  *store.StoredAccount
+	StoredAccount  domain.AccountUsecase
 	StoredToken    *store.StoredToken
 	StoredTransfer *store.StoredTransferAccountID
 }
@@ -15,7 +14,7 @@ type UseCase struct {
 // GetTransfers returns all account transfers
 func (auc UseCase) GetTransfers(token string) ([]store.Transfer, error) {
 	var transfer []store.Transfer
-	accountOriginID := domain.DecoderToken(token)
+	accountOriginID := DecoderToken(token)
 	transfers := auc.StoredTransfer.GetTransfers(accountOriginID)
 	accountToken := auc.StoredToken.GetTokenID(accountOriginID)
 
@@ -37,14 +36,13 @@ func (auc UseCase) GetTransfers(token string) ([]store.Transfer, error) {
 // CreateTransfers create and transfers, returns the id of the created transfer
 func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amount int) (error, int) {
 	err := domain.CheckAmount(amount)
-	accountUseCase := account.UseCase{StoredAccount: auc.StoredAccount}
 
 	if err != nil {
 		return err, 0
 	}
 
-	accountOriginID := domain.DecoderToken(token)
-	accountOrigin := accountUseCase.SearchAccount(accountOriginID)
+	accountOriginID := DecoderToken(token)
+	accountOrigin := auc.StoredAccount.SearchAccount(accountOriginID)
 	accountToken := auc.StoredToken.GetTokenID(accountOriginID)
 	err = domain.CheckToken(token, accountToken)
 
@@ -58,12 +56,9 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 		return err, 0
 	}
 
-	accountDestination := accountUseCase.SearchAccount(accountDestinationID)
+	accountDestination := auc.StoredAccount.SearchAccount(accountDestinationID)
 
-	person1 := auc.StoredAccount.GetBalance(accountOrigin.CPF)
-	person2 := auc.StoredAccount.GetBalance(accountDestination.CPF)
-
-	err = domain.CheckAccountBalance(person1, amount)
+	err = domain.CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
 		return err, 0
 	}
@@ -73,10 +68,10 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 		return err, 0
 	}
 
-	person1.Balance = person1.Balance - amount
-	person2.Balance = person2.Balance + amount
+	accountOrigin.Balance = accountOrigin.Balance - amount
+	accountDestination.Balance = accountDestination.Balance + amount
 
-	auc.StoredAccount.UpdateBalance(person1, person2)
+	auc.StoredAccount.UpdateBalance(accountOrigin, accountDestination)
 
 	id := domain.Random()
 	createdAt := domain.CreatedAt()

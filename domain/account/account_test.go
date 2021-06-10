@@ -120,8 +120,8 @@ func TestGetBalance(t *testing.T) {
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}
-			usecase.StoredAccount.PostAccount(listAccount)
-			usecase.StoredAccount.PostAccount(listAccounts)
+			usecase.StoredAccount.CreateAccount(listAccount)
+			usecase.StoredAccount.CreateAccount(listAccounts)
 			//test
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 

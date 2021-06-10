@@ -1,6 +1,6 @@
 package store
 
-func (a *StoredAccount) PostAccount(account Account) {
+func (a *StoredAccount) CreateAccount(account Account) {
 	accountStorage[account.CPF] = account
 }
 
@@ -15,10 +15,6 @@ func (a StoredAccount) GetAccounts() map[string]Account {
 func (a StoredAccount) GetAccountCPF(cpf string) Account {
 	return accountStorage[cpf]
 }
-
-//func (a StoredLogin) GetLogin(token int) Login {
-//	return accountLogin[token]
-//}
 
 func (a *StoredToken) PostToken(id int, token string) {
 	accountToken[id] = Token{Token: token}

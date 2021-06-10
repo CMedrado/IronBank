@@ -71,8 +71,8 @@ func TestAuthenticatedLogin(t *testing.T) {
 				StoredToken:   accountToken,
 			}
 
-			usecase.StoredAccount.PostAccount(listAccount)
-			usecase.StoredAccount.PostAccount(listAccounts)
+			usecase.StoredAccount.CreateAccount(listAccount)
+			usecase.StoredAccount.CreateAccount(listAccounts)
 
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret)
 

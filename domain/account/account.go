@@ -23,7 +23,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	secretHash := domain.CreateHash(secret)
 	cpf = domain.CpfReplace(cpf)
 	newAccount := store.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
-	auc.StoredAccount.PostAccount(newAccount)
+	auc.StoredAccount.CreateAccount(newAccount)
 	return id, err
 }
 
@@ -64,4 +64,8 @@ func (auc UseCase) SearchAccount(id int) store.Account {
 	}
 
 	return account
+}
+
+func (uc UseCase) UpdateBalance(accountOrigin store.Account, accountDestination store.Account) {
+	uc.StoredAccount.UpdateBalance(accountOrigin, accountDestination)
 }

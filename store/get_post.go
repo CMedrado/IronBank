@@ -37,11 +37,6 @@ func (a *StoredTransferAccountID) GetTransfers(accountOriginID int) map[int]Tran
 	return accountTransferAccountID[accountOriginID].accountTransferID
 }
 
-func (a StoredAccount) UpdateBalance(person1, person2 Account) {
-	accountStorage[person1.CPF] = person1
-	accountStorage[person2.CPF] = person2
-}
-
 func (a *StoredTransferID) PostTransferAccountID(transfer Transfer) StoredTransferID {
 	accountTransferID[transfer.ID] = transfer
 	return StoredTransferID{accountTransferID: accountTransferID}
@@ -51,12 +46,4 @@ func (a *StoredTransferAccountID) PostTransferID(transfer Transfer, id int) {
 	storedTransfer := StoredTransferID{}
 	transferAccount := storedTransfer.PostTransferAccountID(transfer)
 	accountTransferAccountID[id] = transferAccount
-}
-
-func (a StoredAccount) ReturnCPF(cpf string) int {
-	return accountStorage[cpf].ID
-}
-
-func (a StoredToken) ReturnToken(id int) string {
-	return accountToken[id].Token
 }

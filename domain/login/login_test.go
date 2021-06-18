@@ -61,18 +61,18 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store.Account{982, "Lucas", "08131391043", domain.CreateHash("lixo"), 5000, "06/01/2020"}
-			listAccounts := store.Account{981, "Rafael", "38453162093", domain.CreateHash("call"), 6000, "06/01/2020"}
+			accountStorage := make(map[string]store.Account)
+			listAccount := store.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
 
-			accountStorage := store.NewStoredAccount()
+			accountStorage[listAccount.CPF] = listAccount
+			accountStorage[listAccounts.CPF] = listAccounts
+			accountUsecase := &AccountUseCaseMock{AccountList: accountStorage}
 			accountToken := store.NewStoredToked()
 			usecase := UseCase{
-				StoredAccount: accountStorage,
-				StoredToken:   accountToken,
+				AccountUseCase: accountUsecase,
+				StoredToken:    accountToken,
 			}
-
-			usecase.StoredAccount.CreateAccount(listAccount)
-			usecase.StoredAccount.CreateAccount(listAccounts)
 
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret)
 
@@ -89,4 +89,39 @@ func TestAuthenticatedLogin(t *testing.T) {
 			}
 		})
 	}
+}
+
+type AccountUseCaseMock struct {
+	AccountList map[string]store.Account
+}
+
+func (uc AccountUseCaseMock) ReturnCPF(_ string) int {
+	return 0
+}
+
+func (uc AccountUseCaseMock) CreateAccount(_ string, _ string, _ string, _ int) (int, error) {
+	return 0, nil
+}
+
+func (uc AccountUseCaseMock) GetBalance(_ int) (int, error) {
+	return 0, nil
+}
+
+func (uc AccountUseCaseMock) GetAccounts() []store.Account {
+	return nil
+}
+
+func (uc AccountUseCaseMock) SearchAccount(id int) store.Account {
+	return store.Account{}
+}
+
+func (uc *AccountUseCaseMock) UpdateBalance(_ store.Account, _ store.Account) {
+}
+
+func (uc AccountUseCaseMock) GetAccountCPF(cpf string) store.Account {
+	return uc.AccountList[cpf]
+}
+
+func (uc AccountUseCaseMock) GetAccount() map[string]store.Account {
+	return nil
 }

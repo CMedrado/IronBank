@@ -15,8 +15,8 @@ type CreateTransferInput struct {
 }
 
 func TestMakeTransfers(t *testing.T) {
-	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 19727887"))
-	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 19727887"))
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 0"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 1"))
 	tt := []struct {
 		name                    string
 		in                      CreateTransferInput
@@ -77,17 +77,23 @@ func TestMakeTransfers(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
+			accountStorage := make(map[string]store.Account)
+			accountToken := make(map[int]store.Token)
 			originAccount := store.Account{ID: 0, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
 			destinationAccount := store.Account{ID: 1, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+			originToken := store.Token{Token: msg}
+			accountStorage[originAccount.CPF] = originAccount
+			accountStorage[destinationAccount.CPF] = destinationAccount
+			accountToken[originAccount.ID] = originToken
 
-			accountToken := store.NewStoredToked()
-			accountUsecase := &AccountUsecaseMock{AccountList: []store.Account{originAccount, destinationAccount}}
+			tokenUseCase := &TokenUseCaseMock{TokenList: accountToken}
+			accountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
+			storagedTransfer := store.NewStoredTransferAccountID()
 			usecase := UseCase{
-				StoredAccount: accountUsecase,
-				StoredToken:   accountToken,
+				AccountUseCase: accountUsecase,
+				TokenUseCase:   tokenUseCase,
+				StoredTransfer: storagedTransfer,
 			}
-
-			usecase.StoredToken.PostToken(originAccount.ID, msg)
 
 			gotErr, gotTransfer := usecase.CreateTransfers(testCase.in.Token, testCase.in.AccountDestinationID, testCase.in.Amount)
 
@@ -111,8 +117,8 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
-	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00:98498081"))
-	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00:98498081"))
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00:0"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00:1"))
 
 	var tt = []struct {
 		name    string
@@ -138,21 +144,26 @@ func TestMakeGetTransfers(t *testing.T) {
 	}
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			originAccount := store.Account{ID: 19727887, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
-			destinationAccount := store.Account{ID: 98498081, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+			accountStorage := make(map[string]store.Account)
+			accountToken := make(map[int]store.Token)
+			originAccount := store.Account{ID: 0, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			destinationAccount := store.Account{ID: 1, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
 			listTransfer := store.Transfer{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}
 			listTransfers := store.Transfer{ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}
+			originToken := store.Token{Token: msg}
+			accountStorage[originAccount.CPF] = originAccount
+			accountStorage[destinationAccount.CPF] = destinationAccount
+			accountToken[originAccount.ID] = originToken
 
-			accountToken := store.NewStoredToked()
-			accountTransfer := store.NewStoredTransferAccountID()
-			accountUsecase := &AccountUsecaseMock{AccountList: []store.Account{originAccount, destinationAccount}}
+			tokenUseCase := &TokenUseCaseMock{TokenList: accountToken}
+			storagedTransfer := store.NewStoredTransferAccountID()
+			accountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
 			usecase := UseCase{
-				StoredAccount:  accountUsecase,
-				StoredToken:    accountToken,
-				StoredTransfer: accountTransfer,
+				AccountUseCase: accountUsecase,
+				TokenUseCase:   tokenUseCase,
+				StoredTransfer: storagedTransfer,
 			}
 
-			usecase.StoredToken.PostToken(destinationAccount.ID, msg)
 			usecase.StoredTransfer.PostTransferID(listTransfer, destinationAccount.ID)
 			usecase.StoredTransfer.PostTransferID(listTransfers, destinationAccount.ID)
 
@@ -174,9 +185,13 @@ func TestMakeGetTransfers(t *testing.T) {
 }
 
 type AccountUsecaseMock struct {
-	AccountList []store.Account
+	AccountList map[string]store.Account
 
 	UpdateCallCount int
+}
+
+func (uc AccountUsecaseMock) ReturnCPF(_ string) int {
+	return 0
 }
 
 func (uc AccountUsecaseMock) CreateAccount(_ string, _ string, _ string, _ int) (int, error) {
@@ -192,25 +207,41 @@ func (uc AccountUsecaseMock) GetAccounts() []store.Account {
 }
 
 func (uc AccountUsecaseMock) SearchAccount(id int) store.Account {
-	if id > len(uc.AccountList)-1 {
-		return store.Account{}
+	account := store.Account{}
+
+	for _, a := range uc.AccountList {
+		if a.ID == id {
+			account = a
+		}
 	}
-	return uc.AccountList[id]
+
+	return account
 }
 
 func (uc *AccountUsecaseMock) UpdateBalance(_ store.Account, _ store.Account) {
 	uc.UpdateCallCount++
 }
 
-//
-//type TransferUsecaseMock struct {
-//	TransferList []store.Transfer
-//}
-//
-//func (uc *TransferUsecaseMock) CreateTransfers(_ string, _ int, _ int) (error, int) {
-//	return nil, 0
-//}
-//
-//func (uc *TransferUsecaseMock) GetTransfers(token string) ([]store.Transfer, error) {
-//	return uc.TransferList, nil
-//}
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store.Account {
+	return uc.AccountList[cpf]
+}
+
+func (uc AccountUsecaseMock) GetAccount() map[string]store.Account {
+	return nil
+}
+
+type TokenUseCaseMock struct {
+	TokenList map[int]store.Token
+}
+
+func (uc TokenUseCaseMock) AuthenticatedLogin(_, _ string) (error, string) {
+	return nil, ""
+}
+
+func (uc TokenUseCaseMock) ReturnToken(_ int) string {
+	return ""
+}
+
+func (uc TokenUseCaseMock) GetTokenID(id int) store.Token {
+	return uc.TokenList[id]
+}

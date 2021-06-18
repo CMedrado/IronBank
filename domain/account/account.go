@@ -66,6 +66,18 @@ func (auc UseCase) SearchAccount(id int) store.Account {
 	return account
 }
 
-func (uc UseCase) UpdateBalance(accountOrigin store.Account, accountDestination store.Account) {
-	uc.StoredAccount.UpdateBalance(accountOrigin, accountDestination)
+func (auc UseCase) UpdateBalance(accountOrigin store.Account, accountDestination store.Account) {
+	auc.StoredAccount.UpdateBalances(accountOrigin, accountDestination)
+}
+
+func (auc UseCase) ReturnCPF(cpf string) int {
+	return auc.StoredAccount.ReturnCPF(cpf)
+}
+
+func (auc *UseCase) GetAccountCPF(cpf string) store.Account {
+	return auc.StoredAccount.GetAccountCPF(cpf)
+}
+
+func (auc UseCase) GetAccount() map[string]store.Account {
+	return auc.StoredAccount.GetAccounts()
 }

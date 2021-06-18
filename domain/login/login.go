@@ -8,8 +8,8 @@ import (
 )
 
 type UseCase struct {
-	StoredAccount *store.StoredAccount
-	StoredToken   *store.StoredToken
+	AccountUseCase domain.AccountUseCase
+	StoredToken    Repository
 }
 
 // AuthenticatedLogin authenticates the account and returns a token
@@ -23,14 +23,14 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	}
 
 	newLogin := store.Login{CPF: cpf, Secret: secretHash}
-	account := auc.StoredAccount.GetAccountCPF(cpf)
+	account := auc.AccountUseCase.GetAccountCPF(cpf)
 
 	err = domain.CheckLogin(account, newLogin)
 	if err != nil {
 		return domain.ErrLogin, ""
 	}
 
-	id := auc.StoredAccount.GetAccounts()
+	id := auc.AccountUseCase.GetAccount()
 	now := domain.CreatedAt()
 	token := now + ":" + strconv.Itoa(id[cpf].ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))

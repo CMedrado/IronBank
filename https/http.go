@@ -6,10 +6,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewServerAccount(account domain.AccountRepository, login domain.LoginRepository, transfer domain.TransferRepository, logger *log.Entry) *ServerAccount {
+func NewServerAccount(account domain.AccountUseCase, login domain.LoginUseCase, transfer domain.TransferUseCase, logger *log.Entry) *ServerAccount {
 	s := new(ServerAccount)
 
-	s.storage = storage
+	s.account = account
+	s.login = login
+	s.transfer = transfer
+	s.logger = logger
 
 	router := mux.NewRouter()
 	router.HandleFunc("/accounts/{id}/balance", s.handleBalance).Methods("GET")

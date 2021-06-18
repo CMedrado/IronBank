@@ -10,7 +10,7 @@ import (
 func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) {
 	token := r.Header.Get("Authorization")
 
-	Transfers, err := accountUseCase.GetTransfers(token)
+	Transfers, err := s.transfer.GetTransfers(token)
 	w.Header().Set("content-type", "application/json")
 
 	l := s.logger.WithFields(log.Fields{
@@ -36,7 +36,7 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
 		"time": domain.CreatedAt(),
-	}).Info("balance handled sucessfully!")
+	}).Info("balance handled successfully!")
 	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
@@ -57,7 +57,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		"method": "processTransfer",
 	})
 
-	err, id := accountUseCase.CreateTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
+	err, id := s.transfer.CreateTransfers(token, requestBody.AccountDestinationID, requestBody.Amount)
 	w.Header().Set("Content-Type", "application/json")
 
 	if err != nil {
@@ -112,7 +112,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 		"type":       http.StatusCreated,
 		"time":       domain.CreatedAt(),
 		"request_id": id,
-	}).Info("create transfer sucessfully!")
+	}).Info("create transfer successfully!")
 
 	response := TransferResponse{ID: id}
 	w.WriteHeader(http.StatusCreated)

@@ -51,9 +51,9 @@ type GetAccountsResponse struct {
 }
 
 type ServerAccount struct {
-	account  domain.AccountRepository
-	login    domain.LoginRepository
-	transfer domain.TransferRepository
+	account  domain.AccountUseCase
+	login    domain.LoginUseCase
+	transfer domain.TransferUseCase
 	logger   *logrus.Entry
 
 	http.Handler

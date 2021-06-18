@@ -2,20 +2,10 @@ package https
 
 import (
 	"encoding/json"
-	"github.com/CMedrado/DesafioStone/domain/account"
-	"github.com/CMedrado/DesafioStone/store"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
-)
-
-var (
-	accountStorage  = store.NewStoredAccount()
-	accountTransfer = store.NewStoredTransferAccountID()
-	accountToken    = store.NewStoredToked()
-	accountLogin    = store.NewStoredLogin()
-	accountUseCase  = account.UseCase{StoredAccount: accountStorage}
 )
 
 func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +20,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	idAccount, err := accountUseCase.CreateAccount(requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
+	idAccount, err := s.account.CreateAccount(requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
@@ -68,7 +58,7 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	response := GetAccountsResponse{Accounts: accountUseCase.GetAccounts()}
+	response := GetAccountsResponse{Accounts: s.account.GetAccounts()}
 	s.logger.WithFields(log.Fields{
 		"module": "https",
 		"method": "handleAccounts",
@@ -80,7 +70,7 @@ func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	IntID, _ := strconv.Atoi(id)
-	balance, err := accountUseCase.GetBalance(IntID)
+	balance, err := s.account.GetBalance(IntID)
 	w.Header().Set("content-type", "application/json")
 
 	l := s.logger.WithFields(log.Fields{

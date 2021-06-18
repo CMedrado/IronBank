@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/CMedrado/DesafioStone/domain/account"
+	"github.com/CMedrado/DesafioStone/domain/login"
+	"github.com/CMedrado/DesafioStone/domain/transfer"
 	https "github.com/CMedrado/DesafioStone/https"
 	"github.com/CMedrado/DesafioStone/store"
 	"github.com/sirupsen/logrus"
@@ -17,10 +19,11 @@ func main() {
 
 	accountTransfer := store.NewStoredTransferAccountID()
 	accountToken := store.NewStoredToked()
-	accountLogin := store.NewStoredLogin()
 	accountStorage := store.NewStoredAccount()
-	accountUseCase := account.UseCase{Store: accountStorage, Login: accountLogin, Token: accountToken, Transfer: accountTransfer}
-	server := https.NewServerAccount(&accountUseCase.Store, &accountUseCase.Login, &accountUseCase.Transfer, lentry)
+	accountUseCase := account.UseCase{StoredAccount: accountStorage}
+	loginUseCase := login.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
+	transferUseCase := transfer.UseCase{AccountUseCase: &accountUseCase, StoredTransfer: accountTransfer, TokenUseCase: &loginUseCase}
+	server := https.NewServerAccount(&accountUseCase, &loginUseCase, &transferUseCase, lentry)
 
 	if err := http.ListenAndServe(":5000", server); err != nil {
 		log.Fatal("could not hear on port 5000 ")

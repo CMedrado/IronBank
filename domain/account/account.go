@@ -6,7 +6,7 @@ import (
 )
 
 type UseCase struct {
-	StoredAccount *store.StoredAccount
+	StoredAccount Repository
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at

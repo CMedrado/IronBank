@@ -6,9 +6,9 @@ import (
 )
 
 type UseCase struct {
-	StoredAccount  domain.AccountUsecase
-	StoredToken    *store.StoredToken
-	StoredTransfer *store.StoredTransferAccountID
+	AccountUseCase domain.AccountUseCase
+	TokenUseCase   domain.LoginUseCase
+	StoredTransfer Repository
 }
 
 // GetTransfers returns all account transfers
@@ -16,7 +16,7 @@ func (auc UseCase) GetTransfers(token string) ([]store.Transfer, error) {
 	var transfer []store.Transfer
 	accountOriginID := DecoderToken(token)
 	transfers := auc.StoredTransfer.GetTransfers(accountOriginID)
-	accountToken := auc.StoredToken.GetTokenID(accountOriginID)
+	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 
 	err := domain.CheckToken(token, accountToken)
 
@@ -42,8 +42,8 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 	}
 
 	accountOriginID := DecoderToken(token)
-	accountOrigin := auc.StoredAccount.SearchAccount(accountOriginID)
-	accountToken := auc.StoredToken.GetTokenID(accountOriginID)
+	accountOrigin := auc.AccountUseCase.SearchAccount(accountOriginID)
+	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 	err = domain.CheckToken(token, accountToken)
 
 	if err != nil {
@@ -56,7 +56,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 		return err, 0
 	}
 
-	accountDestination := auc.StoredAccount.SearchAccount(accountDestinationID)
+	accountDestination := auc.AccountUseCase.SearchAccount(accountDestinationID)
 
 	err = domain.CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
@@ -71,7 +71,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 	accountOrigin.Balance = accountOrigin.Balance - amount
 	accountDestination.Balance = accountDestination.Balance + amount
 
-	auc.StoredAccount.UpdateBalance(accountOrigin, accountDestination)
+	auc.AccountUseCase.UpdateBalance(accountOrigin, accountDestination)
 
 	id := domain.Random()
 	createdAt := domain.CreatedAt()

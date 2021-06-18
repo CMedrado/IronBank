@@ -16,7 +16,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, token := accountUseCase.AuthenticatedLogin(requestBody.CPF, requestBody.Secret)
+	err, token := s.login.AuthenticatedLogin(requestBody.CPF, requestBody.Secret)
 	w.Header().Set("Content-Type", "application/json")
 
 	l := s.logger.WithFields(log.Fields{

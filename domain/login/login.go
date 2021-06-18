@@ -38,3 +38,11 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 
 	return nil, encoded
 }
+
+func (uc UseCase) ReturnToken(id int) string {
+	return uc.StoredToken.ReturnToken(id)
+}
+
+func (uc UseCase) GetTokenID(id int) store.Token {
+	return uc.StoredToken.GetTokenID(id)
+}

@@ -4,8 +4,9 @@ func (a *StoredAccount) CreateAccount(account Account) {
 	accountStorage[account.CPF] = account
 }
 
-func (a StoredAccount) GetBalance(cpf string) Account {
-	return accountStorage[cpf]
+func (a StoredAccount) UpdateBalances(person1, person2 Account) {
+	accountStorage[person1.CPF] = person1
+	accountStorage[person2.CPF] = person2
 }
 
 func (a StoredAccount) GetAccounts() map[string]Account {
@@ -14,6 +15,10 @@ func (a StoredAccount) GetAccounts() map[string]Account {
 
 func (a StoredAccount) GetAccountCPF(cpf string) Account {
 	return accountStorage[cpf]
+}
+
+func (a StoredAccount) ReturnCPF(cpf string) int {
+	return accountStorage[cpf].ID
 }
 
 func (a *StoredToken) PostToken(id int, token string) {

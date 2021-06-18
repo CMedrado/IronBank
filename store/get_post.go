@@ -29,6 +29,10 @@ func (a *StoredToken) GetTokenID(id int) Token {
 	return accountToken[id]
 }
 
+func (a StoredToken) ReturnToken(id int) string {
+	return accountToken[id].Token
+}
+
 func (a *StoredTransferAccountID) GetTransfers(accountOriginID int) map[int]Transfer {
 	return accountTransferAccountID[accountOriginID].accountTransferID
 }

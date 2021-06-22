@@ -1,11 +1,12 @@
 package account
 
-import "github.com/CMedrado/DesafioStone/store"
+import (
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+)
 
 type Repository interface {
-	GetAccountCPF(cpf string) store.Account
-	CreateAccount(account store.Account)
-	GetAccounts() map[string]store.Account
-	UpdateBalances(person1, person2 store.Account)
-	ReturnCPF(cpf string) int
+	GetAccountCPF(cpf string) store_account.Account
+	CreateAccount(account store_account.Account)
+	GetAccounts() map[string]store_account.Account
+	UpdateBalances(person1, person2 store_account.Account)
 }

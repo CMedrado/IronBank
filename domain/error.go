@@ -2,7 +2,8 @@ package domain
 
 import (
 	"errors"
-	"github.com/CMedrado/DesafioStone/store"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 )
 
 var (
@@ -44,19 +45,18 @@ func CheckAccountBalance(person1 int, amount int) error {
 }
 
 // CheckLogin Checks if the cpf and secret ar correct and returns nil if not, it returns an error
-func CheckLogin(account store.Account, newLogin store.Login) error {
-
-	if account.CPF != newLogin.CPF {
+func CheckLogin(accountOrigin store_account.Account, newLogin store_login.Login) error {
+	if accountOrigin.CPF != newLogin.CPF {
 		return errInvalidCPF
 	}
-	if account.Secret != newLogin.Secret {
+	if accountOrigin.Secret != newLogin.Secret {
 		return errInvalidSecret
 	}
 	return nil
 }
 
 // CheckToken checks if the token is correct and returns nil if not, it returns an error
-func CheckToken(token string, tokens store.Token) error {
+func CheckToken(token string, tokens store_login.Token) error {
 	if token != tokens.Token {
 		return errInvalidToken
 	}
@@ -64,8 +64,8 @@ func CheckToken(token string, tokens store.Token) error {
 }
 
 // CheckExistID checks if the id exists and returns nil if not, it returns an error
-func CheckExistID(account store.Account) error {
-	if (account == store.Account{}) {
+func CheckExistID(accountOrigin store_account.Account) error {
+	if (accountOrigin == store_account.Account{}) {
 		return errInvalidID
 	}
 	return nil
@@ -88,8 +88,8 @@ func CheckCompareID(accountOriginID, accountDestinationID int) error {
 }
 
 // CheckExistDestinationID checks if the destination id exists and returns nil if not, it returns an error
-func CheckExistDestinationID(account store.Account) error {
-	if (account == store.Account{}) {
+func CheckExistDestinationID(accountOrigin store_account.Account) error {
+	if (accountOrigin == store_account.Account{}) {
 		return errInvalidDestinationID
 	}
 	return nil

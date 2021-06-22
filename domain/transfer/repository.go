@@ -1,8 +1,10 @@
 package transfer
 
-import "github.com/CMedrado/DesafioStone/store"
+import (
+	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
+)
 
 type Repository interface {
-	GetTransfers(accountOriginID int) map[int]store.Transfer
-	PostTransferID(transfer store.Transfer, id int)
+	GetTransfers(accountOriginID int) map[int]store_transfer.Transfer
+	PostTransferID(transfer store_transfer.Transfer, id int)
 }

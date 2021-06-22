@@ -1,5 +1,7 @@
 package account
 
+import "io"
+
 var accountStorage = make(map[string]Account)
 
 type Account struct {
@@ -12,9 +14,13 @@ type Account struct {
 }
 
 type StoredAccount struct {
-	accountStorage map[string]Account
+	dataBase io.ReadWriteSeeker
+	accounts Accounts
 }
 
-func NewStoredAccount() *StoredAccount {
-	return &StoredAccount{accountStorage}
+func NewStoredAccount(dataBase io.ReadWriteSeeker) *StoredAccount {
+	dataBase.Seek(0, 0)
+	accounts, _ := NewAccount(dataBase)
+
+	return &StoredAccount{dataBase: dataBase, accounts: accounts}
 }

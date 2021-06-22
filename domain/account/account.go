@@ -14,6 +14,11 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return 0, err
 	}
+	account := auc.GetAccountCPF(cpf)
+	err = domain.CheckAccountExistence(account)
+	if err != nil {
+		return 0, err
+	}
 	err = domain.CheckBalance(balance)
 	if err != nil {
 		return 0, err

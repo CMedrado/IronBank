@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/store"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -14,9 +15,9 @@ import (
 
 func TestLoginHandler(t *testing.T) {
 
-	Account1 := store.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
-	Account2 := store.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
-	AccountStorage := make(map[string]store.Account)
+	Account1 := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+	Account2 := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+	AccountStorage := make(map[string]store_account.Account)
 	AccountStorage[Account1.CPF] = Account1
 	AccountStorage[Account2.CPF] = Account2
 	logger := logrus.New()
@@ -102,7 +103,7 @@ func TestLoginHandler(t *testing.T) {
 }
 
 type TokenUseCaseMock struct {
-	AccountList map[string]store.Account
+	AccountList map[string]store_account.Account
 }
 
 func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
@@ -118,7 +119,7 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 			if uc.AccountList[cpf].Secret != secret {
 				return errors.New("given secret or CPF are incorrect"), ""
 			}
-			if uc.AccountList[cpf] == (store.Account{}) {
+			if uc.AccountList[cpf] == (store_account.Account{}) {
 				return errors.New("given secret or CPF are incorrect"), ""
 			}
 			return nil, "passou"
@@ -126,7 +127,7 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 			return errors.New("given secret or CPF are incorrect"), ""
 		}
 	}
-	if uc.AccountList[cpf] == (store.Account{}) {
+	if uc.AccountList[cpf] == (store_account.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
 	if uc.AccountList[cpf].CPF != cpf {
@@ -142,6 +143,6 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(_ int) store.Token {
-	return store.Token{}
+func (uc TokenUseCaseMock) GetTokenID(_ int) store_login.Token {
+	return store_login.Token{}
 }

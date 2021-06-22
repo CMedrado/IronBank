@@ -5,7 +5,9 @@ import (
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/CMedrado/DesafioStone/domain/transfer"
-	"github.com/CMedrado/DesafioStone/store"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
+	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -15,17 +17,17 @@ import (
 )
 
 func TestTransferHandler(t *testing.T) {
-	Account1 := store.Account{ID: 98498081, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 5000, CreatedAt: "06/01/2020"}
-	Account2 := store.Account{ID: 19727887, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
-	Token1 := store.Token{Token: "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ=="}
-	Token2 := store.Token{Token: "MTgvMDYvMjAyMSAxNjoxMzoyNDo5ODQ5ODA4MQ=="}
-	Transfer1 := store.Transfer{ID: 74941318, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 900, CreatedAt: "18/06/2021 17:26:26"}
-	Transfer2 := store.Transfer{ID: 27131847, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 50, CreatedAt: "18/06/2021 17:26:26"}
-	Transfer3 := store.Transfer{ID: 39984059, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 60, CreatedAt: "18/06/2021 17:26:26"}
-	Transfer4 := store.Transfer{ID: 11902081, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 90, CreatedAt: "18/06/2021 17:26:26"}
-	AccountStorage := make(map[string]store.Account)
-	AccountTransferID := make(map[int]store.Transfer)
-	TokenStorage := make(map[int]store.Token)
+	Account1 := store_account.Account{ID: 98498081, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 5000, CreatedAt: "06/01/2020"}
+	Account2 := store_account.Account{ID: 19727887, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+	Token1 := store_login.Token{Token: "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ=="}
+	Token2 := store_login.Token{Token: "MTgvMDYvMjAyMSAxNjoxMzoyNDo5ODQ5ODA4MQ=="}
+	Transfer1 := store_transfer.Transfer{ID: 74941318, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 900, CreatedAt: "18/06/2021 17:26:26"}
+	Transfer2 := store_transfer.Transfer{ID: 27131847, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 50, CreatedAt: "18/06/2021 17:26:26"}
+	Transfer3 := store_transfer.Transfer{ID: 39984059, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 60, CreatedAt: "18/06/2021 17:26:26"}
+	Transfer4 := store_transfer.Transfer{ID: 11902081, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 90, CreatedAt: "18/06/2021 17:26:26"}
+	AccountStorage := make(map[string]store_account.Account)
+	AccountTransferID := make(map[int]store_transfer.Transfer)
+	TokenStorage := make(map[int]store_login.Token)
 	AccountStorage[Account1.CPF] = Account1
 	AccountStorage[Account2.CPF] = Account2
 	TokenStorage[Account1.ID] = Token1
@@ -190,18 +192,18 @@ func TestTransferHandler(t *testing.T) {
 }
 
 type TransferUsecaseMock struct {
-	AccountList  map[string]store.Account
-	TokenList    map[int]store.Token
-	TransferList map[int]store.Transfer
+	AccountList  map[string]store_account.Account
+	TokenList    map[int]store_login.Token
+	TransferList map[int]store_transfer.Transfer
 }
 
-func (uc TransferUsecaseMock) GetTransfers(token string) ([]store.Transfer, error) {
+func (uc TransferUsecaseMock) GetTransfers(token string) ([]store_transfer.Transfer, error) {
 	accountOriginID := transfer.DecoderToken(token)
 	transfers := uc.TransferList
 	if token != uc.TokenList[accountOriginID].Token {
-		return []store.Transfer{}, errors.New("given token is invalid")
+		return []store_transfer.Transfer{}, errors.New("given token is invalid")
 	}
-	var transfer []store.Transfer
+	var transfer []store_transfer.Transfer
 	for _, a := range transfers {
 		transfer = append(transfer, a)
 	}
@@ -219,13 +221,13 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 	if accountOriginID == accountDestinationID {
 		return errors.New("given account is the same as the account destination"), 0
 	}
-	accountOrigin := store.Account{}
+	accountOrigin := store_account.Account{}
 	for _, a := range uc.AccountList {
 		if a.ID == accountOriginID {
 			accountOrigin = a
 		}
 	}
-	accountDestination := store.Account{}
+	accountDestination := store_account.Account{}
 	for _, a := range uc.AccountList {
 		if a.ID == accountDestinationID {
 			accountDestination = a
@@ -234,7 +236,7 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 	if accountOrigin.Balance < amount {
 		return errors.New("given account without balance"), 0
 	}
-	if (accountDestination == store.Account{}) {
+	if (accountDestination == store_account.Account{}) {
 		return errors.New("given account destination id is invalid"), 0
 	}
 	return nil, 19878

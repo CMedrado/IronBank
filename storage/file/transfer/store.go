@@ -1,6 +1,8 @@
 package transfer
 
-import "io"
+import (
+	"io"
+)
 
 type Transfers []Transfer
 

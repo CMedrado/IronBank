@@ -2,7 +2,6 @@ package account
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
 )
 
 type UseCase struct {
@@ -22,8 +21,8 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	id := domain.Random()
 	secretHash := domain.CreateHash(secret)
 	cpf = domain.CpfReplace(cpf)
-	newAccount := store_account.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
-	auc.StoredAccount.CreateAccount(newAccount)
+	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
+	auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))
 	return id, err
 }
 
@@ -40,41 +39,44 @@ func (auc *UseCase) GetBalance(id int) (int, error) {
 }
 
 //GetAccounts returns all API accounts
-func (auc *UseCase) GetAccounts() []store_account.Account {
-	return auc.StoredAccount.GetAccounts()
+func (auc *UseCase) GetAccounts() []domain.Account {
+	accounts := auc.StoredAccount.ReturnAccounts()
+	var account []domain.Account
+
+	for _, a := range accounts {
+		account = append(account, ChangeAccountStorage(a))
+	}
+
+	return account
 }
 
 // SearchAccount returns the account via the received ID
-func (auc UseCase) SearchAccount(id int) store_account.Account {
-	accounts := auc.StoredAccount.GetAccounts()
-	account := store_account.Account{}
+func (auc UseCase) SearchAccount(id int) domain.Account {
+	accounts := auc.StoredAccount.ReturnAccounts()
+	account := domain.Account{}
 
 	for _, a := range accounts {
 		if a.ID == id {
-			account = a
+			account = ChangeAccountStorage(a)
 		}
 	}
 
 	return account
 }
 
-func (auc UseCase) GetAccountCPF(cpf string) store_account.Account {
-	accounts := auc.StoredAccount.GetAccounts()
-	account := store_account.Account{}
+func (auc UseCase) GetAccountCPF(cpf string) domain.Account {
+	accounts := auc.StoredAccount.ReturnAccounts()
+	account := domain.Account{}
 
 	for _, a := range accounts {
 		if a.CPF == cpf {
-			account = a
+			account = ChangeAccountStorage(a)
 		}
 	}
 
 	return account
 }
 
-func (auc UseCase) UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account) {
-	auc.StoredAccount.UpdateBalances(accountOrigin, accountDestination)
-}
-
-func (auc UseCase) GetAccount() []store_account.Account {
-	return auc.StoredAccount.GetAccounts()
+func (auc UseCase) UpdateBalance(accountOrigin domain.Account, accountDestination domain.Account) {
+	auc.StoredAccount.ChangeBalances(ChangeAccountDomain(accountOrigin), ChangeAccountDomain(accountDestination))
 }

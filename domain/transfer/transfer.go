@@ -2,7 +2,6 @@ package transfer
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
 )
 
 type UseCase struct {
@@ -12,10 +11,10 @@ type UseCase struct {
 }
 
 // GetTransfers returns all account transfers
-func (auc UseCase) GetTransfers(token string) ([]store_transfer.Transfer, error) {
-	var transfer []store_transfer.Transfer
+func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
+	var transfer []domain.Transfer
 	accountOriginID := DecoderToken(token)
-	transfers := auc.StoredTransfer.GetTransfers()
+	transfers := auc.StoredTransfer.ReturnTransfers()
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 
 	err := domain.CheckToken(token, accountToken)
@@ -26,7 +25,7 @@ func (auc UseCase) GetTransfers(token string) ([]store_transfer.Transfer, error)
 
 	for _, a := range transfers {
 		if a.AccountOriginID == accountOriginID {
-			transfer = append(transfer, a)
+			transfer = append(transfer, ChangeTransferStorage(a))
 		}
 	}
 
@@ -75,8 +74,8 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 
 	id := domain.Random()
 	createdAt := domain.CreatedAt()
-	transfer := store_transfer.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
-	auc.StoredTransfer.PostTransferID(transfer)
+	transfer := domain.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
+	auc.StoredTransfer.SaveTransfers(ChangeTransferDomain(transfer))
 
 	return nil, id
 }

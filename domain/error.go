@@ -4,6 +4,7 @@ import (
 	"errors"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
 	store_login "github.com/CMedrado/DesafioStone/store/login"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
 )
 
 var (
@@ -56,7 +57,7 @@ func CheckLogin(accountOrigin store_account.Account, newLogin store_login.Login)
 }
 
 // CheckToken checks if the token is correct and returns nil if not, it returns an error
-func CheckToken(token string, tokens store_login.Token) error {
+func CheckToken(token string, tokens store_token.Token) error {
 	if token != tokens.Token {
 		return errInvalidToken
 	}

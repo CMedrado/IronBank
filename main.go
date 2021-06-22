@@ -5,9 +5,9 @@ import (
 	"github.com/CMedrado/DesafioStone/domain/login"
 	"github.com/CMedrado/DesafioStone/domain/transfer"
 	https "github.com/CMedrado/DesafioStone/https"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
-	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
+	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
+	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
+	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
@@ -44,7 +44,7 @@ func main() {
 
 	accountStorage := store_account.NewStoredAccount(dbAccount)
 	accountToken := store_token.NewStoredToked(dbToken)
-	accountTransfer := store_transfer.NewStoredTransferAccountID(dbTransfer)
+	accountTransfer := store_transfer.NewStoredTransfer(dbTransfer)
 	accountUseCase := account.UseCase{StoredAccount: accountStorage}
 	loginUseCase := login.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
 	transferUseCase := transfer.UseCase{AccountUseCase: &accountUseCase, StoredTransfer: accountTransfer, TokenUseCase: &loginUseCase}

@@ -14,14 +14,14 @@ type Transfer struct {
 	CreatedAt            string `json:"created_at"`
 }
 
-type StoredTransferAccountID struct {
+type StoredTransferAccount struct {
 	dataBase  io.ReadWriteSeeker
 	transfers Transfers
 }
 
-func NewStoredTransferAccountID(dataBase io.ReadWriteSeeker) *StoredTransferAccountID {
+func NewStoredTransfer(dataBase io.ReadWriteSeeker) *StoredTransferAccount {
 	dataBase.Seek(0, 0)
 	transfers, _ := NewTransfer(dataBase)
 
-	return &StoredTransferAccountID{dataBase: dataBase, transfers: transfers}
+	return &StoredTransferAccount{dataBase: dataBase, transfers: transfers}
 }

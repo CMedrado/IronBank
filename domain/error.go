@@ -103,7 +103,7 @@ func CheckBalance(balance int) error {
 }
 
 func CheckAccountExistence(account Account) error {
-	if (account == Account{}) {
+	if (account != Account{}) {
 		return errAccountExists
 	}
 	return nil

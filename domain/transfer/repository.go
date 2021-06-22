@@ -5,6 +5,6 @@ import (
 )
 
 type Repository interface {
-	GetTransfers(accountOriginID int) map[int]store_transfer.Transfer
-	PostTransferID(transfer store_transfer.Transfer, id int)
+	GetTransfers() []store_transfer.Transfer
+	PostTransferID(transfer store_transfer.Transfer)
 }

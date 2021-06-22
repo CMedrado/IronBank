@@ -15,7 +15,7 @@ type UseCase struct {
 func (auc UseCase) GetTransfers(token string) ([]store_transfer.Transfer, error) {
 	var transfer []store_transfer.Transfer
 	accountOriginID := DecoderToken(token)
-	transfers := auc.StoredTransfer.GetTransfers(accountOriginID)
+	transfers := auc.StoredTransfer.GetTransfers()
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 
 	err := domain.CheckToken(token, accountToken)
@@ -24,8 +24,8 @@ func (auc UseCase) GetTransfers(token string) ([]store_transfer.Transfer, error)
 		return transfer, err
 	}
 
-	for m, a := range transfers {
-		if transfers[m].AccountOriginID == accountOriginID {
+	for _, a := range transfers {
+		if a.AccountOriginID == accountOriginID {
 			transfer = append(transfer, a)
 		}
 	}
@@ -76,7 +76,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 	id := domain.Random()
 	createdAt := domain.CreatedAt()
 	transfer := store_transfer.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
-	auc.StoredTransfer.PostTransferID(transfer, accountOriginID)
+	auc.StoredTransfer.PostTransferID(transfer)
 
 	return nil, id
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
 	store_login "github.com/CMedrado/DesafioStone/store/login"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
 	"strconv"
 )
 

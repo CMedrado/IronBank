@@ -1,7 +1,11 @@
 package account
 
+import "encoding/json"
+
 func (a *StoredAccount) CreateAccount(account Account) {
-	accountStorage[account.CPF] = account
+	a.accounts = append(a.accounts, account)
+	a.dataBase.Seek(0, 0)
+	json.NewEncoder(a.dataBase).Encode(a.accounts)
 }
 
 func (a StoredAccount) UpdateBalances(person1, person2 Account) {
@@ -9,8 +13,8 @@ func (a StoredAccount) UpdateBalances(person1, person2 Account) {
 	accountStorage[person2.CPF] = person2
 }
 
-func (a StoredAccount) GetAccounts() map[string]Account {
-	return accountStorage
+func (a StoredAccount) GetAccounts() []Account {
+	return a.accounts
 }
 
 func (a StoredAccount) GetAccountCPF(cpf string) Account {

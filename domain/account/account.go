@@ -23,7 +23,16 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return 0, err
 	}
-	id := domain.Random()
+	aux := 0
+	id := 0
+	for aux == 0 {
+		id = domain.Random()
+		if (auc.SearchAccount(id) != domain.Account{}) {
+			aux = 0
+		} else {
+			aux = 1
+		}
+	}
 	secretHash := domain.CreateHash(secret)
 	cpf = domain.CpfReplace(cpf)
 	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}

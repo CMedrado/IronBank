@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
+	account2 "github.com/CMedrado/DesafioStone/domain/account"
+	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -106,10 +106,10 @@ type TokenUseCaseMock struct {
 
 func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
 	secretHash := domain.CreateHash(secret)
-	account := store_account.Account{}
-	for _, a := range uc.AccountList.GetAccounts() {
+	account := domain.Account{}
+	for _, a := range uc.AccountList.ReturnAccounts() {
 		if a.CPF == cpf {
-			account = a
+			account = account2.ChangeAccountStorage(a)
 		}
 	}
 	if len(cpf) != 11 && len(cpf) != 14 {
@@ -123,7 +123,7 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 			if account.Secret != secret {
 				return errors.New("given secret or CPF are incorrect"), ""
 			}
-			if account == (store_account.Account{}) {
+			if account == (domain.Account{}) {
 				return errors.New("given secret or CPF are incorrect"), ""
 			}
 			return nil, "passou"
@@ -131,7 +131,7 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 			return errors.New("given secret or CPF are incorrect"), ""
 		}
 	}
-	if account == (store_account.Account{}) {
+	if account == (domain.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
 	if account.CPF != cpf {
@@ -147,6 +147,6 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(_ int) store_token.Token {
-	return store_token.Token{}
+func (uc TokenUseCaseMock) GetTokenID(_ int) domain.Token {
+	return domain.Token{}
 }

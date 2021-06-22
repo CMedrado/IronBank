@@ -1,9 +1,12 @@
 package transfer
 
 import (
-	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
-	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
+	"github.com/CMedrado/DesafioStone/domain"
+	account2 "github.com/CMedrado/DesafioStone/domain/account"
+	"github.com/CMedrado/DesafioStone/domain/login"
+	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
+	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
+	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
 	"io"
 	"io/ioutil"
 	"os"
@@ -139,7 +142,7 @@ func TestMakeTransfers(t *testing.T) {
 			accountUsecase := &AccountUsecaseMock{AccountList: accountAccount}
 			accountToken := store_token.NewStoredToked(dataBaseToken)
 			tokenUseCase := &TokenUseCaseMock{accountToken}
-			storagedTransfer := store_transfer.NewStoredTransferAccountID(dataBaseTransfer)
+			storagedTransfer := store_transfer.NewStoredTransfer(dataBaseTransfer)
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				TokenUseCase:   tokenUseCase,
@@ -203,7 +206,7 @@ func TestMakeGetTransfers(t *testing.T) {
 			accountUsecase := &AccountUsecaseMock{AccountList: accountAccount}
 			accountToken := store_token.NewStoredToked(dataBaseToken)
 			tokenUseCase := &TokenUseCaseMock{accountToken}
-			storagedTransfer := store_transfer.NewStoredTransferAccountID(dataBaseTransfer)
+			storagedTransfer := store_transfer.NewStoredTransfer(dataBaseTransfer)
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				TokenUseCase:   tokenUseCase,
@@ -245,39 +248,35 @@ func (uc AccountUsecaseMock) GetBalance(_ int) (int, error) {
 	return 0, nil
 }
 
-func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
+func (uc AccountUsecaseMock) GetAccounts() []domain.Account {
 	return nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
-	account := store_account.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id int) domain.Account {
+	account := domain.Account{}
 
-	for _, a := range uc.AccountList.GetAccounts() {
+	for _, a := range uc.AccountList.ReturnAccounts() {
 		if a.ID == id {
-			account = a
+			account = account2.ChangeAccountStorage(a)
 		}
 	}
 
 	return account
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ store_account.Account, _ store_account.Account) {
+func (uc *AccountUsecaseMock) UpdateBalance(_ domain.Account, _ domain.Account) {
 	uc.UpdateCallCount++
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store_account.Account {
-	account := store_account.Account{}
-	for _, a := range uc.AccountList.GetAccounts() {
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) domain.Account {
+	account := domain.Account{}
+	for _, a := range uc.AccountList.ReturnAccounts() {
 		if a.CPF == cpf {
-			account = a
+			account = account2.ChangeAccountStorage(a)
 		}
 	}
 
 	return account
-}
-
-func (uc AccountUsecaseMock) GetAccount() []store_account.Account {
-	return nil
 }
 
 type TokenUseCaseMock struct {
@@ -292,12 +291,12 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(id int) store_token.Token {
-	token := store_token.Token{}
+func (uc TokenUseCaseMock) GetTokenID(id int) domain.Token {
+	token := domain.Token{}
 
-	for _, a := range uc.TokenList.GetTokens() {
+	for _, a := range uc.TokenList.ReturnTokens() {
 		if a.ID == id {
-			token = a
+			token = login.ChangeTokenStorage(a)
 		}
 	}
 

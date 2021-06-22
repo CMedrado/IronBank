@@ -1,7 +1,8 @@
 package transfer
 
-var accountTransferAccountID = make(map[int]StoredTransferID)
-var accountTransferID = make(map[int]Transfer)
+import "io"
+
+type Transfers []Transfer
 
 type Transfer struct {
 	ID                   int    `json:"id"`
@@ -11,18 +12,14 @@ type Transfer struct {
 	CreatedAt            string `json:"created_at"`
 }
 
-type StoredTransferID struct {
-	accountTransferID map[int]Transfer
-}
-
 type StoredTransferAccountID struct {
-	accountTransferAccountID map[int]StoredTransferID
+	dataBase  io.ReadWriteSeeker
+	transfers Transfers
 }
 
-func NewStoredTransferAccountID() *StoredTransferAccountID {
-	return &StoredTransferAccountID{accountTransferAccountID}
-}
+func NewStoredTransferAccountID(dataBase io.ReadWriteSeeker) *StoredTransferAccountID {
+	dataBase.Seek(0, 0)
+	transfers, _ := NewTransfer(dataBase)
 
-func NewStoredTransferID() *StoredTransferID {
-	return &StoredTransferID{accountTransferID}
+	return &StoredTransferAccountID{dataBase: dataBase, transfers: transfers}
 }

@@ -14,7 +14,6 @@ type AccountUseCase interface {
 	UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account)
 	GetAccountCPF(cpf string) store_account.Account
 	GetAccount() []store_account.Account
-	SearchAccountCPF(cpf string) store_account.Account
 }
 
 type TransferUseCase interface {

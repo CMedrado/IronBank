@@ -31,7 +31,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 		return domain.ErrLogin, ""
 	}
 
-	id := auc.AccountUseCase.SearchAccountCPF(cpf)
+	id := auc.AccountUseCase.GetAccountCPF(cpf)
 	now := domain.CreatedAt()
 	token := now + ":" + strconv.Itoa(id.ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
@@ -40,6 +40,15 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id int) store_login.Token {
-	return uc.StoredToken.GetTokenID(id)
+func (uc UseCase) GetTokenID(id int) store_token.Token {
+	tokens := uc.StoredToken.GetTokens()
+	token := store_token.Token{}
+
+	for _, a := range tokens {
+		if a.ID == id {
+			token = a
+		}
+	}
+
+	return token
 }

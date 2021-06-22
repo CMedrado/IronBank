@@ -1,10 +1,10 @@
 package login
 
 import (
-	store_login "github.com/CMedrado/DesafioStone/store/login"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
 )
 
 type Repository interface {
 	PostToken(id int, token string)
-	GetTokenID(id int) store_login.Token
+	GetTokens() []store_token.Token
 }

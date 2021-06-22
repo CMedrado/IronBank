@@ -58,7 +58,7 @@ func (auc UseCase) SearchAccount(id int) store_account.Account {
 	return account
 }
 
-func (auc UseCase) SearchAccountCPF(cpf string) store_account.Account {
+func (auc UseCase) GetAccountCPF(cpf string) store_account.Account {
 	accounts := auc.StoredAccount.GetAccounts()
 	account := store_account.Account{}
 
@@ -73,10 +73,6 @@ func (auc UseCase) SearchAccountCPF(cpf string) store_account.Account {
 
 func (auc UseCase) UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account) {
 	auc.StoredAccount.UpdateBalances(accountOrigin, accountDestination)
-}
-
-func (auc *UseCase) GetAccountCPF(cpf string) store_account.Account {
-	return auc.StoredAccount.GetAccountCPF(cpf)
 }
 
 func (auc UseCase) GetAccount() []store_account.Account {

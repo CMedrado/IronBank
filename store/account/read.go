@@ -15,3 +15,12 @@ func NewAccount(rdr io.Reader) ([]Account, error) {
 	}
 	return account, err
 }
+
+func (accounts Accounts) Find(name string) *Account {
+	for i, p := range accounts {
+		if p.Name == name {
+			return &accounts[i]
+		}
+	}
+	return nil
+}

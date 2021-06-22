@@ -2,6 +2,9 @@ package account
 
 import (
 	store_account "github.com/CMedrado/DesafioStone/store/account"
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -12,6 +15,23 @@ type CreateAccountTestInput struct {
 	Secret    string
 	Balance   int
 	CreatedAt string
+}
+
+func createTemporaryFile(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
+	filetmp, err := ioutil.TempFile("", "db")
+
+	if err != nil {
+		t.Fatalf("it is not possible to write the temporary file %v", err)
+	}
+
+	filetmp.Write([]byte(Accounts))
+
+	removeArquivo := func() {
+		filetmp.Close()
+		os.Remove(filetmp.Name())
+	}
+
+	return filetmp, removeArquivo
 }
 
 func TestCreateAccount(t *testing.T) {
@@ -25,8 +45,8 @@ func TestCreateAccount(t *testing.T) {
 		{
 			name: "should successfully create an account with formatted CPF",
 			in: CreateAccountTestInput{
-				Name:    "Rafael",
-				CPF:     "081.313.910-43",
+				Name:    "Rafaels",
+				CPF:     "081.313.920-43",
 				Secret:  "lucas",
 				Balance: 50000,
 			},
@@ -56,7 +76,9 @@ func TestCreateAccount(t *testing.T) {
 
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
-			accountStorage := store_account.NewStoredAccount()
+			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			defer clenDataBase()
+			accountStorage := store_account.NewStoredAccount(dataBase)
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}
@@ -113,15 +135,12 @@ func TestGetBalance(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: "lixo", Balance: 5000, CreatedAt: "06/01/2020"}
-			listAccounts := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: "call", Balance: 6000, CreatedAt: "06/01/2020"}
-
-			accountStorage := store_account.NewStoredAccount()
+			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			defer clenDataBase()
+			accountStorage := store_account.NewStoredAccount(dataBase)
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}
-			usecase.StoredAccount.CreateAccount(listAccount)
-			usecase.StoredAccount.CreateAccount(listAccounts)
 			//test
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 

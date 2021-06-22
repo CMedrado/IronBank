@@ -3,7 +3,6 @@ package https
 import (
 	"bytes"
 	"errors"
-	"github.com/CMedrado/DesafioStone/domain"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -15,16 +14,13 @@ import (
 var Aux = 0
 
 func TestAccountHandler(t *testing.T) {
-
-	Account1 := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
-	Account2 := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
-	AccountStorage := make(map[string]store_account.Account)
-	AccountStorage[Account1.CPF] = Account1
-	AccountStorage[Account2.CPF] = Account2
+	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+	defer clenDataBaseAccount()
+	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	Lentry := logrus.NewEntry(logger)
-	AccountUsecase := &AccountUsecaseMock{AccountList: AccountStorage}
+	AccountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
 	S := new(ServerAccount)
 	S.account = AccountUsecase
 	S.logger = Lentry
@@ -115,7 +111,7 @@ func TestAccountHandler(t *testing.T) {
 			method:       "GET",
 			path:         "/accounts",
 			response:     http.StatusOK,
-			responsebody: `{"accounts":[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]}` + "\n",
+			responsebody: `{"accounts":[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]}` + "\n",
 		},
 	}
 	for _, tc := range accountst {
@@ -177,13 +173,9 @@ func TestAccountHandler(t *testing.T) {
 }
 
 type AccountUsecaseMock struct {
-	AccountList map[string]store_account.Account
+	AccountList *store_account.StoredAccount
 
 	UpdateCallCount int
-}
-
-func (uc AccountUsecaseMock) ReturnCPF(_ string) int {
-	return 0
 }
 
 func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (int, error) {
@@ -219,7 +211,7 @@ func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, ba
 
 func (uc AccountUsecaseMock) GetBalance(id int) (int, error) {
 	if Aux == 0 {
-		id = 981
+		id = 19727887
 		Aux++
 	} else {
 		id = 0
@@ -234,7 +226,7 @@ func (uc AccountUsecaseMock) GetBalance(id int) (int, error) {
 func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
 	var account []store_account.Account
 
-	for _, a := range uc.AccountList {
+	for _, a := range uc.AccountList.GetAccounts() {
 		account = append(account, a)
 	}
 
@@ -244,7 +236,7 @@ func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
 func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
 	account := store_account.Account{}
 
-	for _, a := range uc.AccountList {
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.ID == id {
 			account = a
 		}
@@ -258,9 +250,16 @@ func (uc *AccountUsecaseMock) UpdateBalance(_ store_account.Account, _ store_acc
 }
 
 func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store_account.Account {
-	return uc.AccountList[cpf]
+	account := store_account.Account{}
+	for _, a := range uc.AccountList.GetAccounts() {
+		if a.CPF == cpf {
+			account = a
+		}
+	}
+
+	return account
 }
 
-func (uc AccountUsecaseMock) GetAccount() map[string]store_account.Account {
+func (uc AccountUsecaseMock) GetAccount() []store_account.Account {
 	return nil
 }

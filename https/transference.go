@@ -36,7 +36,7 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
 		"time": domain.CreatedAt(),
-	}).Info("balance handled successfully!")
+	}).Info("transfers handled successfully!")
 	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)

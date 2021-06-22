@@ -1,7 +1,7 @@
 package account
 
 import (
-	store_account "github.com/CMedrado/DesafioStone/store/account"
+	storeaccount "github.com/CMedrado/DesafioStone/storage/file/account"
 	"io"
 	"io/ioutil"
 	"os"
@@ -78,7 +78,7 @@ func TestCreateAccount(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 			defer clenDataBase()
-			accountStorage := store_account.NewStoredAccount(dataBase)
+			accountStorage := storeaccount.NewStoredAccount(dataBase)
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}
@@ -137,7 +137,7 @@ func TestGetBalance(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 			defer clenDataBase()
-			accountStorage := store_account.NewStoredAccount(dataBase)
+			accountStorage := storeaccount.NewStoredAccount(dataBase)
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}

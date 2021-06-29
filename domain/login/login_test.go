@@ -1,51 +1,16 @@
 package login
 
 import (
+	"github.com/CMedrado/DesafioStone/domain"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 	store_token "github.com/CMedrado/DesafioStone/store/token"
-	"io"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
 type CreateLoginInput struct {
 	CPF    string
 	Secret string
-}
-
-func createTemporaryFileToken(t *testing.T, Tokens string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtoken")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Tokens))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbaccount")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
 }
 
 func TestAuthenticatedLogin(t *testing.T) {
@@ -98,13 +63,14 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{0,0}]`)
-			defer clenDataBaseToken()
-			accountAccount := store_account.NewStoredAccount(dataBaseAccount)
-			accountUsecase := &AccountUseCaseMock{accountAccount}
-			accountToken := store_token.NewStoredToked(dataBaseToken)
+			accountStorage := make(map[string]store_account.Account)
+			listAccount := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+
+			accountStorage[listAccount.CPF] = listAccount
+			accountStorage[listAccounts.CPF] = listAccounts
+			accountUsecase := &AccountUseCaseMock{AccountList: accountStorage}
+			accountToken := store_token.NewStoredToked()
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				StoredToken:    accountToken,
@@ -128,7 +94,11 @@ func TestAuthenticatedLogin(t *testing.T) {
 }
 
 type AccountUseCaseMock struct {
-	AccountList *store_account.StoredAccount
+	AccountList map[string]store_account.Account
+}
+
+func (uc AccountUseCaseMock) ReturnCPF(_ string) int {
+	return 0
 }
 
 func (uc AccountUseCaseMock) CreateAccount(_ string, _ string, _ string, _ int) (int, error) {
@@ -151,16 +121,9 @@ func (uc *AccountUseCaseMock) UpdateBalance(_ store_account.Account, _ store_acc
 }
 
 func (uc AccountUseCaseMock) GetAccountCPF(cpf string) store_account.Account {
-	account := store_account.Account{}
-	for _, a := range uc.AccountList.GetAccounts() {
-		if a.CPF == cpf {
-			account = a
-		}
-	}
-
-	return account
+	return uc.AccountList[cpf]
 }
 
-func (uc AccountUseCaseMock) GetAccount() []store_account.Account {
+func (uc AccountUseCaseMock) GetAccount() map[string]store_account.Account {
 	return nil
 }

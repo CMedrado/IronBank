@@ -1,12 +1,11 @@
 package transfer
 
 import (
+	"encoding/base64"
+	"github.com/CMedrado/DesafioStone/domain"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
-	"io"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -17,58 +16,9 @@ type CreateTransferInput struct {
 	Amount               int
 }
 
-func createTemporaryFileToken(t *testing.T, Tokens string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtoken")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Tokens))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbaccount")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileTransfer(t *testing.T, Transfers string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtransfer")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Transfers))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
 func TestMakeTransfers(t *testing.T) {
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00 : 0"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00 : 1"))
 	tt := []struct {
 		name                    string
 		in                      CreateTransferInput
@@ -78,8 +28,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should successfully transfer amount",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
+				Token:                msg,
+				AccountDestinationID: 1,
 				Amount:               300,
 			},
 			wantErr:                 false,
@@ -88,8 +38,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is wrong token",
 			in: CreateTransferInput{
-				Token:                "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
-				AccountDestinationID: 98498081,
+				Token:                msgs,
+				AccountDestinationID: 1,
 				Amount:               300,
 			},
 			wantErr:                 true,
@@ -98,8 +48,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is no account destination id",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 19727887,
+				Token:                msg,
+				AccountDestinationID: 2,
 				Amount:               300,
 			},
 			wantErr:                 true,
@@ -108,8 +58,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is too slow",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
+				Token:                msg,
+				AccountDestinationID: 1,
 				Amount:               0,
 			},
 			wantErr:                 true,
@@ -118,9 +68,9 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is greater than the balance",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
-				Amount:               52000,
+				Token:                msg,
+				AccountDestinationID: 1,
+				Amount:               5200,
 			},
 			wantErr:                 true,
 			expectedUpdateCallCount: 0,
@@ -129,17 +79,18 @@ func TestMakeTransfers(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":19727887,"token":"MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw=="}]`)
-			defer clenDataBaseToken()
-			dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, ``)
-			defer clenDataBaseTransfer()
-			accountAccount := store_account.NewStoredAccount(dataBaseAccount)
-			accountUsecase := &AccountUsecaseMock{AccountList: accountAccount}
-			accountToken := store_token.NewStoredToked(dataBaseToken)
-			tokenUseCase := &TokenUseCaseMock{accountToken}
-			storagedTransfer := store_transfer.NewStoredTransferAccountID(dataBaseTransfer)
+			accountStorage := make(map[string]store_account.Account)
+			accountToken := make(map[int]store_login.Token)
+			originAccount := store_account.Account{ID: 0, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			destinationAccount := store_account.Account{ID: 1, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+			originToken := store_login.Token{Token: msg}
+			accountStorage[originAccount.CPF] = originAccount
+			accountStorage[destinationAccount.CPF] = destinationAccount
+			accountToken[originAccount.ID] = originToken
+
+			tokenUseCase := &TokenUseCaseMock{TokenList: accountToken}
+			accountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
+			storagedTransfer := store_transfer.NewStoredTransferAccountID()
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				TokenUseCase:   tokenUseCase,
@@ -168,6 +119,8 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
+	msg := base64.StdEncoding.EncodeToString([]byte("10/02/2009 02:02:00:0"))
+	msgs := base64.StdEncoding.EncodeToString([]byte("10/03/2009 02:02:00:1"))
 
 	var tt = []struct {
 		name    string
@@ -178,7 +131,7 @@ func TestMakeGetTransfers(t *testing.T) {
 		{
 			name: "should successfully get transfers",
 			in: CreateTransferInput{
-				Token: "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+				Token: msg,
 			},
 			wantErr: false,
 			want:    []store_transfer.Transfer{{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}, {ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}},
@@ -186,29 +139,35 @@ func TestMakeGetTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully get transfer when there is wrong token",
 			in: CreateTransferInput{
-				Token: "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
+				Token: msgs,
 			},
 			wantErr: true,
 		},
 	}
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":19727887,"token":"MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw=="}]`)
-			defer clenDataBaseToken()
-			dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[[{"id":39984059,"account_origin_id":19727887,"account_destination_id":98498081,"amount":60,"created_at":"18/06/2021 17:26:26"},{"id":27131847,"account_origin_id":19727887,"account_destination_id":98498081,"amount":50,"created_at":"18/06/2021 17:26:26"},{"id":74941318,"account_origin_id":11902081,"account_destination_id":98498081,"amount":900,"created_at":"18/06/2021 17:26:26"},{"id":11902081,"account_origin_id":98498081,"account_destination_id":19727887,"amount":90,"created_at":"18/06/2021 17:26:26"}]}`)
-			defer clenDataBaseTransfer()
-			accountAccount := store_account.NewStoredAccount(dataBaseAccount)
-			accountUsecase := &AccountUsecaseMock{AccountList: accountAccount}
-			accountToken := store_token.NewStoredToked(dataBaseToken)
-			tokenUseCase := &TokenUseCaseMock{accountToken}
-			storagedTransfer := store_transfer.NewStoredTransferAccountID(dataBaseTransfer)
+			accountStorage := make(map[string]store_account.Account)
+			accountToken := make(map[int]store_login.Token)
+			originAccount := store_account.Account{ID: 0, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+			destinationAccount := store_account.Account{ID: 1, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+			listTransfer := store_transfer.Transfer{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}
+			listTransfers := store_transfer.Transfer{ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}
+			originToken := store_login.Token{Token: msg}
+			accountStorage[originAccount.CPF] = originAccount
+			accountStorage[destinationAccount.CPF] = destinationAccount
+			accountToken[originAccount.ID] = originToken
+
+			tokenUseCase := &TokenUseCaseMock{TokenList: accountToken}
+			storagedTransfer := store_transfer.NewStoredTransferAccountID()
+			accountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				TokenUseCase:   tokenUseCase,
 				StoredTransfer: storagedTransfer,
 			}
+
+			usecase.StoredTransfer.PostTransferID(listTransfer, destinationAccount.ID)
+			usecase.StoredTransfer.PostTransferID(listTransfers, destinationAccount.ID)
 
 			gotTransfer, gotErr := usecase.GetTransfers(testCase.in.Token)
 
@@ -228,7 +187,7 @@ func TestMakeGetTransfers(t *testing.T) {
 }
 
 type AccountUsecaseMock struct {
-	AccountList *store_account.StoredAccount
+	AccountList map[string]store_account.Account
 
 	UpdateCallCount int
 }
@@ -252,7 +211,7 @@ func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
 func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
 	account := store_account.Account{}
 
-	for _, a := range uc.AccountList.GetAccounts() {
+	for _, a := range uc.AccountList {
 		if a.ID == id {
 			account = a
 		}
@@ -266,22 +225,15 @@ func (uc *AccountUsecaseMock) UpdateBalance(_ store_account.Account, _ store_acc
 }
 
 func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store_account.Account {
-	account := store_account.Account{}
-	for _, a := range uc.AccountList.GetAccounts() {
-		if a.CPF == cpf {
-			account = a
-		}
-	}
-
-	return account
+	return uc.AccountList[cpf]
 }
 
-func (uc AccountUsecaseMock) GetAccount() []store_account.Account {
+func (uc AccountUsecaseMock) GetAccount() map[string]store_account.Account {
 	return nil
 }
 
 type TokenUseCaseMock struct {
-	TokenList *store_token.StoredToken
+	TokenList map[int]store_login.Token
 }
 
 func (uc TokenUseCaseMock) AuthenticatedLogin(_, _ string) (error, string) {
@@ -292,14 +244,6 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(id int) store_token.Token {
-	token := store_token.Token{}
-
-	for _, a := range uc.TokenList.GetTokens() {
-		if a.ID == id {
-			token = a
-		}
-	}
-
-	return token
+func (uc TokenUseCaseMock) GetTokenID(id int) store_login.Token {
+	return uc.TokenList[id]
 }

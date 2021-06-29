@@ -4,7 +4,6 @@ import (
 	"github.com/CMedrado/DesafioStone/domain"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
 	store_login "github.com/CMedrado/DesafioStone/store/login"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
 	"testing"
 )
 
@@ -70,7 +69,7 @@ func TestAuthenticatedLogin(t *testing.T) {
 			accountStorage[listAccount.CPF] = listAccount
 			accountStorage[listAccounts.CPF] = listAccounts
 			accountUsecase := &AccountUseCaseMock{AccountList: accountStorage}
-			accountToken := store_token.NewStoredToked()
+			accountToken := store_login.NewStoredToked()
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
 				StoredToken:    accountToken,

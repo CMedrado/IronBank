@@ -6,6 +6,7 @@ import (
 	"github.com/CMedrado/DesafioStone/domain"
 	account2 "github.com/CMedrado/DesafioStone/domain/account"
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +17,7 @@ import (
 var Aux = 0
 
 func TestAccountHandler(t *testing.T) {
-	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 	defer clenDataBaseAccount()
 	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
 	logger := logrus.New()
@@ -40,7 +41,7 @@ func TestAccountHandler(t *testing.T) {
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Rafael", "cpf": "081.313.910-43", "secret": "tatatal", "balance": 5000}`,
-			responsebody: `{"id":981}` + "\n",
+			responsebody: `{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa"}` + "\n",
 			response:     http.StatusCreated,
 		},
 		{
@@ -48,7 +49,7 @@ func TestAccountHandler(t *testing.T) {
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Lucas", "cpf": "38453162093", "secret": "jax", "balance": 3000}`,
-			responsebody: `{"id":982}` + "\n",
+			responsebody: `{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4"}` + "\n",
 			response:     http.StatusCreated,
 		},
 		{
@@ -113,7 +114,7 @@ func TestAccountHandler(t *testing.T) {
 			method:       "GET",
 			path:         "/accounts",
 			response:     http.StatusOK,
-			responsebody: `{"accounts":[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]}` + "\n",
+			responsebody: `{"accounts":[{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]}` + "\n",
 		},
 	}
 	for _, tc := range accountst {
@@ -180,49 +181,44 @@ type AccountUsecaseMock struct {
 	UpdateCallCount int
 }
 
-func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (int, error) {
+func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (uuid.UUID, error) {
 	if len(cpf) != 11 && len(cpf) != 14 {
-		return 0, errors.New("given cpf is invalid")
+		return uuid.UUID{}, errors.New("given cpf is invalid")
 	}
 	if len(cpf) == 14 {
 		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
 			if balance <= 0 {
-				return 0, errors.New("given the balance amount is invalid")
+				return uuid.UUID{}, errors.New("given the balance amount is invalid")
 			}
 			if name == "Rafael" {
-				return 981, nil
+				return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
 			}
 			if name == "Lucas" {
-				return 982, nil
+				return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
 			}
 		} else {
-			return 0, errors.New("given cpf is invalid")
+			return uuid.UUID{}, errors.New("given cpf is invalid")
 		}
 	}
 	if balance <= 0 {
-		return 0, errors.New("given the balance amount is invalid")
+		return uuid.UUID{}, errors.New("given the balance amount is invalid")
 	}
 	if name == "Rafael" {
-		return 981, nil
+		return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
 	}
 	if name == "Lucas" {
-		return 982, nil
+		return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
 	}
-	return 1, nil
+	return uuid.UUID{}, nil
 }
 
-func (uc AccountUsecaseMock) GetBalance(id int) (int, error) {
+func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
 	if Aux == 0 {
-		id = 19727887
 		Aux++
+		return 6000, nil
 	} else {
-		id = 0
-	}
-	accountOrigin := uc.SearchAccount(id)
-	if (accountOrigin == domain.Account{}) {
 		return 0, errors.New("given id is invalid")
 	}
-	return accountOrigin.Balance, nil
 }
 
 func (uc AccountUsecaseMock) GetAccounts() []domain.Account {
@@ -235,7 +231,7 @@ func (uc AccountUsecaseMock) GetAccounts() []domain.Account {
 	return account
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id int) domain.Account {
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) domain.Account {
 	account := domain.Account{}
 
 	for _, a := range uc.AccountList.ReturnAccounts() {
@@ -260,8 +256,4 @@ func (uc AccountUsecaseMock) GetAccountCPF(cpf string) domain.Account {
 	}
 
 	return account
-}
-
-func (uc AccountUsecaseMock) GetAccount() []domain.Account {
-	return nil
 }

@@ -2,6 +2,7 @@ package account
 
 import (
 	storeaccount "github.com/CMedrado/DesafioStone/storage/file/account"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"os"
@@ -9,7 +10,7 @@ import (
 )
 
 type CreateAccountTestInput struct {
-	ID        int
+	ID        uuid.UUID
 	Name      string
 	CPF       string
 	Secret    string
@@ -56,7 +57,7 @@ func TestCreateAccount(t *testing.T) {
 			name: "should successfully create an account with unformulated CPF",
 			in: CreateAccountTestInput{
 				Name:    "Lucas",
-				CPF:     "38453162093",
+				CPF:     "98634575498",
 				Secret:  "teo90",
 				Balance: 60000,
 			},
@@ -76,7 +77,7 @@ func TestCreateAccount(t *testing.T) {
 
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131321083","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 			defer clenDataBase()
 			accountStorage := storeaccount.NewStoredAccount(dataBase)
 			usecase := UseCase{
@@ -95,7 +96,7 @@ func TestCreateAccount(t *testing.T) {
 				t.Error("wanted err but got nil")
 			}
 
-			if gotID == 0 && !testCase.wantErr && gotErr != nil {
+			if (gotID == uuid.UUID{}) && !testCase.wantErr && gotErr != nil {
 				t.Errorf("expected an ID but got %d", gotID)
 			}
 		})
@@ -105,37 +106,26 @@ func TestCreateAccount(t *testing.T) {
 func TestGetBalance(t *testing.T) {
 	tt := []struct {
 		name    string
-		in      int
+		in      string
 		wantErr bool
 		want    int
 	}{
 		{
-			name:    "should successfully get balance with formatted CPF",
-			in:      982,
-			wantErr: false,
-			want:    5000,
-		},
-		{
-			name:    "should successfully get balance with unformulated CPF",
-			in:      981,
+			name:    "should successfully get balance with ID",
+			in:      "a505b1f9-ac4c-45aa-be43-8614a227a9d4",
 			wantErr: false,
 			want:    6000,
 		},
 		{
-			name:    "should unsuccessfully get balance when CPF is invalid",
-			in:      398 - 6,
-			wantErr: true,
-		},
-		{
-			name:    "should unsuccessfully get balance when dont exist account",
-			in:      06237,
+			name:    "should unsuccessfully get balance when ID is invalid",
+			in:      "f7ee7351-4c96-40ca-8cd8-37434810ddfa",
 			wantErr: true,
 		},
 	}
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 			defer clenDataBase()
 			accountStorage := storeaccount.NewStoredAccount(dataBase)
 			usecase := UseCase{

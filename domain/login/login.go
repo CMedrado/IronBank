@@ -3,7 +3,7 @@ package login
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/google/uuid"
+	"strconv"
 )
 
 type UseCase struct {
@@ -31,14 +31,14 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 
 	id := auc.AccountUseCase.GetAccountCPF(cpf)
 	now := domain.CreatedAt()
-	token := now + ":" + id.ID.String()
+	token := now + ":" + strconv.Itoa(id.ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
 	auc.StoredToken.SaveToken(id.ID, encoded)
 
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id uuid.UUID) domain.Token {
+func (uc UseCase) GetTokenID(id int) domain.Token {
 	tokens := uc.StoredToken.ReturnTokens()
 	token := domain.Token{}
 

@@ -8,14 +8,15 @@ func (a *StoredAccount) CreateAccount(account Account) {
 	json.NewEncoder(a.dataBase).Encode(a.accounts)
 }
 
-func (a *StoredAccount) UpdateBalances(person1, person2 Account) {
-	accountOrigin := a.accounts.Find(person1.Name)
-	accountDestination := a.accounts.Find(person2.Name)
-
-	accountOrigin.Balance = person1.Balance
-	accountDestination.Balance = person2.Balance
+func (a StoredAccount) UpdateBalances(person1, person2 Account) {
+	accountStorage[person1.CPF] = person1
+	accountStorage[person2.CPF] = person2
 }
 
 func (a StoredAccount) GetAccounts() []Account {
 	return a.accounts
+}
+
+func (a StoredAccount) GetAccountCPF(cpf string) Account {
+	return accountStorage[cpf]
 }

@@ -25,12 +25,6 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
 		switch err.Error() {
-		case "given cpf is already used":
-			l.WithFields(log.Fields{
-				"type": http.StatusBadRequest,
-			}).Error(err)
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(ErrJson)
 		case "given the balance amount is invalid":
 			l.WithFields(log.Fields{
 				"type": http.StatusBadRequest,

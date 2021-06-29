@@ -2,7 +2,7 @@ package domain
 
 import (
 	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
 )
 
@@ -24,5 +24,5 @@ type TransferUseCase interface {
 
 type LoginUseCase interface {
 	AuthenticatedLogin(cpf, secret string) (error, string)
-	GetTokenID(id int) store_token.Token
+	GetTokenID(id int) store_login.Token
 }

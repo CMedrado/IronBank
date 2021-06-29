@@ -30,7 +30,7 @@ func main() {
 
 	accountTransfer := store_transfer.NewStoredTransferAccountID()
 	accountToken := store_login.NewStoredToked()
-	accountStorage := store_account.NewStoredAccount(db)
+	accountStorage := store_account.NewStoredAccount()
 	accountUseCase := account.UseCase{StoredAccount: accountStorage}
 	loginUseCase := login.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
 	transferUseCase := transfer.UseCase{AccountUseCase: &accountUseCase, StoredTransfer: accountTransfer, TokenUseCase: &loginUseCase}

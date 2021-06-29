@@ -37,11 +37,19 @@ func (auc *UseCase) GetBalance(id int) (int, error) {
 	}
 
 	return account.Balance, nil
+
 }
 
 //GetAccounts returns all API accounts
 func (auc *UseCase) GetAccounts() []store_account.Account {
-	return auc.StoredAccount.GetAccounts()
+	accounts := auc.StoredAccount.GetAccounts()
+	var account []store_account.Account
+
+	for _, a := range accounts {
+		account = append(account, a)
+	}
+
+	return account
 }
 
 // SearchAccount returns the account via the received ID
@@ -58,19 +66,6 @@ func (auc UseCase) SearchAccount(id int) store_account.Account {
 	return account
 }
 
-func (auc UseCase) SearchAccountCPF(cpf string) store_account.Account {
-	accounts := auc.StoredAccount.GetAccounts()
-	account := store_account.Account{}
-
-	for _, a := range accounts {
-		if a.CPF == cpf {
-			account = a
-		}
-	}
-
-	return account
-}
-
 func (auc UseCase) UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account) {
 	auc.StoredAccount.UpdateBalances(accountOrigin, accountDestination)
 }
@@ -79,6 +74,6 @@ func (auc *UseCase) GetAccountCPF(cpf string) store_account.Account {
 	return auc.StoredAccount.GetAccountCPF(cpf)
 }
 
-func (auc UseCase) GetAccount() []store_account.Account {
+func (auc UseCase) GetAccount() map[string]store_account.Account {
 	return auc.StoredAccount.GetAccounts()
 }

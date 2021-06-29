@@ -3,13 +3,10 @@ package https
 import (
 	"bytes"
 	"errors"
-	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/domain/account"
-	"github.com/CMedrado/DesafioStone/domain/login"
 	"github.com/CMedrado/DesafioStone/domain/transfer"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
-	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
-	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
+	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -80,7 +77,7 @@ func TestTransferHandler(t *testing.T) {
 	defer clenDataBaseTransfer()
 	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
 	tokenStorage := store_token.NewStoredToked(dataBaseToken)
-	transferStorage := store_transfer.NewStoredTransfer(dataBaseTransfer)
+	transferStorage := store_transfer.NewStoredTransferAccountID(dataBaseTransfer)
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	Lentry := logrus.NewEntry(logger)
@@ -230,25 +227,25 @@ func TestTransferHandler(t *testing.T) {
 type TransferUsecaseMock struct {
 	AccountList  *store_account.StoredAccount
 	TokenList    *store_token.StoredToken
-	TransferList *store_transfer.StoredTransferAccount
+	TransferList *store_transfer.StoredTransferAccountID
 }
 
-func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain.Transfer, error) {
+func (uc *TransferUsecaseMock) GetTransfers(token string) ([]store_transfer.Transfer, error) {
 	accountOriginID := transfer.DecoderToken(token)
-	tokens := domain.Token{}
-	for _, a := range uc.TokenList.ReturnTokens() {
+	tokens := store_token.Token{}
+	for _, a := range uc.TokenList.GetTokens() {
 		if a.ID == accountOriginID {
-			tokens = login.ChangeTokenStorage(a)
+			tokens = a
 		}
 	}
 	if token != tokens.Token {
-		return []domain.Transfer{}, errors.New("given token is invalid")
+		return []store_transfer.Transfer{}, errors.New("given token is invalid")
 	}
-	var transfers []domain.Transfer
-	for _, a := range uc.TransferList.ReturnTransfers() {
-		transfers = append(transfers, transfer.ChangeTransferStorage(a))
+	var transfer []store_transfer.Transfer
+	for _, a := range uc.TransferList.GetTransfers() {
+		transfer = append(transfer, a)
 	}
-	return transfers, nil
+	return transfer, nil
 }
 
 func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID int, amount int) (error, int) {
@@ -256,10 +253,10 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 		return errors.New("given amount is invalid"), 0
 	}
 	accountOriginID := transfer.DecoderToken(token)
-	tokens := domain.Token{}
-	for _, a := range uc.TokenList.ReturnTokens() {
+	tokens := store_token.Token{}
+	for _, a := range uc.TokenList.GetTokens() {
 		if a.ID == accountOriginID {
-			tokens = login.ChangeTokenStorage(a)
+			tokens = a
 		}
 	}
 	if tokens.Token != token {
@@ -268,22 +265,22 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 	if accountOriginID == accountDestinationID {
 		return errors.New("given account is the same as the account destination"), 0
 	}
-	accountOrigin := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	accountOrigin := store_account.Account{}
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.ID == accountOriginID {
-			accountOrigin = account.ChangeAccountStorage(a)
+			accountOrigin = a
 		}
 	}
-	accountDestination := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	accountDestination := store_account.Account{}
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.ID == accountDestinationID {
-			accountDestination = account.ChangeAccountStorage(a)
+			accountDestination = a
 		}
 	}
 	if accountOrigin.Balance < amount {
 		return errors.New("given account without balance"), 0
 	}
-	if (accountDestination == domain.Account{}) {
+	if (accountDestination == store_account.Account{}) {
 		return errors.New("given account destination id is invalid"), 0
 	}
 	return nil, 19878

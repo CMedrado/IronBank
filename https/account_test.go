@@ -3,9 +3,7 @@ package https
 import (
 	"bytes"
 	"errors"
-	"github.com/CMedrado/DesafioStone/domain"
-	account2 "github.com/CMedrado/DesafioStone/domain/account"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -219,49 +217,49 @@ func (uc AccountUsecaseMock) GetBalance(id int) (int, error) {
 		id = 0
 	}
 	accountOrigin := uc.SearchAccount(id)
-	if (accountOrigin == domain.Account{}) {
+	if (accountOrigin == store_account.Account{}) {
 		return 0, errors.New("given id is invalid")
 	}
 	return accountOrigin.Balance, nil
 }
 
-func (uc AccountUsecaseMock) GetAccounts() []domain.Account {
-	var account []domain.Account
+func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
+	var account []store_account.Account
 
-	for _, a := range uc.AccountList.ReturnAccounts() {
-		account = append(account, account2.ChangeAccountStorage(a))
+	for _, a := range uc.AccountList.GetAccounts() {
+		account = append(account, a)
 	}
 
 	return account
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id int) domain.Account {
-	account := domain.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
+	account := store_account.Account{}
 
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.ID == id {
-			account = account2.ChangeAccountStorage(a)
+			account = a
 		}
 	}
 
 	return account
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ domain.Account, _ domain.Account) {
+func (uc *AccountUsecaseMock) UpdateBalance(_ store_account.Account, _ store_account.Account) {
 	uc.UpdateCallCount++
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) domain.Account {
-	account := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store_account.Account {
+	account := store_account.Account{}
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.CPF == cpf {
-			account = account2.ChangeAccountStorage(a)
+			account = a
 		}
 	}
 
 	return account
 }
 
-func (uc AccountUsecaseMock) GetAccount() []domain.Account {
+func (uc AccountUsecaseMock) GetAccount() []store_account.Account {
 	return nil
 }

@@ -1,10 +1,8 @@
 package login
 
 import (
-	"github.com/CMedrado/DesafioStone/domain"
-	account2 "github.com/CMedrado/DesafioStone/domain/account"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
-	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
+	store_account "github.com/CMedrado/DesafioStone/store/account"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
 	"io"
 	"io/ioutil"
 	"os"
@@ -141,24 +139,28 @@ func (uc AccountUseCaseMock) GetBalance(_ int) (int, error) {
 	return 0, nil
 }
 
-func (uc AccountUseCaseMock) GetAccounts() []domain.Account {
+func (uc AccountUseCaseMock) GetAccounts() []store_account.Account {
 	return nil
 }
 
-func (uc AccountUseCaseMock) SearchAccount(id int) domain.Account {
-	return domain.Account{}
+func (uc AccountUseCaseMock) SearchAccount(id int) store_account.Account {
+	return store_account.Account{}
 }
 
-func (uc *AccountUseCaseMock) UpdateBalance(_ domain.Account, _ domain.Account) {
+func (uc *AccountUseCaseMock) UpdateBalance(_ store_account.Account, _ store_account.Account) {
 }
 
-func (uc AccountUseCaseMock) GetAccountCPF(cpf string) domain.Account {
-	account := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+func (uc AccountUseCaseMock) GetAccountCPF(cpf string) store_account.Account {
+	account := store_account.Account{}
+	for _, a := range uc.AccountList.GetAccounts() {
 		if a.CPF == cpf {
-			account = account2.ChangeAccountStorage(a)
+			account = a
 		}
 	}
 
 	return account
+}
+
+func (uc AccountUseCaseMock) GetAccount() []store_account.Account {
+	return nil
 }

@@ -11,19 +11,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"log"
 	"net/http"
-	"os"
 	time "time"
 )
 
-const dbFileName = "accounts.db.json"
-
 func main() {
-	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileName, err)
-	}
-
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	lentry := logrus.NewEntry(logger)

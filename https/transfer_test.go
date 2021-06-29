@@ -17,7 +17,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"testing"
 	"time"
 )
@@ -73,11 +72,11 @@ func createTemporaryFileTransfer(t *testing.T, Transfers string) (io.ReadWriteSe
 	return filetmp, removeArquivo
 }
 func TestTransferHandler(t *testing.T) {
-	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","name":"Lucas","cpf":"38453162093","secret":"7e65a9b554bbc9817aa049ce38c84a72","balance":3000,"created_at":"29/06/2021 12:45:35"},{"id":"75432539-c5ba-46d3-9690-44985b516da7","name":"Rafael","cpf":"08131391043","secret":"3467e121a1a109628e0a5b0cebba361b","balance":5000,"created_at":"29/06/2021 12:46:28"}]`)
 	defer clenDataBaseAccount()
-	dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":19727887,"token":"MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw=="}]`)
+	dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","token":"MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA="}]`)
 	defer clenDataBaseToken()
-	dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[{"id":39984059,"account_origin_id":98498081,"account_destination_id":19727887,"amount":60,"created_at":"18/06/2021 17:26:26"},{"id":27131847,"account_origin_id":98498081,"account_destination_id":19727887,"amount":50,"created_at":"18/06/2021 17:26:26"},{"id":74941318,"account_origin_id":98498081,"account_destination_id":19727887,"amount":900,"created_at":"18/06/2021 17:26:26"},{"id":11902081,"account_origin_id":98498081,"account_destination_id":19727887,"amount":90,"created_at":"18/06/2021 17:26:26"}]`)
+	dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[{"id":"47399f23-2093-4dde-b32f-990cac27630e","account_origin_id":"c5424440-4737-4e03-86d2-3adac90ddd20","account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount":150,"created_at":"29/06/2021 12:48:06"}]`)
 	defer clenDataBaseTransfer()
 	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
 	tokenStorage := store_token.NewStoredToked(dataBaseToken)
@@ -89,8 +88,6 @@ func TestTransferHandler(t *testing.T) {
 	S := new(ServerAccount)
 	S.transfer = TransferUseCase
 	S.logger = Lentry
-	secondIDString := strconv.Itoa(98498081)
-	firstIDString := strconv.Itoa(19727887)
 	createtransfer := []struct {
 		name         string
 		method       string
@@ -104,54 +101,54 @@ func TestTransferHandler(t *testing.T) {
 			name:         "should successfully transfer amount",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":` + secondIDString + `,"amount": 500}`,
+			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 500}`,
 			response:     http.StatusCreated,
-			responsebody: `{"id":19878}` + "\n",
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+			responsebody: `{"id":"c5424440-4737-4e03-86d2-3adac90ddd20"}` + "\n",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there is wrong token",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":` + secondIDString + `,"amount": 300}`,
+			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 300}`,
 			response:     http.StatusUnauthorized,
-			token:        "MTgvMDYvMjAyMSAxNjozNDozMjo5OD5ODA4MQ==",
+			token:        "MjkvMDYvMjAyMSAxMzoxNjo1NTo3NTQzMjUzOS1jNWJhLTQ2ZDMtOTY5MC00NDk4NWI1MTZkYTc=",
 			responsebody: `{"errors":"given token is invalid"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there is wrong destination ID",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":7568497,"amount": 300}`,
+			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da5","amount": 300}`,
 			response:     http.StatusNotAcceptable,
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there is invalid amount",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":` + secondIDString + `,"amount": -5}`,
+			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": -5}`,
 			response:     http.StatusBadRequest,
-			token:        "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 			responsebody: `{"errors":"given amount is invalid"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there without balance ",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":` + secondIDString + `,"amount": 60000}`,
+			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 60000}`,
 			response:     http.StatusBadRequest,
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 			responsebody: `{"errors":"given account without balance"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there same account ",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":` + firstIDString + `,"amount": 300}`,
+			body:         `{"account_destination_id":"c5424440-4737-4e03-86d2-3adac90ddd20","amount": 300}`,
 			response:     http.StatusBadRequest,
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 			responsebody: `{"errors":"given account is the same as the account destination"}` + "\n",
 		},
 		{
@@ -195,15 +192,15 @@ func TestTransferHandler(t *testing.T) {
 			method:       "GET",
 			path:         "/transfers",
 			response:     http.StatusOK,
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-			responsebody: `{"transfers":[{"id":39984059,"account_origin_id":98498081,"account_destination_id":19727887,"amount":60,"created_at":"18/06/2021 17:26:26"},{"id":27131847,"account_origin_id":98498081,"account_destination_id":19727887,"amount":50,"created_at":"18/06/2021 17:26:26"},{"id":74941318,"account_origin_id":98498081,"account_destination_id":19727887,"amount":900,"created_at":"18/06/2021 17:26:26"},{"id":11902081,"account_origin_id":98498081,"account_destination_id":19727887,"amount":90,"created_at":"18/06/2021 17:26:26"}]}` + "\n",
+			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			responsebody: `{"transfers":[{"id":"47399f23-2093-4dde-b32f-990cac27630e","account_origin_id":"c5424440-4737-4e03-86d2-3adac90ddd20","account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount":150,"created_at":"29/06/2021 12:48:06"}]}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully get transfer when there is wrong token",
 			method:       "GET",
 			path:         "/transfers",
 			response:     http.StatusUnauthorized,
-			token:        "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4w==",
+			token:        "MjkvMDYvMjAyMSAxMzoxNjo1NTo3NTQzMjUzOS1jNWJhLTQ2ZDMtOTY5MC00NDk4NWI1MTZkYTc=",
 			responsebody: `{"errors":"given token is invalid"}` + "\n",
 		},
 	}
@@ -252,10 +249,11 @@ func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain.Transfer, er
 	return transfers, nil
 }
 
-func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID uuid.UUID, amount int) (error, uuid.UUID) {
+func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationIDString string, amount int) (error, uuid.UUID) {
 	if amount <= 0 {
 		return errors.New("given amount is invalid"), uuid.UUID{}
 	}
+	accountDestinationID := uuid.MustParse(accountDestinationIDString)
 	accountOriginID := transfer.DecoderToken(token)
 	tokens := domain.Token{}
 	for _, a := range uc.TokenList.ReturnTokens() {
@@ -287,5 +285,6 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 	if (accountDestination == domain.Account{}) {
 		return errors.New("given account destination id is invalid"), uuid.UUID{}
 	}
-	return nil, uuid.UUID{}
+	returnID := uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20")
+	return nil, returnID
 }

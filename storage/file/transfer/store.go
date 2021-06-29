@@ -1,17 +1,18 @@
 package transfer
 
 import (
+	"github.com/google/uuid"
 	"io"
 )
 
 type Transfers []Transfer
 
 type Transfer struct {
-	ID                   int    `json:"id"`
-	AccountOriginID      int    `json:"account_origin_id"`
-	AccountDestinationID int    `json:"account_destination_id"`
-	Amount               int    `json:"amount"`
-	CreatedAt            string `json:"created_at"`
+	ID                   uuid.UUID `json:"id"`
+	AccountOriginID      uuid.UUID `json:"account_origin_id"`
+	AccountDestinationID uuid.UUID `json:"account_destination_id"`
+	Amount               int       `json:"amount"`
+	CreatedAt            string    `json:"created_at"`
 }
 
 type StoredTransferAccount struct {

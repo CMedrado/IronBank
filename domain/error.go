@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"github.com/google/uuid"
 )
 
 var (
@@ -79,7 +80,7 @@ func CheckAmount(amount int) error {
 }
 
 // CheckCompareID Compare two IDs to see if they are the same and returns nil if not, it returns an error
-func CheckCompareID(accountOriginID, accountDestinationID int) error {
+func CheckCompareID(accountOriginID, accountDestinationID uuid.UUID) error {
 	if accountOriginID == accountDestinationID {
 		return errSameAccount
 	}

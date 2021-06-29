@@ -1,8 +1,10 @@
 package domain
 
-import "math/rand"
+import (
+	"github.com/google/uuid"
+)
 
 // Random returns a random number
-func Random() int {
-	return rand.Intn(1000000000)
+func Random() (uuid.UUID, error) {
+	return uuid.NewRandom()
 }

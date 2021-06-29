@@ -1,16 +1,19 @@
 package account
 
-import "io"
+import (
+	"github.com/google/uuid"
+	"io"
+)
 
 type Accounts []Account
 
 type Account struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	CPF       string `json:"cpf"`
-	Secret    string `json:"secret"`
-	Balance   int    `json:"balance"`
-	CreatedAt string `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CPF       string    `json:"cpf"`
+	Secret    string    `json:"secret"`
+	Balance   int       `json:"balance"`
+	CreatedAt string    `json:"created_at"`
 }
 
 type StoredAccount struct {

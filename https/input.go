@@ -2,8 +2,7 @@ package https
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
+	"github.com/CMedrado/DesafioStone/store"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -44,11 +43,11 @@ type TransferResponse struct {
 }
 
 type GetTransfersResponse struct {
-	Transfers []store_transfer.Transfer `json:"transfers"`
+	Transfers []store.Transfer `json:"transfers"`
 }
 
 type GetAccountsResponse struct {
-	Accounts []store_account.Account `json:"accounts"`
+	Accounts []store.Account `json:"accounts"`
 }
 
 type ServerAccount struct {

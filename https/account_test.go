@@ -4,21 +4,20 @@ import (
 	"bytes"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
+	"github.com/CMedrado/DesafioStone/store"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 )
 
-var Aux = 0
-
 func TestAccountHandler(t *testing.T) {
 
-	Account1 := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
-	Account2 := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
-	AccountStorage := make(map[string]store_account.Account)
+	Account1 := store.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: domain.CreateHash("call"), Balance: 6000, CreatedAt: "06/01/2020"}
+	Account2 := store.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: domain.CreateHash("lixo"), Balance: 5000, CreatedAt: "06/01/2020"}
+	AccountStorage := make(map[string]store.Account)
 	AccountStorage[Account1.CPF] = Account1
 	AccountStorage[Account2.CPF] = Account2
 	logger := logrus.New()
@@ -28,6 +27,8 @@ func TestAccountHandler(t *testing.T) {
 	S := new(ServerAccount)
 	S.account = AccountUsecase
 	S.logger = Lentry
+	Id1 := strconv.Itoa(981)
+	Id2 := strconv.Itoa(982)
 
 	tt := []struct {
 		name         string
@@ -146,8 +147,15 @@ func TestAccountHandler(t *testing.T) {
 		{
 			name:         "should successfully get balance with ID",
 			method:       "GET",
+			path:         Id2,
 			response:     http.StatusOK,
-			responsebody: `{"balance":6000}` + "\n",
+			responsebody: `{"errors":"given id is invalid"}` + "\n",
+		},
+		{
+			name:     "should successfully get balance with unformatted CPF",
+			method:   "GET",
+			path:     Id1,
+			response: http.StatusOK,
 		},
 		{
 			name:         "should unsuccessfully get balance when ID is invalid",
@@ -177,7 +185,7 @@ func TestAccountHandler(t *testing.T) {
 }
 
 type AccountUsecaseMock struct {
-	AccountList map[string]store_account.Account
+	AccountList map[string]store.Account
 
 	UpdateCallCount int
 }
@@ -218,21 +226,15 @@ func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, ba
 }
 
 func (uc AccountUsecaseMock) GetBalance(id int) (int, error) {
-	if Aux == 0 {
-		id = 981
-		Aux++
-	} else {
-		id = 0
-	}
-	accountOrigin := uc.SearchAccount(id)
-	if (accountOrigin == store_account.Account{}) {
+	account := uc.SearchAccount(id)
+	if (account == store.Account{}) {
 		return 0, errors.New("given id is invalid")
 	}
-	return accountOrigin.Balance, nil
+	return account.Balance, nil
 }
 
-func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
-	var account []store_account.Account
+func (uc AccountUsecaseMock) GetAccounts() []store.Account {
+	var account []store.Account
 
 	for _, a := range uc.AccountList {
 		account = append(account, a)
@@ -241,8 +243,8 @@ func (uc AccountUsecaseMock) GetAccounts() []store_account.Account {
 	return account
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
-	account := store_account.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id int) store.Account {
+	account := store.Account{}
 
 	for _, a := range uc.AccountList {
 		if a.ID == id {
@@ -253,14 +255,14 @@ func (uc AccountUsecaseMock) SearchAccount(id int) store_account.Account {
 	return account
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ store_account.Account, _ store_account.Account) {
+func (uc *AccountUsecaseMock) UpdateBalance(_ store.Account, _ store.Account) {
 	uc.UpdateCallCount++
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store_account.Account {
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) store.Account {
 	return uc.AccountList[cpf]
 }
 
-func (uc AccountUsecaseMock) GetAccount() map[string]store_account.Account {
+func (uc AccountUsecaseMock) GetAccount() map[string]store.Account {
 	return nil
 }

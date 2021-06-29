@@ -1,7 +1,7 @@
 package account
 
 import (
-	store_account "github.com/CMedrado/DesafioStone/store/account"
+	"github.com/CMedrado/DesafioStone/store"
 	"testing"
 )
 
@@ -56,7 +56,7 @@ func TestCreateAccount(t *testing.T) {
 
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
-			accountStorage := store_account.NewStoredAccount()
+			accountStorage := store.NewStoredAccount()
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}
@@ -113,10 +113,10 @@ func TestGetBalance(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			listAccount := store_account.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: "lixo", Balance: 5000, CreatedAt: "06/01/2020"}
-			listAccounts := store_account.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: "call", Balance: 6000, CreatedAt: "06/01/2020"}
+			listAccount := store.Account{ID: 982, Name: "Lucas", CPF: "08131391043", Secret: "lixo", Balance: 5000, CreatedAt: "06/01/2020"}
+			listAccounts := store.Account{ID: 981, Name: "Rafael", CPF: "38453162093", Secret: "call", Balance: 6000, CreatedAt: "06/01/2020"}
 
-			accountStorage := store_account.NewStoredAccount()
+			accountStorage := store.NewStoredAccount()
 			usecase := UseCase{
 				StoredAccount: accountStorage,
 			}

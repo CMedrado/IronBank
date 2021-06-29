@@ -5,6 +5,7 @@ import (
 	account2 "github.com/CMedrado/DesafioStone/domain/account"
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"os"
@@ -133,11 +134,11 @@ type AccountUseCaseMock struct {
 	AccountList *store_account.StoredAccount
 }
 
-func (uc AccountUseCaseMock) CreateAccount(_ string, _ string, _ string, _ int) (int, error) {
-	return 0, nil
+func (uc AccountUseCaseMock) CreateAccount(_ string, _ string, _ string, _ int) (uuid.UUID, error) {
+	return uuid.UUID{}, nil
 }
 
-func (uc AccountUseCaseMock) GetBalance(_ int) (int, error) {
+func (uc AccountUseCaseMock) GetBalance(_ string) (int, error) {
 	return 0, nil
 }
 
@@ -145,7 +146,7 @@ func (uc AccountUseCaseMock) GetAccounts() []domain.Account {
 	return nil
 }
 
-func (uc AccountUseCaseMock) SearchAccount(id int) domain.Account {
+func (uc AccountUseCaseMock) SearchAccount(_ uuid.UUID) domain.Account {
 	return domain.Account{}
 }
 

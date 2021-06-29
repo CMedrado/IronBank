@@ -1,14 +1,15 @@
 package token
 
 import (
+	"github.com/google/uuid"
 	"io"
 )
 
 type Tokens []Token
 
 type Token struct {
-	ID    int    `json:"id"`
-	Token string `json:"token"`
+	ID    uuid.UUID `json:"id"`
+	Token string    `json:"token"`
 }
 
 type StoredToken struct {

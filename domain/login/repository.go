@@ -2,9 +2,10 @@ package login
 
 import (
 	"github.com/CMedrado/DesafioStone/storage/file/token"
+	"github.com/google/uuid"
 )
 
 type Repository interface {
-	SaveToken(id int, token string)
+	SaveToken(id uuid.UUID, token string)
 	ReturnTokens() []token.Token
 }

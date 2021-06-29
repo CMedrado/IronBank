@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/google/uuid"
 )
 
 type UseCase struct {
@@ -33,11 +34,11 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 }
 
 // CreateTransfers create and transfers, returns the id of the created transfer
-func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amount int) (error, int) {
+func (auc UseCase) CreateTransfers(token string, accountDestinationID string, amount int) (error, uuid.UUID) {
 	err := domain.CheckAmount(amount)
-
+	accountDestinationIdUUID := uuid.MustParse(accountDestinationID)
 	if err != nil {
-		return err, 0
+		return err, uuid.UUID{}
 	}
 
 	accountOriginID := DecoderToken(token)
@@ -46,25 +47,25 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 	err = domain.CheckToken(token, accountToken)
 
 	if err != nil {
-		return err, 0
+		return err, uuid.UUID{}
 	}
 
-	err = domain.CheckCompareID(accountOriginID, accountDestinationID)
+	err = domain.CheckCompareID(accountOriginID, accountDestinationIdUUID)
 
 	if err != nil {
-		return err, 0
+		return err, uuid.UUID{}
 	}
 
-	accountDestination := auc.AccountUseCase.SearchAccount(accountDestinationID)
+	accountDestination := auc.AccountUseCase.SearchAccount(accountDestinationIdUUID)
 
 	err = domain.CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
-		return err, 0
+		return err, uuid.UUID{}
 	}
 
 	err = domain.CheckExistDestinationID(accountDestination)
 	if err != nil {
-		return err, 0
+		return err, uuid.UUID{}
 	}
 
 	accountOrigin.Balance = accountOrigin.Balance - amount
@@ -72,9 +73,9 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID int, amoun
 
 	auc.AccountUseCase.UpdateBalance(accountOrigin, accountDestination)
 
-	id := domain.Random()
+	id, _ := domain.Random()
 	createdAt := domain.CreatedAt()
-	transfer := domain.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationID, Amount: amount, CreatedAt: createdAt}
+	transfer := domain.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
 	auc.StoredTransfer.SaveTransfers(ChangeTransferDomain(transfer))
 
 	return nil, id

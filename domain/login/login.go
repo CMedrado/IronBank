@@ -30,11 +30,11 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 		return domain.ErrLogin, ""
 	}
 
-	id := auc.AccountUseCase.SearchAccountCPF(cpf)
+	id := auc.AccountUseCase.GetAccount()
 	now := domain.CreatedAt()
-	token := now + ":" + strconv.Itoa(id.ID)
+	token := now + ":" + strconv.Itoa(id[cpf].ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
-	auc.StoredToken.PostToken(id.ID, encoded)
+	auc.StoredToken.PostToken(id[cpf].ID, encoded)
 
 	return nil, encoded
 }

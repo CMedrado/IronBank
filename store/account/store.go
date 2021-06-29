@@ -2,7 +2,7 @@ package account
 
 import "io"
 
-type Accounts []Account
+var accountStorage = make(map[string]Account)
 
 type Account struct {
 	ID        int    `json:"id"`

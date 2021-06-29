@@ -2,6 +2,7 @@ package https
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -14,7 +15,7 @@ type CreateRequest struct {
 }
 
 type CreateResponse struct {
-	ID int `json:"id"`
+	ID uuid.UUID `json:"id"`
 }
 
 type BalanceResponse struct {
@@ -31,14 +32,14 @@ type TokenResponse struct {
 }
 
 type TransfersRequest struct {
-	AccountOriginID      int `json:"account_origin_id"`
-	Token                int `json:"token"`
-	AccountDestinationID int `json:"account_destination_id"`
-	Amount               int `json:"amount"`
+	AccountOriginID      string `json:"account_origin_id"`
+	Token                int    `json:"token"`
+	AccountDestinationID string `json:"account_destination_id"`
+	Amount               int    `json:"amount"`
 }
 
 type TransferResponse struct {
-	ID int `json:"id"`
+	ID uuid.UUID `json:"id"`
 }
 
 type GetTransfersResponse struct {

@@ -7,6 +7,7 @@ import (
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
 	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"os"
@@ -16,7 +17,7 @@ import (
 type CreateTransferInput struct {
 	AccountOriginID      int
 	Token                string
-	AccountDestinationID int
+	AccountDestinationID string
 	Amount               int
 }
 
@@ -81,8 +82,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should successfully transfer amount",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
+				Token:                "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+				AccountDestinationID: "75432539-c5ba-46d3-9690-44985b516da7",
 				Amount:               300,
 			},
 			wantErr:                 false,
@@ -91,8 +92,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is wrong token",
 			in: CreateTransferInput{
-				Token:                "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
-				AccountDestinationID: 98498081,
+				Token:                "MjkvMDYvMjAyMSAxMzoxNjo1NTo3NTQzMjUzOS1jNWJhLTQ2ZDMtOTY5MC00NDk4NWI1MTZkYTc=",
+				AccountDestinationID: "75432539-c5ba-46d3-9690-44985b516da7",
 				Amount:               300,
 			},
 			wantErr:                 true,
@@ -101,8 +102,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is no account destination id",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 19727887,
+				Token:                "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+				AccountDestinationID: "c5424440-4737-4e03-86d2-3adac90ddd20",
 				Amount:               300,
 			},
 			wantErr:                 true,
@@ -111,8 +112,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is too slow",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
+				Token:                "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+				AccountDestinationID: "75432539-c5ba-46d3-9690-44985b516da7",
 				Amount:               0,
 			},
 			wantErr:                 true,
@@ -121,8 +122,8 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when the amount is greater than the balance",
 			in: CreateTransferInput{
-				Token:                "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
-				AccountDestinationID: 98498081,
+				Token:                "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+				AccountDestinationID: "75432539-c5ba-46d3-9690-44985b516da7",
 				Amount:               52000,
 			},
 			wantErr:                 true,
@@ -132,9 +133,9 @@ func TestMakeTransfers(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","name":"Lucas","cpf":"38453162093","secret":"7e65a9b554bbc9817aa049ce38c84a72","balance":3000,"created_at":"29/06/2021 12:45:35"},{"id":"75432539-c5ba-46d3-9690-44985b516da7","name":"Rafael","cpf":"08131391043","secret":"3467e121a1a109628e0a5b0cebba361b","balance":5000,"created_at":"29/06/2021 12:46:28"}]`)
 			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":19727887,"token":"MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw=="}]`)
+			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","token":"MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA="}]`)
 			defer clenDataBaseToken()
 			dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, ``)
 			defer clenDataBaseTransfer()
@@ -159,7 +160,7 @@ func TestMakeTransfers(t *testing.T) {
 				t.Error("wanted err but got nil")
 			}
 
-			if gotTransfer == 0 && !testCase.wantErr && gotErr != nil {
+			if (gotTransfer == uuid.UUID{}) && !testCase.wantErr && gotErr != nil {
 				t.Errorf("expected an Token but got %d", gotTransfer)
 			}
 
@@ -181,26 +182,25 @@ func TestMakeGetTransfers(t *testing.T) {
 		{
 			name: "should successfully get transfers",
 			in: CreateTransferInput{
-				Token: "MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw==",
+				Token: "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
 			},
 			wantErr: false,
-			want:    []store_transfer.Transfer{{ID: 47278511, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 500, CreatedAt: "13/05/2021 09:09:16"}, {ID: 6410694, AccountOriginID: 98498081, AccountDestinationID: 19727887, Amount: 200, CreatedAt: "13/05/2021 09:09:16"}},
 		},
 		{
 			name: "should unsuccessfully get transfer when there is wrong token",
 			in: CreateTransferInput{
-				Token: "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
+				Token: "MjkvMDYvMjAyMSAxMzoxNjo1NTo3NTQzMjUzOS1jNWJhLTQ2ZDMtOTY5MC00NDk4NWI1MTZkYTc=",
 			},
 			wantErr: true,
 		},
 	}
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
+			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","name":"Lucas","cpf":"38453162093","secret":"7e65a9b554bbc9817aa049ce38c84a72","balance":3000,"created_at":"29/06/2021 12:45:35"},{"id":"75432539-c5ba-46d3-9690-44985b516da7","name":"Rafael","cpf":"08131391043","secret":"3467e121a1a109628e0a5b0cebba361b","balance":5000,"created_at":"29/06/2021 12:46:28"}]`)
 			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":19727887,"token":"MjEvMDYvMjAyMSAyMzo1OTowMDoxOTcyNzg4Nw=="}]`)
+			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","token":"MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA="}]`)
 			defer clenDataBaseToken()
-			dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[[{"id":39984059,"account_origin_id":19727887,"account_destination_id":98498081,"amount":60,"created_at":"18/06/2021 17:26:26"},{"id":27131847,"account_origin_id":19727887,"account_destination_id":98498081,"amount":50,"created_at":"18/06/2021 17:26:26"},{"id":74941318,"account_origin_id":11902081,"account_destination_id":98498081,"amount":900,"created_at":"18/06/2021 17:26:26"},{"id":11902081,"account_origin_id":98498081,"account_destination_id":19727887,"amount":90,"created_at":"18/06/2021 17:26:26"}]}`)
+			dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[{"id":"47399f23-2093-4dde-b32f-990cac27630e","account_origin_id":"c5424440-4737-4e03-86d2-3adac90ddd20","account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount":150,"created_at":"29/06/2021 12:48:06"}]`)
 			defer clenDataBaseTransfer()
 			accountAccount := store_account.NewStoredAccount(dataBaseAccount)
 			accountUsecase := &AccountUsecaseMock{AccountList: accountAccount}
@@ -240,11 +240,11 @@ func (uc AccountUsecaseMock) ReturnCPF(_ string) int {
 	return 0
 }
 
-func (uc AccountUsecaseMock) CreateAccount(_ string, _ string, _ string, _ int) (int, error) {
-	return 0, nil
+func (uc AccountUsecaseMock) CreateAccount(_ string, _ string, _ string, _ int) (uuid.UUID, error) {
+	return uuid.UUID{}, nil
 }
 
-func (uc AccountUsecaseMock) GetBalance(_ int) (int, error) {
+func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
 	return 0, nil
 }
 
@@ -252,7 +252,7 @@ func (uc AccountUsecaseMock) GetAccounts() []domain.Account {
 	return nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id int) domain.Account {
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) domain.Account {
 	account := domain.Account{}
 
 	for _, a := range uc.AccountList.ReturnAccounts() {
@@ -291,7 +291,7 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(id int) domain.Token {
+func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) domain.Token {
 	token := domain.Token{}
 
 	for _, a := range uc.TokenList.ReturnTokens() {

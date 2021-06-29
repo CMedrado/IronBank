@@ -10,6 +10,7 @@ import (
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
 	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -251,9 +252,9 @@ func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain.Transfer, er
 	return transfers, nil
 }
 
-func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID int, amount int) (error, int) {
+func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID uuid.UUID, amount int) (error, uuid.UUID) {
 	if amount <= 0 {
-		return errors.New("given amount is invalid"), 0
+		return errors.New("given amount is invalid"), uuid.UUID{}
 	}
 	accountOriginID := transfer.DecoderToken(token)
 	tokens := domain.Token{}
@@ -263,10 +264,10 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 		}
 	}
 	if tokens.Token != token {
-		return errors.New("given token is invalid"), 0
+		return errors.New("given token is invalid"), uuid.UUID{}
 	}
 	if accountOriginID == accountDestinationID {
-		return errors.New("given account is the same as the account destination"), 0
+		return errors.New("given account is the same as the account destination"), uuid.UUID{}
 	}
 	accountOrigin := domain.Account{}
 	for _, a := range uc.AccountList.ReturnAccounts() {
@@ -281,10 +282,10 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 		}
 	}
 	if accountOrigin.Balance < amount {
-		return errors.New("given account without balance"), 0
+		return errors.New("given account without balance"), uuid.UUID{}
 	}
 	if (accountDestination == domain.Account{}) {
-		return errors.New("given account destination id is invalid"), 0
+		return errors.New("given account destination id is invalid"), uuid.UUID{}
 	}
-	return nil, 19878
+	return nil, uuid.UUID{}
 }

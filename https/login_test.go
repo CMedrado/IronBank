@@ -6,6 +6,7 @@ import (
 	"github.com/CMedrado/DesafioStone/domain"
 	account2 "github.com/CMedrado/DesafioStone/domain/account"
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
@@ -147,6 +148,6 @@ func (uc TokenUseCaseMock) ReturnToken(_ int) string {
 	return ""
 }
 
-func (uc TokenUseCaseMock) GetTokenID(_ int) domain.Token {
+func (uc TokenUseCaseMock) GetTokenID(_ uuid.UUID) domain.Token {
 	return domain.Token{}
 }

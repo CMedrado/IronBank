@@ -1,27 +1,25 @@
 package domain
 
-import (
-	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_login "github.com/CMedrado/DesafioStone/store/login"
-	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
-)
+import "github.com/CMedrado/DesafioStone/store"
 
 type AccountUseCase interface {
 	CreateAccount(name string, cpf string, secret string, balance int) (int, error)
 	GetBalance(id int) (int, error)
-	GetAccounts() []store_account.Account
-	SearchAccount(id int) store_account.Account
-	UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account)
-	GetAccountCPF(cpf string) store_account.Account
-	GetAccount() map[string]store_account.Account
+	GetAccounts() []store.Account
+	SearchAccount(id int) store.Account
+	UpdateBalance(accountOrigin store.Account, accountDestination store.Account)
+	ReturnCPF(cpf string) int
+	GetAccountCPF(cpf string) store.Account
+	GetAccount() map[string]store.Account
 }
 
 type TransferUseCase interface {
-	GetTransfers(token string) ([]store_transfer.Transfer, error)
+	GetTransfers(token string) ([]store.Transfer, error)
 	CreateTransfers(token string, accountDestinationID int, amount int) (error, int)
 }
 
 type LoginUseCase interface {
 	AuthenticatedLogin(cpf, secret string) (error, string)
-	GetTokenID(id int) store_login.Token
+	ReturnToken(id int) string
+	GetTokenID(id int) store.Token
 }

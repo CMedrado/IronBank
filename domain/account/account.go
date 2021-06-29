@@ -2,7 +2,7 @@ package account
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	store_account "github.com/CMedrado/DesafioStone/store/account"
+	"github.com/CMedrado/DesafioStone/store"
 )
 
 type UseCase struct {
@@ -22,7 +22,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	id := domain.Random()
 	secretHash := domain.CreateHash(secret)
 	cpf = domain.CpfReplace(cpf)
-	newAccount := store_account.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
+	newAccount := store.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
 	auc.StoredAccount.CreateAccount(newAccount)
 	return id, err
 }
@@ -41,9 +41,9 @@ func (auc *UseCase) GetBalance(id int) (int, error) {
 }
 
 //GetAccounts returns all API accounts
-func (auc *UseCase) GetAccounts() []store_account.Account {
+func (auc *UseCase) GetAccounts() []store.Account {
 	accounts := auc.StoredAccount.GetAccounts()
-	var account []store_account.Account
+	var account []store.Account
 
 	for _, a := range accounts {
 		account = append(account, a)
@@ -53,9 +53,9 @@ func (auc *UseCase) GetAccounts() []store_account.Account {
 }
 
 // SearchAccount returns the account via the received ID
-func (auc UseCase) SearchAccount(id int) store_account.Account {
+func (auc UseCase) SearchAccount(id int) store.Account {
 	accounts := auc.StoredAccount.GetAccounts()
-	account := store_account.Account{}
+	account := store.Account{}
 
 	for _, a := range accounts {
 		if a.ID == id {
@@ -66,14 +66,18 @@ func (auc UseCase) SearchAccount(id int) store_account.Account {
 	return account
 }
 
-func (auc UseCase) UpdateBalance(accountOrigin store_account.Account, accountDestination store_account.Account) {
+func (auc UseCase) UpdateBalance(accountOrigin store.Account, accountDestination store.Account) {
 	auc.StoredAccount.UpdateBalances(accountOrigin, accountDestination)
 }
 
-func (auc *UseCase) GetAccountCPF(cpf string) store_account.Account {
+func (auc UseCase) ReturnCPF(cpf string) int {
+	return auc.StoredAccount.ReturnCPF(cpf)
+}
+
+func (auc *UseCase) GetAccountCPF(cpf string) store.Account {
 	return auc.StoredAccount.GetAccountCPF(cpf)
 }
 
-func (auc UseCase) GetAccount() map[string]store_account.Account {
+func (auc UseCase) GetAccount() map[string]store.Account {
 	return auc.StoredAccount.GetAccounts()
 }

@@ -3,7 +3,7 @@ package login
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
-	store_login "github.com/CMedrado/DesafioStone/store/login"
+	"github.com/CMedrado/DesafioStone/store"
 	"strconv"
 )
 
@@ -22,7 +22,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 		return domain.ErrLogin, ""
 	}
 
-	newLogin := store_login.Login{CPF: cpf, Secret: secretHash}
+	newLogin := store.Login{CPF: cpf, Secret: secretHash}
 	account := auc.AccountUseCase.GetAccountCPF(cpf)
 
 	err = domain.CheckLogin(account, newLogin)
@@ -39,6 +39,10 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id int) store_login.Token {
+func (uc UseCase) ReturnToken(id int) string {
+	return uc.StoredToken.ReturnToken(id)
+}
+
+func (uc UseCase) GetTokenID(id int) store.Token {
 	return uc.StoredToken.GetTokenID(id)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +75,8 @@ func (s *ServerAccount) handleAccounts(w http.ResponseWriter, r *http.Request) {
 
 func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	balance, err := s.account.GetBalance(id)
+	IntID, _ := strconv.Atoi(id)
+	balance, err := s.account.GetBalance(IntID)
 	w.Header().Set("content-type", "application/json")
 
 	l := s.logger.WithFields(log.Fields{

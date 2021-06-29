@@ -2,7 +2,6 @@ package account
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/google/uuid"
 )
 
 type UseCase struct {
@@ -10,25 +9,25 @@ type UseCase struct {
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error) {
+func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (int, error) {
 	err := domain.CheckCPF(cpf)
 	if err != nil {
-		return uuid.UUID{}, err
+		return 0, err
 	}
 	cpf = domain.CpfReplace(cpf)
 	account := auc.GetAccountCPF(cpf)
 	err = domain.CheckAccountExistence(account)
 	if err != nil {
-		return uuid.UUID{}, err
+		return 0, err
 	}
 	err = domain.CheckBalance(balance)
 	if err != nil {
-		return uuid.UUID{}, err
+		return 0, err
 	}
 	aux := 0
-	var id uuid.UUID
+	id := 0
 	for aux == 0 {
-		id, _ = domain.Random()
+		id = domain.Random()
 		if (auc.SearchAccount(id) != domain.Account{}) {
 			aux = 0
 		} else {
@@ -36,15 +35,15 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 		}
 	}
 	secretHash := domain.CreateHash(secret)
+	cpf = domain.CpfReplace(cpf)
 	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
 	auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))
 	return id, err
 }
 
 //GetBalance requests the salary for the Story by sending the ID
-func (auc *UseCase) GetBalance(id string) (int, error) {
-	idUUID := uuid.MustParse(id)
-	account := auc.SearchAccount(idUUID)
+func (auc *UseCase) GetBalance(id int) (int, error) {
+	account := auc.SearchAccount(id)
 	err := domain.CheckExistID(account)
 
 	if err != nil {
@@ -67,7 +66,7 @@ func (auc *UseCase) GetAccounts() []domain.Account {
 }
 
 // SearchAccount returns the account via the received ID
-func (auc UseCase) SearchAccount(id uuid.UUID) domain.Account {
+func (auc UseCase) SearchAccount(id int) domain.Account {
 	accounts := auc.StoredAccount.ReturnAccounts()
 	account := domain.Account{}
 

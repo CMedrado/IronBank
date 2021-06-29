@@ -3,6 +3,8 @@ package login
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
+	store_token "github.com/CMedrado/DesafioStone/store/token"
 	"strconv"
 )
 
@@ -21,7 +23,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 		return domain.ErrLogin, ""
 	}
 
-	newLogin := domain.Login{CPF: cpf, Secret: secretHash}
+	newLogin := store_login.Login{CPF: cpf, Secret: secretHash}
 	account := auc.AccountUseCase.GetAccountCPF(cpf)
 
 	err = domain.CheckLogin(account, newLogin)
@@ -33,18 +35,18 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	now := domain.CreatedAt()
 	token := now + ":" + strconv.Itoa(id.ID)
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
-	auc.StoredToken.SaveToken(id.ID, encoded)
+	auc.StoredToken.PostToken(id.ID, encoded)
 
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id int) domain.Token {
-	tokens := uc.StoredToken.ReturnTokens()
-	token := domain.Token{}
+func (uc UseCase) GetTokenID(id int) store_token.Token {
+	tokens := uc.StoredToken.GetTokens()
+	token := store_token.Token{}
 
 	for _, a := range tokens {
 		if a.ID == id {
-			token = ChangeTokenStorage(a)
+			token = a
 		}
 	}
 

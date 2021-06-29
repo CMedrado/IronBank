@@ -6,7 +6,7 @@ import (
 	"github.com/CMedrado/DesafioStone/domain/transfer"
 	https "github.com/CMedrado/DesafioStone/https"
 	store_account "github.com/CMedrado/DesafioStone/store/account"
-	store_token "github.com/CMedrado/DesafioStone/store/token"
+	store_login "github.com/CMedrado/DesafioStone/store/login"
 	store_transfer "github.com/CMedrado/DesafioStone/store/transfer"
 	"github.com/sirupsen/logrus"
 	"log"
@@ -15,20 +15,13 @@ import (
 	time "time"
 )
 
-const dbFileNameAccount = "accounts.db.json"
-const dbFileNameToken = "token.db.json"
+const dbFileName = "accounts.db.json"
 
 func main() {
-	dbAccount, err := os.OpenFile(dbFileNameAccount, os.O_RDWR|os.O_CREATE, 0666)
+	db, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileNameAccount, err)
-	}
-
-	dbToken, err := os.OpenFile(dbFileNameToken, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileNameToken, err)
+		log.Fatal("problem opening %s %v", dbFileName, err)
 	}
 
 	logger := logrus.New()
@@ -36,8 +29,8 @@ func main() {
 	lentry := logrus.NewEntry(logger)
 
 	accountTransfer := store_transfer.NewStoredTransferAccountID()
-	accountToken := store_token.NewStoredToked(dbToken)
-	accountStorage := store_account.NewStoredAccount(dbAccount)
+	accountToken := store_login.NewStoredToked()
+	accountStorage := store_account.NewStoredAccount(db)
 	accountUseCase := account.UseCase{StoredAccount: accountStorage}
 	loginUseCase := login.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
 	transferUseCase := transfer.UseCase{AccountUseCase: &accountUseCase, StoredTransfer: accountTransfer, TokenUseCase: &loginUseCase}

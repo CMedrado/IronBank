@@ -15,7 +15,6 @@ var (
 	errSameAccount          = errors.New("given account is the same as the account destination")
 	errBalanceAbsent        = errors.New("given the balance amount is invalid")
 	ErrLogin                = errors.New("given secret or CPF are incorrect")
-	errAccountExists        = errors.New("given cpf is already used")
 )
 
 // CheckCPF checks if the cpf exists and returns nil if not, it returns an error
@@ -98,13 +97,6 @@ func CheckExistDestinationID(accountOrigin Account) error {
 func CheckBalance(balance int) error {
 	if balance <= 0 {
 		return errBalanceAbsent
-	}
-	return nil
-}
-
-func CheckAccountExistence(account Account) error {
-	if (account == Account{}) {
-		return errAccountExists
 	}
 	return nil
 }

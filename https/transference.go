@@ -20,15 +20,14 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
-		switch err.Error() {
-		case "given token is invalid":
+		if err.Error() == domain.ErrInvalidToken.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
-		default:
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return
@@ -62,8 +61,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
-		switch err.Error() {
-		case "given account destination id is invalid":
+		if err.Error() == domain.ErrInvalidDestinationID.Error() {
 			l.WithFields(log.Fields{
 				"type":          http.StatusNotAcceptable,
 				"time":          domain.CreatedAt(),
@@ -71,7 +69,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given account without balance":
+		} else if err.Error() == domain.ErrWithoutBalance.Error() {
 			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
@@ -79,14 +77,14 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given token is invalid":
+		} else if err.Error() == domain.ErrInvalidToken.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given amount is invalid":
+		} else if err.Error() == domain.ErrInvalidAmount.Error() {
 			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
@@ -94,7 +92,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given account is the same as the account destination":
+		} else if err.Error() == domain.ErrSameAccount.Error() {
 			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),
@@ -102,7 +100,7 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
-		default:
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return

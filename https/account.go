@@ -2,6 +2,7 @@ package https
 
 import (
 	"encoding/json"
+	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -23,26 +24,25 @@ func (s *ServerAccount) processAccount(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
-		switch err.Error() {
-		case "given cpf is already used":
+		if err.Error() == domain.ErrAccountExists.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusBadRequest,
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given the balance amount is invalid":
+		} else if err.Error() == domain.ErrBalanceAbsent.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusBadRequest,
 			}).Error(err)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
-		case "given cpf is invalid":
+		} else if err.Error() == domain.ErrInvalidCPF.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusNotAcceptable,
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
-		default:
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return
@@ -84,15 +84,14 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
-		switch err.Error() {
-		case "given id is invalid":
+		if err.Error() == domain.ErrInvalidID.Error() {
 			l.WithFields(log.Fields{
 				"type":       http.StatusNotAcceptable,
 				"request_id": id,
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
-		default:
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return

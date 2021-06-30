@@ -11,19 +11,18 @@ type UseCase struct {
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
 func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error) {
-	err := domain.CheckCPF(cpf)
+	err, cpf := domain.CheckCPF(cpf)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	cpf = domain.CpfReplace(cpf)
 	account := auc.GetAccountCPF(cpf)
-	err = domain.CheckAccountExistence(account)
+	err = CheckAccountExistence(account)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	err = domain.CheckBalance(balance)
+	err = domain.CheckAmount(balance)
 	if err != nil {
-		return uuid.UUID{}, err
+		return uuid.UUID{}, domain.ErrBalanceAbsent
 	}
 	aux := 0
 	var id uuid.UUID

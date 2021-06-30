@@ -18,7 +18,7 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	transfers := auc.StoredTransfer.ReturnTransfers()
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 
-	err := domain.CheckToken(token, accountToken)
+	err := CheckToken(token, accountToken)
 
 	if err != nil {
 		return transfer, err
@@ -44,13 +44,13 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 	accountOriginID := DecoderToken(token)
 	accountOrigin := auc.AccountUseCase.SearchAccount(accountOriginID)
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
-	err = domain.CheckToken(token, accountToken)
+	err = CheckToken(token, accountToken)
 
 	if err != nil {
 		return err, uuid.UUID{}
 	}
 
-	err = domain.CheckCompareID(accountOriginID, accountDestinationIdUUID)
+	err = CheckCompareID(accountOriginID, accountDestinationIdUUID)
 
 	if err != nil {
 		return err, uuid.UUID{}
@@ -58,14 +58,14 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 
 	accountDestination := auc.AccountUseCase.SearchAccount(accountDestinationIdUUID)
 
-	err = domain.CheckAccountBalance(accountOrigin.Balance, amount)
+	err = CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
 		return err, uuid.UUID{}
 	}
 
-	err = domain.CheckExistDestinationID(accountDestination)
+	err = domain.CheckExistID(accountDestination)
 	if err != nil {
-		return err, uuid.UUID{}
+		return domain.ErrInvalidDestinationID, uuid.UUID{}
 	}
 
 	accountOrigin.Balance = accountOrigin.Balance - amount

@@ -26,15 +26,14 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		ErrJson := ErrorsResponse{Errors: err.Error()}
-		switch err.Error() {
-		case "given secret or CPF are incorrect":
+		if err.Error() == domain.ErrLogin.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 				"time": domain.CreatedAt(),
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
-		default:
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		return

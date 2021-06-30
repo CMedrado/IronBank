@@ -15,8 +15,7 @@ type UseCase struct {
 func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	secretHash := domain.CreateHash(secret)
 
-	err := domain.CheckCPF(cpf)
-	cpf = domain.CpfReplace(cpf)
+	err, cpf := domain.CheckCPF(cpf)
 	if err != nil {
 		return domain.ErrLogin, ""
 	}
@@ -24,7 +23,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	newLogin := domain.Login{CPF: cpf, Secret: secretHash}
 	account := auc.AccountUseCase.GetAccountCPF(cpf)
 
-	err = domain.CheckLogin(account, newLogin)
+	err = CheckLogin(account, newLogin)
 	if err != nil {
 		return domain.ErrLogin, ""
 	}

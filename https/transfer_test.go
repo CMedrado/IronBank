@@ -232,7 +232,10 @@ type TransferUsecaseMock struct {
 }
 
 func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain.Transfer, error) {
-	accountOriginID := transfer.DecoderToken(token)
+	accountOriginID, err := transfer.DecoderToken(token)
+	if err != nil {
+		return []domain.Transfer{}, domain.ErrParse
+	}
 	tokens := domain.Token{}
 	for _, a := range uc.TokenList.ReturnTokens() {
 		if a.ID == accountOriginID {
@@ -254,7 +257,11 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 		return errors.New("given amount is invalid"), uuid.UUID{}
 	}
 	accountDestinationID := uuid.MustParse(accountDestinationIDString)
-	accountOriginID := transfer.DecoderToken(token)
+	accountOriginID, err := transfer.DecoderToken(token)
+	if err != nil {
+		return domain.ErrParse, uuid.UUID{}
+	}
+
 	tokens := domain.Token{}
 	for _, a := range uc.TokenList.ReturnTokens() {
 		if a.ID == accountOriginID {

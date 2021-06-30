@@ -27,6 +27,13 @@ func (s *ServerAccount) handleTransfers(w http.ResponseWriter, r *http.Request) 
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
+		} else if err.Error() == domain.ErrParse.Error() {
+			l.WithFields(log.Fields{
+				"type": http.StatusBadRequest,
+				"time": domain.CreatedAt(),
+			}).Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
@@ -93,6 +100,14 @@ func (s *ServerAccount) processTransfer(w http.ResponseWriter, r *http.Request) 
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrJson)
 		} else if err.Error() == domain.ErrSameAccount.Error() {
+			l.WithFields(log.Fields{
+				"type":          http.StatusBadRequest,
+				"time":          domain.CreatedAt(),
+				"request_token": token,
+			}).Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
+		} else if err.Error() == domain.ErrParse.Error() {
 			l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain.CreatedAt(),

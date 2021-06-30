@@ -14,11 +14,14 @@ type UseCase struct {
 // GetTransfers returns all account transfers
 func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	var transfer []domain.Transfer
-	accountOriginID := DecoderToken(token)
+	accountOriginID, err := DecoderToken(token)
+	if err != nil {
+		return transfer, domain.ErrParse
+	}
 	transfers := auc.StoredTransfer.ReturnTransfers()
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 
-	err := CheckToken(token, accountToken)
+	err = CheckToken(token, accountToken)
 
 	if err != nil {
 		return transfer, err
@@ -36,12 +39,22 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 // CreateTransfers create and transfers, returns the id of the created transfer
 func (auc UseCase) CreateTransfers(token string, accountDestinationID string, amount int) (error, uuid.UUID) {
 	err := domain.CheckAmount(amount)
-	accountDestinationIdUUID := uuid.MustParse(accountDestinationID)
+
 	if err != nil {
 		return err, uuid.UUID{}
 	}
 
-	accountOriginID := DecoderToken(token)
+	accountDestinationIdUUID, err := uuid.Parse(accountDestinationID)
+
+	if err != nil {
+		return domain.ErrParse, uuid.UUID{}
+	}
+
+	accountOriginID, err := DecoderToken(token)
+	if err != nil {
+		return domain.ErrParse, uuid.UUID{}
+	}
+
 	accountOrigin := auc.AccountUseCase.SearchAccount(accountOriginID)
 	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
 	err = CheckToken(token, accountToken)

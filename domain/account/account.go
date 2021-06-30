@@ -42,9 +42,14 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 
 //GetBalance requests the salary for the Story by sending the ID
 func (auc *UseCase) GetBalance(id string) (int, error) {
-	idUUID := uuid.MustParse(id)
+	idUUID, err := uuid.Parse(id)
+
+	if err != nil {
+		return 0, domain.ErrParse
+	}
+
 	account := auc.SearchAccount(idUUID)
-	err := domain.CheckExistID(account)
+	err = domain.CheckExistID(account)
 
 	if err != nil {
 		return 0, err

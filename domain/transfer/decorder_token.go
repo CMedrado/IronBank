@@ -7,10 +7,9 @@ import (
 )
 
 // DecoderToken returns the ID that was inside an encrypted code
-func DecoderToken(token string) uuid.UUID {
+func DecoderToken(token string) (uuid.UUID, error) {
 	tokeDecode, _ := base64.StdEncoding.DecodeString(token)
 	idString := strings.Split(string(tokeDecode), ":")
-	idInt := uuid.MustParse(idString[3])
-
-	return idInt
+	idInt, err := uuid.Parse(idString[3])
+	return idInt, err
 }

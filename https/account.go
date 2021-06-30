@@ -91,6 +91,13 @@ func (s *ServerAccount) handleBalance(w http.ResponseWriter, r *http.Request) {
 			}).Error(err)
 			w.WriteHeader(http.StatusNotAcceptable)
 			json.NewEncoder(w).Encode(ErrJson)
+		} else if err.Error() == domain.ErrParse.Error() {
+			l.WithFields(log.Fields{
+				"type":       http.StatusBadRequest,
+				"request_id": id,
+			}).Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}

@@ -1,13 +1,14 @@
-package https
+package authentication
 
 import (
 	"encoding/json"
 	"github.com/CMedrado/DesafioStone/domain"
+	"github.com/CMedrado/DesafioStone/https"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var requestBody LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
@@ -25,7 +26,7 @@ func (s *ServerAccount) processLogin(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		ErrJson := ErrorsResponse{Errors: err.Error()}
+		ErrJson := https.ErrorsResponse{Errors: err.Error()}
 		if err.Error() == domain.ErrLogin.Error() {
 			l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,

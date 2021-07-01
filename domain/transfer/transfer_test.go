@@ -3,7 +3,7 @@ package transfer
 import (
 	"github.com/CMedrado/DesafioStone/domain"
 	account2 "github.com/CMedrado/DesafioStone/domain/account"
-	"github.com/CMedrado/DesafioStone/domain/login"
+	"github.com/CMedrado/DesafioStone/domain/authentication"
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
 	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
@@ -296,7 +296,7 @@ func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) domain.Token {
 
 	for _, a := range uc.TokenList.ReturnTokens() {
 		if a.ID == id {
-			token = login.ChangeTokenStorage(a)
+			token = authentication.ChangeTokenStorage(a)
 		}
 	}
 

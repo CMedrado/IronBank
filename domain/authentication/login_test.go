@@ -1,4 +1,4 @@
-package login
+package authentication
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"

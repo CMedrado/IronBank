@@ -2,14 +2,16 @@ package main
 
 import (
 	"github.com/CMedrado/DesafioStone/domain/account"
-	"github.com/CMedrado/DesafioStone/domain/login"
+	"github.com/CMedrado/DesafioStone/domain/authentication"
 	"github.com/CMedrado/DesafioStone/domain/transfer"
 	https "github.com/CMedrado/DesafioStone/https"
+	http_account "github.com/CMedrado/DesafioStone/https/account"
+	http_login "github.com/CMedrado/DesafioStone/https/authentication"
+	http_transfer "github.com/CMedrado/DesafioStone/https/transfer"
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
 	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
 	"github.com/sirupsen/logrus"
-	"log"
 	"net/http"
 	"os"
 	time "time"
@@ -46,11 +48,15 @@ func main() {
 	accountToken := store_token.NewStoredToked(dbToken)
 	accountTransfer := store_transfer.NewStoredTransfer(dbTransfer)
 	accountUseCase := account.UseCase{StoredAccount: accountStorage}
-	loginUseCase := login.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
+	loginUseCase := authentication.UseCase{AccountUseCase: &accountUseCase, StoredToken: accountToken}
 	transferUseCase := transfer.UseCase{AccountUseCase: &accountUseCase, StoredTransfer: accountTransfer, TokenUseCase: &loginUseCase}
-	server := https.NewServerAccount(&accountUseCase, &loginUseCase, &transferUseCase, lentry)
-
+	accountHandler := http_account.NewHandler(&accountUseCase, lentry)
+	loginHandler := http_login.NewHandler(&loginUseCase, lentry)
+	transferHandler := http_transfer.NewHandler(&transferUseCase, lentry)
+	server := https.NewAPI(accountHandler, loginHandler, transferHandler, lentry)
+	lentry.WithField("Port", Port).Info("starting the server!")
 	if err := http.ListenAndServe(":5000", server); err != nil {
-		log.Fatal("could not hear on port 5000 ")
+		lentry.Fatal("could not hear on port 5000 ")
 	}
+	lentry.WithField("Port", Port).Info("shutting down the server")
 }

@@ -20,29 +20,30 @@ import (
 const dbFileNameAccount = "accounts.db.json"
 const dbFileNameToken = "token.db.json"
 const dbFileNameTransfer = "transfer.db.json"
+const Port = "5000"
 
 func main() {
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+	lentry := logrus.NewEntry(logger)
+
 	dbAccount, err := os.OpenFile(dbFileNameAccount, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileNameAccount, err)
+		lentry.Fatal("problem opening %s %v", dbFileNameAccount, err)
 	}
 
 	dbToken, err := os.OpenFile(dbFileNameToken, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileNameToken, err)
+		lentry.Fatal("problem opening %s %v", dbFileNameToken, err)
 	}
 
 	dbTransfer, err := os.OpenFile(dbFileNameTransfer, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		log.Fatal("problem opening %s %v", dbFileNameTransfer, err)
+		lentry.Fatal("problem opening %s %v", dbFileNameTransfer, err)
 	}
-
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
 
 	accountStorage := store_account.NewStoredAccount(dbAccount)
 	accountToken := store_token.NewStoredToked(dbToken)

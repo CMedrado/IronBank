@@ -1,4 +1,4 @@
-package https
+package authentication
 
 import (
 	"bytes"
@@ -8,13 +8,33 @@ import (
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 )
 
-func TestLoginHandler(t *testing.T) {
+func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
+	filetmp, err := ioutil.TempFile("", "dbaccount")
+
+	if err != nil {
+		t.Fatalf("it is not possible to write the temporary file %v", err)
+	}
+
+	filetmp.Write([]byte(Accounts))
+
+	removeArquivo := func() {
+		filetmp.Close()
+		os.Remove(filetmp.Name())
+	}
+
+	return filetmp, removeArquivo
+}
+
+func TestHandler_Login(t *testing.T) {
 
 	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 	defer clenDataBaseAccount()
@@ -23,7 +43,7 @@ func TestLoginHandler(t *testing.T) {
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	Lentry := logrus.NewEntry(logger)
 	LoginUseCase := &TokenUseCaseMock{AccountList: accountStorage}
-	S := new(ServerAccount)
+	S := new(Handler)
 	S.login = LoginUseCase
 	S.logger = Lentry
 	logint := []struct {
@@ -88,7 +108,7 @@ func TestLoginHandler(t *testing.T) {
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			responseRecorder := httptest.NewRecorder()
 
-			S.processLogin(responseRecorder, request)
+			S.Login(responseRecorder, request)
 
 			if tc.response != responseRecorder.Code {
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)

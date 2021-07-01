@@ -1,4 +1,4 @@
-package https
+package account
 
 import (
 	"bytes"
@@ -8,15 +8,35 @@ import (
 	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 )
 
 var Aux = 0
 
-func TestAccountHandler(t *testing.T) {
+func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
+	filetmp, err := ioutil.TempFile("", "dbaccount")
+
+	if err != nil {
+		t.Fatalf("it is not possible to write the temporary file %v", err)
+	}
+
+	filetmp.Write([]byte(Accounts))
+
+	removeArquivo := func() {
+		filetmp.Close()
+		os.Remove(filetmp.Name())
+	}
+
+	return filetmp, removeArquivo
+}
+
+func TestHandler_CreateAccount(t *testing.T) {
 	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
 	defer clenDataBaseAccount()
 	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
@@ -24,7 +44,7 @@ func TestAccountHandler(t *testing.T) {
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	Lentry := logrus.NewEntry(logger)
 	AccountUsecase := &AccountUsecaseMock{AccountList: accountStorage}
-	S := new(ServerAccount)
+	S := new(Handler)
 	S.account = AccountUsecase
 	S.logger = Lentry
 
@@ -90,81 +110,9 @@ func TestAccountHandler(t *testing.T) {
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			responseRecorder := httptest.NewRecorder()
 
-			S.processAccount(responseRecorder, request)
+			S.CreateAccount(responseRecorder, request)
 
 			if tc.response != responseRecorder.Code {
-				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
-			}
-
-			if responseRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
-				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
-			}
-		})
-	}
-	accountst := []struct {
-		name         string
-		method       string
-		path         string
-		body         string
-		response     int
-		responsebody string
-	}{
-		{
-			name:         "should successfully get accounts",
-			method:       "GET",
-			path:         "/accounts",
-			response:     http.StatusOK,
-			responsebody: `{"accounts":[{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]}` + "\n",
-		},
-	}
-	for _, tc := range accountst {
-		t.Run(tc.name, func(t *testing.T) {
-			bodyBytes := []byte(tc.body)
-			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
-			responseRecorder := httptest.NewRecorder()
-
-			S.handleAccounts(responseRecorder, request)
-
-			if tc.response != responseRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
-				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
-			}
-
-			if responseRecorder.Body.String() != tc.responsebody {
-				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
-			}
-		})
-	}
-	balancet := []struct {
-		name         string
-		method       string
-		path         string
-		body         string
-		response     int
-		responsebody string
-	}{
-		{
-			name:         "should successfully get balance with ID",
-			method:       "GET",
-			response:     http.StatusOK,
-			responsebody: `{"balance":6000}` + "\n",
-		},
-		{
-			name:         "should unsuccessfully get balance when ID is invalid",
-			method:       "GET",
-			path:         "/accounts/3848/balance",
-			response:     http.StatusNotAcceptable,
-			responsebody: `{"errors":"given id is invalid"}` + "\n",
-		},
-	}
-	for _, tc := range balancet {
-		t.Run(tc.name, func(t *testing.T) {
-			bodyBytes := []byte(tc.body)
-			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
-			responseRecorder := httptest.NewRecorder()
-
-			S.handleBalance(responseRecorder, request)
-
-			if tc.response != responseRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 

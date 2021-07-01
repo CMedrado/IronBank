@@ -1,4 +1,4 @@
-package login
+package authentication
 
 import (
 	"encoding/base64"

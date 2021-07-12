@@ -17,4 +17,6 @@ var (
 	ErrLogin                = errors.New("given secret or CPF are incorrect")
 	ErrAccountExists        = errors.New("given cpf is already used")
 	ErrParse                = errors.New("given the UUID is incorrect")
+	ErrInsert               = errors.New("unable to insert")
+	ErrUpdate               = errors.New("unable to update")
 )

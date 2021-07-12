@@ -5,10 +5,10 @@ import "github.com/google/uuid"
 type AccountUseCase interface {
 	CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error)
 	GetBalance(id string) (int, error)
-	GetAccounts() []Account
-	SearchAccount(id uuid.UUID) Account
-	UpdateBalance(accountOrigin Account, accountDestination Account)
-	GetAccountCPF(cpf string) Account
+	GetAccounts() ([]Account, error)
+	SearchAccount(id uuid.UUID) (Account, error)
+	UpdateBalance(accountOrigin Account, accountDestination Account) error
+	GetAccountCPF(cpf string) (Account, error)
 }
 
 type LoginUseCase interface {

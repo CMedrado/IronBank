@@ -15,7 +15,10 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	account := auc.GetAccountCPF(cpf)
+	account, err := auc.GetAccountCPF(cpf)
+	if err != nil {
+		return uuid.UUID{}, err
+	}
 	err = CheckAccountExistence(account)
 	if err != nil {
 		return uuid.UUID{}, err
@@ -28,7 +31,11 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	var id uuid.UUID
 	for aux == 0 {
 		id, _ = domain.Random()
-		if (auc.SearchAccount(id) != domain.Account{}) {
+		searchAccount, err := auc.SearchAccount(id)
+		if err != nil {
+			return uuid.UUID{}, err
+		}
+		if (searchAccount != domain.Account{}) {
 			aux = 0
 		} else {
 			aux = 1
@@ -48,7 +55,10 @@ func (auc *UseCase) GetBalance(id string) (int, error) {
 		return 0, domain.ErrParse
 	}
 
-	account := auc.SearchAccount(idUUID)
+	account, err := auc.SearchAccount(idUUID)
+	if err != nil {
+		return 0, err
+	}
 	err = domain.CheckExistID(account)
 
 	if err != nil {
@@ -59,20 +69,28 @@ func (auc *UseCase) GetBalance(id string) (int, error) {
 }
 
 //GetAccounts returns all API accounts
-func (auc *UseCase) GetAccounts() []domain.Account {
-	accounts := auc.StoredAccount.ReturnAccounts()
+func (auc *UseCase) GetAccounts() ([]domain.Account, error) {
+	accounts, err := auc.StoredAccount.ReturnAccounts()
+
+	if err != nil {
+		return []domain.Account{}, domain.ErrInsert
+	}
+
 	var account []domain.Account
 
 	for _, a := range accounts {
 		account = append(account, ChangeAccountStorage(a))
 	}
 
-	return account
+	return account, nil
 }
 
 // SearchAccount returns the account via the received ID
-func (auc UseCase) SearchAccount(id uuid.UUID) domain.Account {
-	accounts := auc.StoredAccount.ReturnAccounts()
+func (auc UseCase) SearchAccount(id uuid.UUID) (domain.Account, error) {
+	accounts, err := auc.StoredAccount.ReturnAccounts()
+	if err != nil {
+		return domain.Account{}, domain.ErrInsert
+	}
 	account := domain.Account{}
 
 	for _, a := range accounts {
@@ -81,11 +99,14 @@ func (auc UseCase) SearchAccount(id uuid.UUID) domain.Account {
 		}
 	}
 
-	return account
+	return account, nil
 }
 
-func (auc UseCase) GetAccountCPF(cpf string) domain.Account {
-	accounts := auc.StoredAccount.ReturnAccounts()
+func (auc UseCase) GetAccountCPF(cpf string) (domain.Account, error) {
+	accounts, err := auc.StoredAccount.ReturnAccounts()
+	if err != nil {
+		return domain.Account{}, domain.ErrInsert
+	}
 	account := domain.Account{}
 
 	for _, a := range accounts {
@@ -94,9 +115,13 @@ func (auc UseCase) GetAccountCPF(cpf string) domain.Account {
 		}
 	}
 
-	return account
+	return account, nil
 }
 
-func (auc UseCase) UpdateBalance(accountOrigin domain.Account, accountDestination domain.Account) {
-	auc.StoredAccount.ChangeBalances(ChangeAccountDomain(accountOrigin), ChangeAccountDomain(accountDestination))
+func (auc UseCase) UpdateBalance(accountOrigin domain.Account, accountDestination domain.Account) error {
+	err := auc.StoredAccount.ChangeBalance(ChangeAccountDomain(accountOrigin), ChangeAccountDomain(accountDestination))
+	if err != nil {
+		return domain.ErrUpdate
+	}
+	return nil
 }

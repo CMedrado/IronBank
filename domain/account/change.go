@@ -2,7 +2,7 @@ package account
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/storage/file/account"
+	account "github.com/CMedrado/DesafioStone/storage/postgre/accounts"
 )
 
 func ChangeAccountDomain(accountDomain domain.Account) account.Account {

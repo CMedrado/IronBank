@@ -2,7 +2,7 @@ package authentication
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/storage/file/token"
+	"github.com/CMedrado/DesafioStone/storage/postgre/token"
 )
 
 //func ChangeTokenDomain(tokenDomain domain.Token) token.Token {
@@ -11,6 +11,6 @@ import (
 //}
 
 func ChangeTokenStorage(tokenStorage token.Token) domain.Token {
-	tokenDomain := domain.Token{ID: tokenStorage.ID, Token: tokenStorage.Token}
+	tokenDomain := domain.Token{ID: tokenStorage.ID, IdAccount: tokenStorage.IdAccount, CreatedAt: tokenStorage.CreatedAt}
 	return tokenDomain
 }

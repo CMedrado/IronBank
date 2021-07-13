@@ -18,8 +18,14 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	if err != nil {
 		return transfer, domain.ErrParse
 	}
-	transfers := auc.StoredTransfer.ReturnTransfers()
-	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
+	transfers, err := auc.StoredTransfer.ReturnTransfer()
+	if err != nil {
+		return []domain.Transfer{}, err
+	}
+	accountToken, err := auc.TokenUseCase.GetTokenID(accountOriginID)
+	if err != nil {
+		return []domain.Transfer{}, err
+	}
 
 	err = CheckToken(token, accountToken)
 
@@ -28,7 +34,7 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	}
 
 	for _, a := range transfers {
-		if a.AccountOriginID == accountOriginID {
+		if a.OriginAccountID == accountOriginID {
 			transfer = append(transfer, ChangeTransferStorage(a))
 		}
 	}
@@ -55,8 +61,16 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 		return domain.ErrParse, uuid.UUID{}
 	}
 
-	accountOrigin := auc.AccountUseCase.SearchAccount(accountOriginID)
-	accountToken := auc.TokenUseCase.GetTokenID(accountOriginID)
+	accountOrigin, err := auc.AccountUseCase.SearchAccount(accountOriginID)
+	if err != nil {
+		return err, uuid.UUID{}
+	}
+
+	accountToken, err := auc.TokenUseCase.GetTokenID(accountOriginID)
+	if err != nil {
+		return err, uuid.UUID{}
+	}
+
 	err = CheckToken(token, accountToken)
 
 	if err != nil {
@@ -69,8 +83,10 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 		return err, uuid.UUID{}
 	}
 
-	accountDestination := auc.AccountUseCase.SearchAccount(accountDestinationIdUUID)
-
+	accountDestination, err := auc.AccountUseCase.SearchAccount(accountDestinationIdUUID)
+	if err != nil {
+		return err, uuid.UUID{}
+	}
 	err = CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
 		return err, uuid.UUID{}
@@ -88,8 +104,8 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 
 	id, _ := domain.Random()
 	createdAt := domain.CreatedAt()
-	transfer := domain.Transfer{ID: id, AccountOriginID: accountOriginID, AccountDestinationID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
-	auc.StoredTransfer.SaveTransfers(ChangeTransferDomain(transfer))
+	transfer := domain.Transfer{ID: id, OriginAccountID: accountOriginID, DestinationAccountID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
+	auc.StoredTransfer.SaveTransfer(ChangeTransferDomain(transfer))
 
 	return nil, id
 }

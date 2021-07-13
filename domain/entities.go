@@ -19,8 +19,8 @@ type Token struct {
 
 type Transfer struct {
 	ID                   uuid.UUID `json:"id"`
-	AccountOriginID      uuid.UUID `json:"account_origin_id"`
-	AccountDestinationID uuid.UUID `json:"account_destination_id"`
+	OriginAccountID      uuid.UUID `json:"origin_account_id"`
+	DestinationAccountID uuid.UUID `json:"destination_account_id"`
 	Amount               int       `json:"amount"`
 	CreatedAt            string    `json:"created_at"`
 }

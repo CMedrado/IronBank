@@ -1,0 +1,26 @@
+version: "3.1"
+
+services:
+  db:
+    image: postgres:11
+    networks:
+      - bd
+    ports:
+      - 5432:5432
+    volumes:
+      - ./volume/postgre:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: example
+
+  client:
+    image: dpage/pgadmin4
+    networks:
+      - bd
+    ports:
+      - 8080:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@ol.com
+      PGADMIN_DEFAULT_PASSWORD: senha#123
+
+networks:
+  bd: { }

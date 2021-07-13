@@ -12,8 +12,9 @@ type Account struct {
 }
 
 type Token struct {
-	ID    uuid.UUID `json:"id"`
-	Token string    `json:"token"`
+	ID        int       `json:"id"`
+	IdAccount uuid.UUID `json:"id_account"`
+	CreatedAt string    `json:"created_at"`
 }
 
 type Transfer struct {

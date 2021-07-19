@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type Account struct {
@@ -12,7 +13,7 @@ type Account struct {
 	CPF       string    `json:"cpf"`
 	Secret    string    `json:"secret"`
 	Balance   int       `json:"balance"`
-	CreatedAt string    `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Storage struct {

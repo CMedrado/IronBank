@@ -4,12 +4,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type Token struct {
-	ID        int       `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	IdAccount uuid.UUID `json:"id_account"`
-	CreatedAt string    `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Storage struct {

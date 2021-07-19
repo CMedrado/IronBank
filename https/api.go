@@ -23,8 +23,8 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	s.logger = logger
 
 	router := mux.NewRouter()
-	router.HandleFunc("/accounts/{id}/balance", s.account.ListAccounts).Methods("GET")
-	router.HandleFunc("/accounts", s.account.GetBalance).Methods("GET")
+	router.HandleFunc("/accounts/{id}/balance", s.account.GetBalance).Methods("GET")
+	router.HandleFunc("/accounts", s.account.ListAccounts).Methods("GET")
 	router.HandleFunc("/accounts", s.account.CreateAccount).Methods("POST")
 	router.HandleFunc("/login", s.Login.Login).Methods("POST")
 	router.HandleFunc("/transfers", s.transfer.ListTransfers).Methods("GET")

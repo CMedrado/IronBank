@@ -43,7 +43,10 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	}
 	secretHash := domain.CreateHash(secret)
 	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
-	auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))
+	err = auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))
+	if err != nil {
+		return uuid.UUID{}, domain.ErrInsert
+	}
 	return id, err
 }
 

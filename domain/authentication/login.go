@@ -3,6 +3,7 @@ package authentication
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
+	token2 "github.com/CMedrado/DesafioStone/storage/postgre/token"
 	"github.com/google/uuid"
 )
 
@@ -43,19 +44,20 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	var idToken uuid.UUID
 	for aux2 == 0 {
 		idToken, _ = domain.Random()
-		searchAccount, err := auc.AccountUseCase.SearchAccount(idToken)
+		searchToken, err := auc.SearchToken(idToken)
 		if err != nil {
 			return err, ""
 		}
-		if (searchAccount != domain.Account{}) {
+		if (searchToken != domain.Token{}) {
 			aux2 = 0
 		} else {
 			aux2 = 1
 		}
 	}
-	token := now + ":" + id.ID.String()
+	token := now.Format("02/01/2006 15:04:05") + ":" + id.ID.String()
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
-	err = auc.StoredToken.SaveToken(idToken, id.ID, now)
+	save := token2.Token{ID: idToken, IdAccount: id.ID, CreatedAt: now}
+	err = auc.StoredToken.SaveToken(save)
 	if err != nil {
 		return domain.ErrInsert, ""
 	}
@@ -71,6 +73,22 @@ func (uc UseCase) GetTokenID(id uuid.UUID) (domain.Token, error) {
 
 	for _, a := range tokens {
 		if a.IdAccount == id {
+			token = ChangeTokenStorage(a)
+		}
+	}
+
+	return token, nil
+}
+
+func (auc UseCase) SearchToken(id uuid.UUID) (domain.Token, error) {
+	tokens, err := auc.StoredToken.ReturnTokens()
+	if err != nil {
+		return domain.Token{}, domain.ErrInsert
+	}
+	token := domain.Token{}
+
+	for _, a := range tokens {
+		if a.ID == id {
 			token = ChangeTokenStorage(a)
 		}
 	}

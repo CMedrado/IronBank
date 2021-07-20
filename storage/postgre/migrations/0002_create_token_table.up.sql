@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS tokens(
-    id UUID PRIMARY KEY,
+    id_token UUID PRIMARY KEY,
     id_account UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
 

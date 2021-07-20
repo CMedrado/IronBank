@@ -34,6 +34,12 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 			}).Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(ErrJson)
+		} else if err.Error() == domain.ErrInsert.Error() {
+			l.WithFields(log.Fields{
+				"type": http.StatusBadRequest,
+			}).Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrJson)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}

@@ -23,7 +23,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	err = domain.CheckAmount(balance)
+	err = CheckBalance(balance)
 	if err != nil {
 		return uuid.UUID{}, domain.ErrBalanceAbsent
 	}

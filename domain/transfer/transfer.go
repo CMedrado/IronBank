@@ -44,7 +44,7 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 
 // CreateTransfers create and transfers, returns the id of the created transfer
 func (auc UseCase) CreateTransfers(token string, accountDestinationID string, amount int) (error, uuid.UUID) {
-	err := domain.CheckAmount(amount)
+	err := CheckAmount(amount)
 
 	if err != nil {
 		return err, uuid.UUID{}
@@ -105,7 +105,9 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 	id, _ := domain.Random()
 	createdAt := domain.CreatedAt()
 	transfer := domain.Transfer{ID: id, OriginAccountID: accountOriginID, DestinationAccountID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
-	auc.StoredTransfer.SaveTransfer(ChangeTransferDomain(transfer))
-
+	err = auc.StoredTransfer.SaveTransfer(ChangeTransferDomain(transfer))
+	if err != nil {
+		return err, uuid.UUID{}
+	}
 	return nil, id
 }

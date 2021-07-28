@@ -30,7 +30,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	id, _ := domain.Random()
 	secretHash := domain.CreateHash(secret)
 	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
-	err = auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))
+	err = auc.StoredAccount.SaveAccount(newAccount)
 	if err != nil {
 		return uuid.UUID{}, domain.ErrInsert
 	}
@@ -69,7 +69,7 @@ func (auc *UseCase) GetAccounts() ([]domain.Account, error) {
 	var account []domain.Account
 
 	for _, a := range accounts {
-		account = append(account, ChangeAccountStorage(a))
+		account = append(account, a)
 	}
 
 	return account, nil
@@ -81,7 +81,7 @@ func (auc UseCase) SearchAccount(id uuid.UUID) (domain.Account, error) {
 	if err != nil {
 		return domain.Account{}, domain.ErrSelect
 	}
-	return ChangeAccountStorage(accounts), nil
+	return accounts, nil
 }
 
 func (auc UseCase) GetAccountCPF(cpf string) (domain.Account, error) {
@@ -89,11 +89,11 @@ func (auc UseCase) GetAccountCPF(cpf string) (domain.Account, error) {
 	if err != nil {
 		return domain.Account{}, domain.ErrSelect
 	}
-	return ChangeAccountStorage(accounts), nil
+	return accounts, nil
 }
 
 func (auc UseCase) UpdateBalance(accountOrigin domain.Account, accountDestination domain.Account) error {
-	err := auc.StoredAccount.ChangeBalance(ChangeAccountDomain(accountOrigin), ChangeAccountDomain(accountDestination))
+	err := auc.StoredAccount.ChangeBalance(accountOrigin, accountDestination)
 	if err != nil {
 		return domain.ErrUpdate
 	}

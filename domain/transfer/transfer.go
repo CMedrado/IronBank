@@ -35,7 +35,7 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 
 	for _, a := range transfers {
 		if a.OriginAccountID == accountOriginID {
-			transfer = append(transfer, ChangeTransferStorage(a))
+			transfer = append(transfer, a)
 		}
 	}
 
@@ -105,7 +105,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 	id, _ := domain.Random()
 	createdAt := domain.CreatedAt()
 	transfer := domain.Transfer{ID: id, OriginAccountID: accountOriginID, DestinationAccountID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
-	err = auc.StoredTransfer.SaveTransfer(ChangeTransferDomain(transfer))
+	err = auc.StoredTransfer.SaveTransfer(transfer)
 	if err != nil {
 		return err, uuid.UUID{}
 	}

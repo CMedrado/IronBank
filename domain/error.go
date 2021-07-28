@@ -19,4 +19,5 @@ var (
 	ErrParse                = errors.New("given the UUID is incorrect")
 	ErrInsert               = errors.New("unable to insert")
 	ErrUpdate               = errors.New("unable to update")
+	ErrSelect               = errors.New("unable to select")
 )

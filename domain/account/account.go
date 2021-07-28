@@ -77,35 +77,19 @@ func (auc *UseCase) GetAccounts() ([]domain.Account, error) {
 
 // SearchAccount returns the account via the received ID
 func (auc UseCase) SearchAccount(id uuid.UUID) (domain.Account, error) {
-	accounts, err := auc.StoredAccount.ReturnAccounts()
+	accounts, err := auc.StoredAccount.ReturnAccountID(id)
 	if err != nil {
-		return domain.Account{}, domain.ErrInsert
+		return domain.Account{}, domain.ErrSelect
 	}
-	account := domain.Account{}
-
-	for _, a := range accounts {
-		if a.ID == id {
-			account = ChangeAccountStorage(a)
-		}
-	}
-
-	return account, nil
+	return ChangeAccountStorage(accounts), nil
 }
 
 func (auc UseCase) GetAccountCPF(cpf string) (domain.Account, error) {
-	accounts, err := auc.StoredAccount.ReturnAccounts()
+	accounts, err := auc.StoredAccount.ReturnAccountCPF(cpf)
 	if err != nil {
-		return domain.Account{}, domain.ErrInsert
+		return domain.Account{}, domain.ErrSelect
 	}
-	account := domain.Account{}
-
-	for _, a := range accounts {
-		if a.CPF == cpf {
-			account = ChangeAccountStorage(a)
-		}
-	}
-
-	return account, nil
+	return ChangeAccountStorage(accounts), nil
 }
 
 func (auc UseCase) UpdateBalance(accountOrigin domain.Account, accountDestination domain.Account) error {

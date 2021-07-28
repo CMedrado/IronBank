@@ -3,7 +3,6 @@ package authentication
 import (
 	"encoding/base64"
 	"github.com/CMedrado/DesafioStone/domain"
-	token2 "github.com/CMedrado/DesafioStone/storage/postgre/token"
 	"github.com/google/uuid"
 )
 
@@ -37,7 +36,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	idToken, _ := domain.Random()
 	token := now.Format("02/01/2006 15:04:05") + ":" + id.ID.String()
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
-	save := token2.Token{ID: idToken, IdAccount: id.ID, CreatedAt: now}
+	save := domain.Token{ID: idToken, IdAccount: id.ID, CreatedAt: now}
 	err = auc.StoredToken.SaveToken(save)
 	if err != nil {
 		return domain.ErrInsert, ""
@@ -54,7 +53,7 @@ func (uc UseCase) GetTokenID(id uuid.UUID) (domain.Token, error) {
 
 	for _, a := range tokens {
 		if a.IdAccount == id {
-			token = ChangeTokenStorage(a)
+			token = a
 		}
 	}
 

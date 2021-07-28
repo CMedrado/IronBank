@@ -22,21 +22,15 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	}
 
 	newLogin := domain.Login{CPF: cpf, Secret: secretHash}
-	account, err := auc.AccountUseCase.GetAccountCPF(cpf)
-
-	if err != nil {
-		return domain.ErrInsert, ""
-	}
-
-	err = CheckLogin(account, newLogin)
-	if err != nil {
-		return domain.ErrLogin, ""
-	}
-
 	id, err := auc.AccountUseCase.GetAccountCPF(cpf)
 
 	if err != nil {
 		return domain.ErrInsert, ""
+	}
+
+	err = CheckLogin(id, newLogin)
+	if err != nil {
+		return domain.ErrLogin, ""
 	}
 
 	now := domain.CreatedAt()
@@ -60,22 +54,6 @@ func (uc UseCase) GetTokenID(id uuid.UUID) (domain.Token, error) {
 
 	for _, a := range tokens {
 		if a.IdAccount == id {
-			token = ChangeTokenStorage(a)
-		}
-	}
-
-	return token, nil
-}
-
-func (auc UseCase) SearchToken(id uuid.UUID) (domain.Token, error) {
-	tokens, err := auc.StoredToken.ReturnTokens()
-	if err != nil {
-		return domain.Token{}, domain.ErrInsert
-	}
-	token := domain.Token{}
-
-	for _, a := range tokens {
-		if a.ID == id {
 			token = ChangeTokenStorage(a)
 		}
 	}

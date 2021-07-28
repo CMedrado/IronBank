@@ -14,7 +14,6 @@ type AccountUseCase interface {
 type LoginUseCase interface {
 	AuthenticatedLogin(cpf, secret string) (error, string)
 	GetTokenID(id uuid.UUID) (Token, error)
-	SearchToken(id uuid.UUID) (Token, error)
 }
 
 type TransferUseCase interface {

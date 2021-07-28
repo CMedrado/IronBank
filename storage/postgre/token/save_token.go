@@ -2,9 +2,10 @@ package token
 
 import (
 	"context"
+	"github.com/CMedrado/DesafioStone/domain"
 )
 
-func (a *Storage) SaveToken(token Token) error {
+func (a *Storage) SaveToken(token domain.Token) error {
 	statement := `INSERT INTO tokens(id_token, id_account, created_at)
 				  VALUES ($1, $2, $3)`
 	comand, err := a.pool.Exec(context.Background(), statement, token.ID, token.IdAccount, token.CreatedAt)

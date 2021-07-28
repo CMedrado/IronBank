@@ -1,12 +1,12 @@
 package authentication
 
 import (
-	"github.com/CMedrado/DesafioStone/storage/postgre/token"
+	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/google/uuid"
 )
 
 type Repository interface {
-	SaveToken(token token.Token) error
-	ReturnTokens() ([]token.Token, error)
-	ReturnTokenID(id uuid.UUID) (token.Token, error)
+	SaveToken(token domain.Token) error
+	ReturnTokens() ([]domain.Token, error)
+	ReturnTokenID(id uuid.UUID) (domain.Token, error)
 }

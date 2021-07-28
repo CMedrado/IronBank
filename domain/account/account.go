@@ -27,20 +27,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return uuid.UUID{}, domain.ErrBalanceAbsent
 	}
-	aux := 0
-	var id uuid.UUID
-	for aux == 0 {
-		id, _ = domain.Random()
-		searchAccount, err := auc.SearchAccount(id)
-		if err != nil {
-			return uuid.UUID{}, err
-		}
-		if (searchAccount != domain.Account{}) {
-			aux = 0
-		} else {
-			aux = 1
-		}
-	}
+	id, _ := domain.Random()
 	secretHash := domain.CreateHash(secret)
 	newAccount := domain.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
 	err = auc.StoredAccount.SaveAccount(ChangeAccountDomain(newAccount))

@@ -40,20 +40,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 	}
 
 	now := domain.CreatedAt()
-	aux2 := 0
-	var idToken uuid.UUID
-	for aux2 == 0 {
-		idToken, _ = domain.Random()
-		searchToken, err := auc.SearchToken(idToken)
-		if err != nil {
-			return err, ""
-		}
-		if (searchToken != domain.Token{}) {
-			aux2 = 0
-		} else {
-			aux2 = 1
-		}
-	}
+	idToken, _ := domain.Random()
 	token := now.Format("02/01/2006 15:04:05") + ":" + id.ID.String()
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
 	save := token2.Token{ID: idToken, IdAccount: id.ID, CreatedAt: now}

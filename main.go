@@ -33,13 +33,13 @@ func main() {
 
 	err := postgre.RunMigrations(dbUrl)
 	if err != nil {
-		lentry.Fatal(os.Stderr, "failed to run migrations: %v\n", err)
+		lentry.Fatalf("failed to run migrations: %v\n", err)
 		os.Exit(1)
 	}
 
 	pool, err := getDbPool(dbUrl)
 	if err != nil {
-		lentry.Fatal("failed to get db connection pool: %v", err)
+		lentry.Fatalf("failed to get db connection pool: %v", err)
 	}
 
 	accountStorage := store_account.NewStored(pool, lentry)

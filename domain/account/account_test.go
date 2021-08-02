@@ -1,12 +1,10 @@
 package account
 
 import (
-	storeaccount "github.com/CMedrado/DesafioStone/storage/file/account"
+	"github.com/CMedrado/DesafioStone/domain"
 	"github.com/google/uuid"
-	"io"
-	"io/ioutil"
-	"os"
 	"testing"
+	"time"
 )
 
 type CreateAccountTestInput struct {
@@ -18,22 +16,7 @@ type CreateAccountTestInput struct {
 	CreatedAt string
 }
 
-func createTemporaryFile(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "db")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
+var I = 0
 
 func TestCreateAccount(t *testing.T) {
 	//prepare
@@ -73,19 +56,23 @@ func TestCreateAccount(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "should unsuccessfully create an account when CPF is already used",
+			in: CreateAccountTestInput{
+				Name:    "Rafaels",
+				CPF:     "081.313.920-43",
+				Secret:  "lucas",
+				Balance: 50000,
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131321083","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBase()
-			accountStorage := storeaccount.NewStoredAccount(dataBase)
-			usecase := UseCase{
-				StoredAccount: accountStorage,
-			}
-
 			//test
-			gotID, gotErr := usecase.CreateAccount(testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
+			useCase := UseCase{AccountRepoMock{}}
+			gotID, gotErr := useCase.CreateAccount(testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
 
 			//assert
 			if !testCase.wantErr && gotErr != nil { // O teste falhará pois não queremos erro e obtivemos um
@@ -125,13 +112,7 @@ func TestGetBalance(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBase, clenDataBase := createTemporaryFile(t, `[{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4","name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBase()
-			accountStorage := storeaccount.NewStoredAccount(dataBase)
-			usecase := UseCase{
-				StoredAccount: accountStorage,
-			}
-			//test
+			usecase := UseCase{AccountRepoMock{}}
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 
 			//assert
@@ -148,4 +129,93 @@ func TestGetBalance(t *testing.T) {
 			}
 		})
 	}
+}
+
+type AccountRepoMock struct {
+}
+
+func (uc AccountRepoMock) SaveAccount(_ domain.Account) error {
+	return nil
+}
+
+func (uc AccountRepoMock) ReturnAccounts() ([]domain.Account, error) {
+	return []domain.Account{
+		{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time.Now(),
+		},
+		{
+			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Balance:   5000,
+			CreatedAt: time.Now(),
+		},
+	}, nil
+}
+
+func (uc AccountRepoMock) ChangeBalance(person1, person2 domain.Account) error {
+	return nil
+}
+
+func (uc AccountRepoMock) ReturnAccountID(id uuid.UUID) (domain.Account, error) {
+	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
+		return domain.Account{
+			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Balance:   5000,
+			CreatedAt: time.Now(),
+		}, nil
+	}
+	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
+		return domain.Account{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time.Now(),
+		}, nil
+	}
+	return domain.Account{}, nil
+}
+
+func (uc AccountRepoMock) ReturnAccountCPF(cpf string) (domain.Account, error) {
+	cpf2 := "08131392043"
+	cpf3 := "38453162093"
+	if cpf == cpf2 {
+		if I == 0 {
+			I = 1
+			return domain.Account{}, nil
+		}
+		if I != 0 {
+			return domain.Account{
+				ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+				Name:      "Lucas",
+				CPF:       "08131391043",
+				Secret:    "c74af74c69d81831a5703aefe9cb4199",
+				Balance:   5000,
+				CreatedAt: time.Now(),
+			}, nil
+		}
+	}
+	if cpf == cpf3 {
+		return domain.Account{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time.Now(),
+		}, nil
+
+	}
+	return domain.Account{}, nil
 }

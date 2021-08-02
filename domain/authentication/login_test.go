@@ -2,53 +2,14 @@ package authentication
 
 import (
 	"github.com/CMedrado/DesafioStone/domain"
-	account2 "github.com/CMedrado/DesafioStone/domain/account"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
-	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
 	"github.com/google/uuid"
-	"io"
-	"io/ioutil"
-	"os"
 	"testing"
+	"time"
 )
 
 type CreateLoginInput struct {
 	CPF    string
 	Secret string
-}
-
-func createTemporaryFileToken(t *testing.T, Tokens string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtoken")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Tokens))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbaccount")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
 }
 
 func TestAuthenticatedLogin(t *testing.T) {
@@ -101,16 +62,10 @@ func TestAuthenticatedLogin(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":981,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":982,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-			defer clenDataBaseAccount()
-			dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{0,0}]`)
-			defer clenDataBaseToken()
-			accountAccount := store_account.NewStoredAccount(dataBaseAccount)
-			accountUsecase := &AccountUseCaseMock{accountAccount}
-			accountToken := store_token.NewStoredToked(dataBaseToken)
+			accountUsecase := &AccountUseCaseMock{}
 			usecase := UseCase{
 				AccountUseCase: accountUsecase,
-				StoredToken:    accountToken,
+				StoredToken:    LoginRepoMock{},
 			}
 
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret)
@@ -131,7 +86,6 @@ func TestAuthenticatedLogin(t *testing.T) {
 }
 
 type AccountUseCaseMock struct {
-	AccountList *store_account.StoredAccount
 }
 
 func (uc AccountUseCaseMock) CreateAccount(_ string, _ string, _ string, _ int) (uuid.UUID, error) {
@@ -142,24 +96,64 @@ func (uc AccountUseCaseMock) GetBalance(_ string) (int, error) {
 	return 0, nil
 }
 
-func (uc AccountUseCaseMock) GetAccounts() []domain.Account {
+func (uc AccountUseCaseMock) GetAccounts() ([]domain.Account, error) {
+	return []domain.Account{}, nil
+}
+
+func (uc AccountUseCaseMock) SearchAccount(_ uuid.UUID) (domain.Account, error) {
+	return domain.Account{}, nil
+}
+
+func (uc *AccountUseCaseMock) UpdateBalance(_ domain.Account, _ domain.Account) error {
 	return nil
 }
 
-func (uc AccountUseCaseMock) SearchAccount(_ uuid.UUID) domain.Account {
-	return domain.Account{}
-}
-
-func (uc *AccountUseCaseMock) UpdateBalance(_ domain.Account, _ domain.Account) {
-}
-
-func (uc AccountUseCaseMock) GetAccountCPF(cpf string) domain.Account {
-	account := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
-		if a.CPF == cpf {
-			account = account2.ChangeAccountStorage(a)
-		}
+func (uc AccountUseCaseMock) GetAccountCPF(cpf string) (domain.Account, error) {
+	if cpf == "08131391043" {
+		return domain.Account{
+			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Balance:   5000,
+			CreatedAt: time.Now(),
+		}, nil
 	}
+	if cpf == "38453162093" {
+		return domain.Account{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time.Now(),
+		}, nil
+	}
+	return domain.Account{}, nil
+}
 
-	return account
+type LoginRepoMock struct {
+}
+
+func (rm LoginRepoMock) SaveToken(_ domain.Token) error {
+	return nil
+}
+
+func (rm LoginRepoMock) ReturnTokenID(id uuid.UUID) (domain.Token, error) {
+	if id == uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4") {
+		return domain.Token{
+			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
+			IdAccount: uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			CreatedAt: time.Now(),
+		}, nil
+
+	}
+	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
+		return domain.Token{
+			ID:        uuid.MustParse("40ccb980-538f-4a1d-b1c8-566da5888f45"),
+			IdAccount: uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			CreatedAt: time.Now(),
+		}, nil
+	}
+	return domain.Token{}, nil
 }

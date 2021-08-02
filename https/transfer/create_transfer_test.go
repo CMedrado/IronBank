@@ -4,90 +4,16 @@ import (
 	"bytes"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
-	"github.com/CMedrado/DesafioStone/domain/account"
-	"github.com/CMedrado/DesafioStone/domain/authentication"
 	"github.com/CMedrado/DesafioStone/domain/transfer"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
-	store_token "github.com/CMedrado/DesafioStone/storage/file/token"
-	store_transfer "github.com/CMedrado/DesafioStone/storage/file/transfer"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 )
 
-func createTemporaryFileToken(t *testing.T, Tokens string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtoken")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Tokens))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbaccount")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
-func createTemporaryFileTransfer(t *testing.T, Transfers string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbtransfer")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Transfers))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
 func TestHandler_CreateTransfer(t *testing.T) {
-	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","name":"Lucas","cpf":"38453162093","secret":"7e65a9b554bbc9817aa049ce38c84a72","balance":3000,"created_at":"29/06/2021 12:45:35"},{"id":"75432539-c5ba-46d3-9690-44985b516da7","name":"Rafael","cpf":"08131391043","secret":"3467e121a1a109628e0a5b0cebba361b","balance":5000,"created_at":"29/06/2021 12:46:28"}]`)
-	defer clenDataBaseAccount()
-	dataBaseToken, clenDataBaseToken := createTemporaryFileToken(t, `[{"id":"c5424440-4737-4e03-86d2-3adac90ddd20","token":"MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA="}]`)
-	defer clenDataBaseToken()
-	dataBaseTransfer, clenDataBaseTransfer := createTemporaryFileTransfer(t, `[{"id":"47399f23-2093-4dde-b32f-990cac27630e","account_origin_id":"c5424440-4737-4e03-86d2-3adac90ddd20","account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount":150,"created_at":"29/06/2021 12:48:06"}]`)
-	defer clenDataBaseTransfer()
-	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
-	tokenStorage := store_token.NewStoredToked(dataBaseToken)
-	transferStorage := store_transfer.NewStoredTransfer(dataBaseTransfer)
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	Lentry := logrus.NewEntry(logger)
-	TransferUseCase := &TransferUsecaseMock{AccountList: accountStorage, TokenList: tokenStorage, TransferList: transferStorage}
-	S := new(Handler)
-	S.transfer = TransferUseCase
-	S.logger = Lentry
 	createtransfer := []struct {
 		name         string
 		method       string
@@ -101,10 +27,10 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			name:         "should successfully transfer amount",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 500}`,
+			body:         `{"account_destination_id":"a61227cf-a857-4bc6-8fcd-ad97cdad382a","amount": 500}`,
 			response:     http.StatusCreated,
 			responsebody: `{"id":"c5424440-4737-4e03-86d2-3adac90ddd20"}` + "\n",
-			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there is wrong token",
@@ -112,7 +38,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 300}`,
 			response:     http.StatusUnauthorized,
-			token:        "MjkvMDYvMjAyMSAxMzoxNjo1NTo3NTQzMjUzOS1jNWJhLTQ2ZDMtOTY5MC00NDk4NWI1MTZkYTc=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMeQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given token is invalid"}` + "\n",
 		},
 		{
@@ -121,7 +47,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da5","amount": 300}`,
 			response:     http.StatusNotAcceptable,
-			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
 		{
@@ -130,7 +56,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": -5}`,
 			response:     http.StatusBadRequest,
-			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given amount is invalid"}` + "\n",
 		},
 		{
@@ -139,16 +65,16 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 60000}`,
 			response:     http.StatusBadRequest,
-			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account without balance"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there same account ",
 			method:       "POST",
 			path:         "/transfers",
-			body:         `{"account_destination_id":"c5424440-4737-4e03-86d2-3adac90ddd20","amount": 300}`,
+			body:         `{"account_destination_id":"6b1941db-ce17-4ffe-a7ed-22493a926bbc","amount": 300}`,
 			response:     http.StatusBadRequest,
-			token:        "MjkvMDYvMjAyMSAxMjo0NzowNzpjNTQyNDQ0MC00NzM3LTRlMDMtODZkMi0zYWRhYzkwZGRkMjA=",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account is the same as the account destination"}` + "\n",
 		},
 		{
@@ -157,18 +83,24 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:     "/transfers",
 			body:     `{"account"0}`,
 			response: http.StatusBadRequest,
-			token:    "MTgvMDYvMjAyMSAxNjozNDozMjo5ODQ5ODA4MQ==",
+			token:    "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 		},
 	}
 	for _, tc := range createtransfer {
 		t.Run(tc.name, func(t *testing.T) {
+			s := new(Handler)
+			s.transfer = &TransferUsecaseMock{AccountUsecaseMock{}, TokenUseCaseMock{}}
+			logger := logrus.New()
+			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+			Lentry := logrus.NewEntry(logger)
+			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			respondeRecorder := httptest.NewRecorder()
 
 			request.Header.Add("Authorization", tc.token)
 
-			S.CreateTransfer(respondeRecorder, request)
+			s.CreateTransfer(respondeRecorder, request)
 
 			if tc.response != respondeRecorder.Code { // O teste falhará pois não queremos erro e obtivemos um
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, respondeRecorder.Code)
@@ -181,30 +113,25 @@ func TestHandler_CreateTransfer(t *testing.T) {
 }
 
 type TransferUsecaseMock struct {
-	AccountList  *store_account.StoredAccount
-	TokenList    *store_token.StoredToken
-	TransferList *store_transfer.StoredTransferAccount
+	AccountList AccountUsecaseMock
+	TokenList   TokenUseCaseMock
 }
 
 func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain.Transfer, error) {
-	accountOriginID, err := transfer.DecoderToken(token)
-	if err != nil {
-		return []domain.Transfer{}, domain.ErrParse
-	}
-	tokens := domain.Token{}
-	for _, a := range uc.TokenList.ReturnTokens() {
-		if a.ID == accountOriginID {
-			tokens = authentication.ChangeTokenStorage(a)
-		}
-	}
-	if token != tokens.Token {
+	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" == token {
 		return []domain.Transfer{}, errors.New("given token is invalid")
 	}
-	var transfers []domain.Transfer
-	for _, a := range uc.TransferList.ReturnTransfers() {
-		transfers = append(transfers, transfer.ChangeTransferStorage(a))
-	}
-	return transfers, nil
+
+	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
+	return []domain.Transfer{
+		{
+			ID:                   uuid.MustParse("47399f23-2093-4dde-b32f-990cac27630e"),
+			OriginAccountID:      uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
+			DestinationAccountID: uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
+			Amount:               150,
+			CreatedAt:            time1,
+		},
+	}, nil
 }
 
 func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationIDString string, amount int) (error, uuid.UUID) {
@@ -212,33 +139,25 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 		return errors.New("given amount is invalid"), uuid.UUID{}
 	}
 	accountDestinationID := uuid.MustParse(accountDestinationIDString)
-	accountOriginID, err := transfer.DecoderToken(token)
-	if err != nil {
-		return domain.ErrParse, uuid.UUID{}
-	}
+	accountOriginID, _, _ := transfer.DecoderToken(token)
 
-	tokens := domain.Token{}
-	for _, a := range uc.TokenList.ReturnTokens() {
-		if a.ID == accountOriginID {
-			tokens = authentication.ChangeTokenStorage(a)
-		}
-	}
-	if tokens.Token != token {
+	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" != token {
 		return errors.New("given token is invalid"), uuid.UUID{}
 	}
 	if accountOriginID == accountDestinationID {
 		return errors.New("given account is the same as the account destination"), uuid.UUID{}
 	}
 	accountOrigin := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	accounts2, _ := uc.AccountList.GetAccounts()
+	for _, a := range accounts2 {
 		if a.ID == accountOriginID {
-			accountOrigin = account.ChangeAccountStorage(a)
+			accountOrigin = a
 		}
 	}
 	accountDestination := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	for _, a := range accounts2 {
 		if a.ID == accountDestinationID {
-			accountDestination = account.ChangeAccountStorage(a)
+			accountDestination = a
 		}
 	}
 	if accountOrigin.Balance < amount {
@@ -247,6 +166,149 @@ func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationID
 	if (accountDestination == domain.Account{}) {
 		return errors.New("given account destination id is invalid"), uuid.UUID{}
 	}
-	returnID := uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20")
-	return nil, returnID
+	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20")
+}
+
+type TokenUseCaseMock struct {
+	AccountList AccountUsecaseMock
+}
+
+func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
+	secretHash := domain.CreateHash(secret)
+	account := domain.Account{}
+	accounts, _ := uc.AccountList.GetAccounts()
+	for _, a := range accounts {
+		if a.CPF == cpf {
+			account = a
+		}
+	}
+	if len(cpf) != 11 && len(cpf) != 14 {
+		return errors.New("given secret or CPF are incorrect"), ""
+	}
+	if len(cpf) == 14 {
+		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
+			if account.CPF != cpf {
+				return errors.New("given secret or CPF are incorrect"), ""
+			}
+			if account.Secret != secret {
+				return errors.New("given secret or CPF are incorrect"), ""
+			}
+			if account == (domain.Account{}) {
+				return errors.New("given secret or CPF are incorrect"), ""
+			}
+			return nil, "passou"
+		} else {
+			return errors.New("given secret or CPF are incorrect"), ""
+		}
+	}
+	if account == (domain.Account{}) {
+		return errors.New("given secret or CPF are incorrect"), ""
+	}
+	if account.CPF != cpf {
+		return errors.New("given secret or CPF are incorrect"), ""
+	}
+	if account.Secret != secretHash {
+		return errors.New("given secret or CPF are incorrect"), ""
+	}
+	return nil, "passou"
+}
+
+func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) (domain.Token, error) {
+	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:27:44.933365Z")
+	if id == uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04") {
+		return domain.Token{
+			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
+			IdAccount: uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
+			CreatedAt: time1,
+		}, nil
+	}
+	return domain.Token{}, nil
+}
+
+type AccountUsecaseMock struct {
+}
+
+func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (uuid.UUID, error) {
+	if len(cpf) != 11 && len(cpf) != 14 {
+		return uuid.UUID{}, errors.New("given cpf is invalid")
+	}
+	if len(cpf) == 14 {
+		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
+			if balance <= 0 {
+				return uuid.UUID{}, errors.New("given the balance amount is invalid")
+			}
+			if name == "Rafael" {
+				return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
+			}
+			if name == "Lucas" {
+				return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
+			}
+		} else {
+			return uuid.UUID{}, errors.New("given cpf is invalid")
+		}
+	}
+	if balance <= 0 {
+		return uuid.UUID{}, errors.New("given the balance amount is invalid")
+	}
+	if name == "Rafael" {
+		return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
+	}
+	if name == "Lucas" {
+		return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
+	}
+	return uuid.UUID{}, nil
+}
+
+func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
+	return 0, nil
+}
+
+func (uc AccountUsecaseMock) GetAccounts() ([]domain.Account, error) {
+	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:41:46.813816-03:00")
+	return []domain.Account{
+		{
+			ID:        uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time1,
+		},
+		{
+			ID:        uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Balance:   5000,
+			CreatedAt: time1,
+		},
+	}, nil
+}
+
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain.Account, error) {
+	account := domain.Account{}
+	accounts, _ := uc.GetAccounts()
+	for _, a := range accounts {
+		if a.ID == id {
+			account = a
+		}
+	}
+
+	return account, nil
+}
+
+func (uc *AccountUsecaseMock) UpdateBalance(_ domain.Account, _ domain.Account) error {
+	return nil
+}
+
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (domain.Account, error) {
+	account := domain.Account{}
+	accounts, _ := uc.GetAccounts()
+	for _, a := range accounts {
+		if a.CPF == cpf {
+			account = a
+		}
+	}
+
+	return account, nil
 }

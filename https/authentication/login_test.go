@@ -4,48 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"github.com/CMedrado/DesafioStone/domain"
-	account2 "github.com/CMedrado/DesafioStone/domain/account"
-	store_account "github.com/CMedrado/DesafioStone/storage/file/account"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 )
 
-func createTemporaryFileAccount(t *testing.T, Accounts string) (io.ReadWriteSeeker, func()) {
-	filetmp, err := ioutil.TempFile("", "dbaccount")
-
-	if err != nil {
-		t.Fatalf("it is not possible to write the temporary file %v", err)
-	}
-
-	filetmp.Write([]byte(Accounts))
-
-	removeArquivo := func() {
-		filetmp.Close()
-		os.Remove(filetmp.Name())
-	}
-
-	return filetmp, removeArquivo
-}
-
 func TestHandler_Login(t *testing.T) {
-
-	dataBaseAccount, clenDataBaseAccount := createTemporaryFileAccount(t, `[{"id":19727887,"name":"Rafael","cpf":"38453162093","secret":"53b9e9679a8ea25880376080b76f98ad","balance":6000,"created_at":"06/01/2020"},{"id":98498081,"name":"Lucas","cpf":"08131391043","secret":"c74af74c69d81831a5703aefe9cb4199","balance":5000,"created_at":"06/01/2020"}]`)
-	defer clenDataBaseAccount()
-	accountStorage := store_account.NewStoredAccount(dataBaseAccount)
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	Lentry := logrus.NewEntry(logger)
-	LoginUseCase := &TokenUseCaseMock{AccountList: accountStorage}
-	S := new(Handler)
-	S.login = LoginUseCase
-	S.logger = Lentry
 	logint := []struct {
 		name         string
 		method       string
@@ -104,11 +71,17 @@ func TestHandler_Login(t *testing.T) {
 	}
 	for _, tc := range logint {
 		t.Run(tc.name, func(t *testing.T) {
+			s := new(Handler)
+			s.login = &TokenUseCaseMock{AccountUsecaseMock{}}
+			logger := logrus.New()
+			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+			Lentry := logrus.NewEntry(logger)
+			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			responseRecorder := httptest.NewRecorder()
 
-			S.Login(responseRecorder, request)
+			s.Login(responseRecorder, request)
 
 			if tc.response != responseRecorder.Code {
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
@@ -122,15 +95,16 @@ func TestHandler_Login(t *testing.T) {
 }
 
 type TokenUseCaseMock struct {
-	AccountList *store_account.StoredAccount
+	AccountList AccountUsecaseMock
 }
 
 func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
 	secretHash := domain.CreateHash(secret)
 	account := domain.Account{}
-	for _, a := range uc.AccountList.ReturnAccounts() {
+	accounts, _ := uc.AccountList.GetAccounts()
+	for _, a := range accounts {
 		if a.CPF == cpf {
-			account = account2.ChangeAccountStorage(a)
+			account = a
 		}
 	}
 	if len(cpf) != 11 && len(cpf) != 14 {
@@ -164,10 +138,94 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 	return nil, "passou"
 }
 
-func (uc TokenUseCaseMock) ReturnToken(_ int) string {
-	return ""
+func (uc TokenUseCaseMock) GetTokenID(_ uuid.UUID) (domain.Token, error) {
+	return domain.Token{}, nil
 }
 
-func (uc TokenUseCaseMock) GetTokenID(_ uuid.UUID) domain.Token {
-	return domain.Token{}
+type AccountUsecaseMock struct {
+}
+
+func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (uuid.UUID, error) {
+	if len(cpf) != 11 && len(cpf) != 14 {
+		return uuid.UUID{}, errors.New("given cpf is invalid")
+	}
+	if len(cpf) == 14 {
+		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
+			if balance <= 0 {
+				return uuid.UUID{}, errors.New("given the balance amount is invalid")
+			}
+			if name == "Rafael" {
+				return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
+			}
+			if name == "Lucas" {
+				return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
+			}
+		} else {
+			return uuid.UUID{}, errors.New("given cpf is invalid")
+		}
+	}
+	if balance <= 0 {
+		return uuid.UUID{}, errors.New("given the balance amount is invalid")
+	}
+	if name == "Rafael" {
+		return uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"), nil
+	}
+	if name == "Lucas" {
+		return uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"), nil
+	}
+	return uuid.UUID{}, nil
+}
+
+func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
+	return 0, nil
+}
+
+func (uc AccountUsecaseMock) GetAccounts() ([]domain.Account, error) {
+	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:41:46.813816-03:00")
+	return []domain.Account{
+		{
+			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Balance:   6000,
+			CreatedAt: time1,
+		},
+		{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Balance:   5000,
+			CreatedAt: time1,
+		},
+	}, nil
+}
+
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain.Account, error) {
+	account := domain.Account{}
+	accounts, _ := uc.GetAccounts()
+	for _, a := range accounts {
+		if a.ID == id {
+			account = a
+		}
+	}
+
+	return account, nil
+}
+
+func (uc *AccountUsecaseMock) UpdateBalance(_ domain.Account, _ domain.Account) error {
+	return nil
+}
+
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (domain.Account, error) {
+	account := domain.Account{}
+	accounts, _ := uc.GetAccounts()
+	for _, a := range accounts {
+		if a.CPF == cpf {
+			account = a
+		}
+	}
+
+	return account, nil
 }

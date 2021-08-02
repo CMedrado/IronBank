@@ -24,7 +24,7 @@ const dbFileNameAccount = "accounts.db.json"
 const dbFileNameToken = "token.db.json"
 const dbFileNameTransfer = "transfer.db.json"
 const Port = "5000"
-const dbUrl = "postgresql://postgres:example@localhost:5432/desafio?sslmode=disable"
+const dbUrl = "postgresql://postgres:example@db:5432/desafio?sslmode=disable"
 
 func main() {
 	logger := logrus.New()

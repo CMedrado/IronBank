@@ -8,8 +8,8 @@ import (
 
 func (a *Storage) ReturnAccountID(id uuid.UUID) (domain.Account, error) {
 	var account domain.Account
-	statement := `SELECT accounts WHERE id=$1`
-	err := a.pool.QueryRow(context.Background(), statement, id).Scan(&account)
+	statement := `SELECT * FROM accounts WHERE id=$1`
+	err := a.pool.QueryRow(context.Background(), statement, id).Scan(&account.ID, &account.Name, &account.CPF, &account.Secret, &account.Balance, &account.CreatedAt)
 	if err != nil {
 		return domain.Account{}, err
 	}

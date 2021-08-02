@@ -14,7 +14,7 @@ type UseCase struct {
 // GetTransfers returns all account transfers
 func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	var transfer []domain.Transfer
-	accountOriginID, err := DecoderToken(token)
+	accountOriginID, tokenOriginID, err := DecoderToken(token)
 	if err != nil {
 		return transfer, domain.ErrParse
 	}
@@ -22,7 +22,7 @@ func (auc UseCase) GetTransfers(token string) ([]domain.Transfer, error) {
 	if err != nil {
 		return []domain.Transfer{}, err
 	}
-	accountToken, err := auc.TokenUseCase.GetTokenID(accountOriginID)
+	accountToken, err := auc.TokenUseCase.GetTokenID(tokenOriginID)
 	if err != nil {
 		return []domain.Transfer{}, err
 	}
@@ -56,7 +56,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 		return domain.ErrParse, uuid.UUID{}
 	}
 
-	accountOriginID, err := DecoderToken(token)
+	accountOriginID, tokenOriginID, err := DecoderToken(token)
 	if err != nil {
 		return domain.ErrParse, uuid.UUID{}
 	}
@@ -66,7 +66,7 @@ func (auc UseCase) CreateTransfers(token string, accountDestinationID string, am
 		return err, uuid.UUID{}
 	}
 
-	accountToken, err := auc.TokenUseCase.GetTokenID(accountOriginID)
+	accountToken, err := auc.TokenUseCase.GetTokenID(tokenOriginID)
 	if err != nil {
 		return err, uuid.UUID{}
 	}

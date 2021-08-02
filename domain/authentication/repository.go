@@ -7,6 +7,5 @@ import (
 
 type Repository interface {
 	SaveToken(token domain.Token) error
-	ReturnTokens() ([]domain.Token, error)
 	ReturnTokenID(id uuid.UUID) (domain.Token, error)
 }

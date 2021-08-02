@@ -7,8 +7,8 @@ import (
 
 func (a *Storage) ReturnAccountCPF(cpf string) (domain.Account, error) {
 	var account domain.Account
-	statement := `SELECT accounts WHERE id=$1`
-	err := a.pool.QueryRow(context.Background(), statement, cpf).Scan(&account)
+	statement := `SELECT * FROM accounts WHERE cpf=$1`
+	err := a.pool.QueryRow(context.Background(), statement, cpf).Scan(&account.ID, &account.Name, &account.CPF, &account.Secret, &account.Balance, &account.CreatedAt)
 	if err != nil {
 		return domain.Account{}, err
 	}

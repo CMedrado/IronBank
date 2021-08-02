@@ -34,7 +34,7 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 
 	now := domain.CreatedAt()
 	idToken, _ := domain.Random()
-	token := now.Format("02/01/2006 15:04:05") + ":" + id.ID.String()
+	token := now.Format("02/01/2006 15:04:05") + ":" + id.ID.String() + ":" + idToken.String()
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
 	save := domain.Token{ID: idToken, IdAccount: id.ID, CreatedAt: now}
 	err = auc.StoredToken.SaveToken(save)
@@ -45,17 +45,9 @@ func (auc UseCase) AuthenticatedLogin(cpf, secret string) (error, string) {
 }
 
 func (uc UseCase) GetTokenID(id uuid.UUID) (domain.Token, error) {
-	tokens, err := uc.StoredToken.ReturnTokens()
+	token, err := uc.StoredToken.ReturnTokenID(id)
 	if err != nil {
 		return domain.Token{}, domain.ErrInsert
 	}
-	token := domain.Token{}
-
-	for _, a := range tokens {
-		if a.IdAccount == id {
-			token = a
-		}
-	}
-
 	return token, nil
 }

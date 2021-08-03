@@ -20,23 +20,29 @@ import (
 	"time"
 )
 
-const dbFileNameAccount = "accounts.db.json"
-const dbFileNameToken = "token.db.json"
-const dbFileNameTransfer = "transfer.db.json"
-const Port = "5000"
-const dbUrl = "postgresql://postgres:example@db:5432/desafio?sslmode=disable"
-
 func main() {
+	config, err := LoadConfigs()
+	if err != nil {
+		fmt.Printf("something went wrong when reading config env vars: %v\n", err)
+		os.Exit(1)
+	}
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+	logLevel, err := logrus.ParseLevel(config.Api.LogLevel)
+	if err != nil {
+		fmt.Printf("informed log level on config is invalid: %v", err)
+		os.Exit(1)
+	}
+	logger.SetLevel(logLevel)
 	lentry := logrus.NewEntry(logger)
 
-	err := postgre.RunMigrations(dbUrl)
+	dbURL := config.Database.GetUrl()
+	err = postgre.RunMigrations(dbURL)
 	if err != nil {
 		lentry.Fatalf("failed to run migrations: %v\n", err)
 	}
 
-	pool, err := getDbPool(dbUrl)
+	pool, err := getDbPool(dbURL)
 	if err != nil {
 		lentry.Fatalf("failed to get db connection pool: %v", err)
 	}
@@ -52,11 +58,13 @@ func main() {
 	transferHandler := transfer3.NewHandler(&accountUseCase, &loginUseCase, &transferUseCase, lentry)
 	server := http2.NewAPI(accountHandler, loginHandler, transferHandler, lentry)
 
-	lentry.WithField("Port", Port).Info("starting the server!")
-	if err := http.ListenAndServe(":5000", server); err != nil {
-		lentry.Fatal("could not hear on port 5000 ")
+	serverLog := lentry.WithField("Port", config.Api.Port)
+	serverLog.Info("starting the server!")
+	address := fmt.Sprintf(":%s", config.Api.Port)
+	if err := http.ListenAndServe(address, server); err != nil {
+		lentry.Fatalf("could not hear on port %s: %v", config.Api.Port, err)
 	}
-	lentry.WithField("Port", Port).Info("shutting down the server")
+	serverLog.Info("shutting down the server")
 }
 
 func getDbPool(dburl string) (*pgxpool.Pool, error) {

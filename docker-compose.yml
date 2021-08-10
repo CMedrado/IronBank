@@ -8,7 +8,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./volume/postgre:/var/lib/postgresql/data
+      - desafio_db_volume:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: example
 
@@ -24,3 +24,5 @@ services:
 
 networks:
   bd: { }
+volumes:
+  desafio_db_volume: {}

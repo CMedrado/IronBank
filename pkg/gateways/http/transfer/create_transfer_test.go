@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -45,7 +46,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			method:       "POST",
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da5","amount": 300}`,
-			response:     http.StatusNotAcceptable,
+			response:     http.StatusBadRequest,
 			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
@@ -88,7 +89,9 @@ func TestHandler_CreateTransfer(t *testing.T) {
 	for _, tc := range createtransfer {
 		t.Run(tc.name, func(t *testing.T) {
 			s := new(Handler)
-			s.transfer = &TransferUsecaseMock{AccountUsecaseMock{}, TokenUseCaseMock{}}
+			s.transfer = &TransferUsecaseMock{}
+			s.account = &AccountUsecaseMock{}
+			s.login = &TokenUseCaseMock{}
 			logger := logrus.New()
 			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 			Lentry := logrus.NewEntry(logger)
@@ -112,98 +115,54 @@ func TestHandler_CreateTransfer(t *testing.T) {
 }
 
 type TransferUsecaseMock struct {
-	AccountList AccountUsecaseMock
-	TokenList   TokenUseCaseMock
 }
 
-func (uc *TransferUsecaseMock) GetTransfers(token string) ([]domain2.Transfer, error) {
-	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" == token {
-		return []domain2.Transfer{}, errors.New("given token is invalid")
-	}
-
+func (uc *TransferUsecaseMock) GetTransfers(_ uuid.UUID, _ entities.Token, token string) ([]entities.Transfer, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
-	return []domain2.Transfer{
-		{
-			ID:                   uuid.MustParse("47399f23-2093-4dde-b32f-990cac27630e"),
-			OriginAccountID:      uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
-			DestinationAccountID: uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
-			Amount:               150,
-			CreatedAt:            time1,
-		},
-	}, nil
+	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" == token {
+		return []entities.Transfer{
+			{
+				ID:                   uuid.MustParse("47399f23-2093-4dde-b32f-990cac27630e"),
+				OriginAccountID:      uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
+				DestinationAccountID: uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
+				Amount:               150,
+				CreatedAt:            time1,
+			},
+		}, nil
+	}
+
+	return []entities.Transfer{}, errors.New("given token is invalid")
 }
 
-func (uc TransferUsecaseMock) CreateTransfers(token string, accountDestinationIDString string, amount int) (error, uuid.UUID) {
+func (uc TransferUsecaseMock) CreateTransfers(accountOriginID uuid.UUID, _ entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
 	if amount <= 0 {
-		return errors.New("given amount is invalid"), uuid.UUID{}
+		return errors.New("given amount is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
-	accountDestinationID := uuid.MustParse(accountDestinationIDString)
-	accountOriginID, _, _ := DecoderToken(token)
-
 	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" != token {
-		return errors.New("given token is invalid"), uuid.UUID{}
+		return errors.New("given token is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
-	if accountOriginID == accountDestinationID {
-		return errors.New("given account is the same as the account destination"), uuid.UUID{}
-	}
-	accountOrigin := domain2.Account{}
-	accounts2, _ := uc.AccountList.GetAccounts()
-	for _, a := range accounts2 {
-		if a.ID == accountOriginID {
-			accountOrigin = a
-		}
-	}
-	accountDestination := domain2.Account{}
-	for _, a := range accounts2 {
-		if a.ID == accountDestinationID {
-			accountDestination = a
-		}
+	if accountOriginID == accountDestinationIdUUID {
+		return errors.New("given account is the same as the account destination"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	if accountOrigin.Balance < amount {
-		return errors.New("given account without balance"), uuid.UUID{}
+		return errors.New("given account without balance"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
-	if (accountDestination == domain2.Account{}) {
-		return errors.New("given account destination id is invalid"), uuid.UUID{}
+	if (accountDestination == entities.Account{}) {
+		return errors.New("given account destination id is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
-	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20")
+	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20"), accountOrigin, accountDestination
 }
 
 type TokenUseCaseMock struct {
 	AccountList AccountUsecaseMock
 }
 
-func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
+func (uc TokenUseCaseMock) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
 	secretHash := domain2.CreateHash(secret)
-	account := domain2.Account{}
-	accounts, _ := uc.AccountList.GetAccounts()
-	for _, a := range accounts {
-		if a.CPF == cpf {
-			account = a
-		}
-	}
-	if len(cpf) != 11 && len(cpf) != 14 {
+	if account == (entities.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
-	if len(cpf) == 14 {
-		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
-			if account.CPF != cpf {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			if account.Secret != secret {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			if account == (domain2.Account{}) {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			return nil, "passou"
-		} else {
-			return errors.New("given secret or CPF are incorrect"), ""
-		}
-	}
-	if account == (domain2.Account{}) {
-		return errors.New("given secret or CPF are incorrect"), ""
-	}
-	if account.CPF != cpf {
+	if account.CPF != account.CPF {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
 	if account.Secret != secretHash {
@@ -212,16 +171,16 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 	return nil, "passou"
 }
 
-func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) (domain2.Token, error) {
+func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) (entities.Token, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:27:44.933365Z")
 	if id == uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04") {
-		return domain2.Token{
+		return entities.Token{
 			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
 			IdAccount: uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
 			CreatedAt: time1,
 		}, nil
 	}
-	return domain2.Token{}, nil
+	return entities.Token{}, nil
 }
 
 type AccountUsecaseMock struct {
@@ -262,9 +221,9 @@ func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
 	return 0, nil
 }
 
-func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
+func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:41:46.813816-03:00")
-	return []domain2.Account{
+	return []entities.Account{
 		{
 			ID:        uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
 			Name:      "Rafael",
@@ -284,8 +243,8 @@ func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
 	}, nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.ID == id {
@@ -296,12 +255,12 @@ func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error
 	return account, nil
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ domain2.Account, _ domain2.Account) error {
+func (uc *AccountUsecaseMock) UpdateBalance(_ entities.Account, _ entities.Account) error {
 	return nil
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.CPF == cpf {

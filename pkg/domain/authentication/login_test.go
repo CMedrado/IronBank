@@ -1,7 +1,7 @@
 package authentication
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"testing"
 	"time"
@@ -66,7 +66,7 @@ func TestAuthenticatedLogin(t *testing.T) {
 				StoredToken: LoginRepoMock{},
 			}
 			account := GetAccountCPF(testCase.in.CPF)
-			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.CPF, testCase.in.Secret, account)
+			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.Secret, account)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -83,9 +83,9 @@ func TestAuthenticatedLogin(t *testing.T) {
 	}
 }
 
-func GetAccountCPF(cpf string) domain2.Account {
+func GetAccountCPF(cpf string) entities.Account {
 	if cpf == "081.313.910-43" {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Lucas",
 			CPF:       "08131391043",
@@ -95,7 +95,7 @@ func GetAccountCPF(cpf string) domain2.Account {
 		}
 	}
 	if cpf == "38453162093" {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Rafael",
 			CPF:       "38453162093",
@@ -104,19 +104,19 @@ func GetAccountCPF(cpf string) domain2.Account {
 			CreatedAt: time.Now(),
 		}
 	}
-	return domain2.Account{}
+	return entities.Account{}
 }
 
 type LoginRepoMock struct {
 }
 
-func (rm LoginRepoMock) SaveToken(_ domain2.Token) error {
+func (rm LoginRepoMock) SaveToken(_ entities.Token) error {
 	return nil
 }
 
-func (rm LoginRepoMock) ReturnTokenID(id uuid.UUID) (domain2.Token, error) {
+func (rm LoginRepoMock) ReturnTokenID(id uuid.UUID) (entities.Token, error) {
 	if id == uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4") {
-		return domain2.Token{
+		return entities.Token{
 			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
 			IdAccount: uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			CreatedAt: time.Now(),
@@ -124,11 +124,11 @@ func (rm LoginRepoMock) ReturnTokenID(id uuid.UUID) (domain2.Token, error) {
 
 	}
 	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
-		return domain2.Token{
+		return entities.Token{
 			ID:        uuid.MustParse("40ccb980-538f-4a1d-b1c8-566da5888f45"),
 			IdAccount: uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			CreatedAt: time.Now(),
 		}, nil
 	}
-	return domain2.Token{}, nil
+	return entities.Token{}, nil
 }

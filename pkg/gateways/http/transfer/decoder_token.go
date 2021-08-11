@@ -13,11 +13,11 @@ func DecoderToken(token string) (uuid.UUID, uuid.UUID, error) {
 	idString := strings.Split(string(tokeDecode), ":")
 	idInt, err := uuid.Parse(idString[3])
 	if err != nil {
-		return uuid.UUID{}, uuid.UUID{}, domain2.ErrParse
+		return uuid.UUID{}, uuid.UUID{}, domain2.ErrInvalidToken
 	}
 	idToken, err := uuid.Parse(idString[4])
 	if err != nil {
-		return uuid.UUID{}, uuid.UUID{}, domain2.ErrParse
+		return uuid.UUID{}, uuid.UUID{}, domain2.ErrInvalidToken
 	}
 	return idInt, idToken, nil
 }

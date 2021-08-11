@@ -2,7 +2,6 @@ package account
 
 import (
 	"encoding/json"
-	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ func (s *Handler) ListAccounts(w http.ResponseWriter, r *http.Request) {
 
 func (e errorStruct) errorList(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-	if errors.Is(err, domain2.ErrInsert) {
+	if err.Error() == domain2.ErrInsert.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusBadRequest,
 		}).Error(err)

@@ -2,7 +2,6 @@ package account
 
 import (
 	"encoding/json"
-	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	"github.com/gorilla/mux"
@@ -43,7 +42,7 @@ func (e errorStruct) errorBalance(err error) {
 		}).Error(err)
 		e.w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(e.w).Encode(ErrJson)
-	} else if errors.Is(err, domain2.ErrParse) || errors.Is(err, domain2.ErrSelect) {
+	} else if err.Error() == domain2.ErrParse.Error() || err.Error() == domain2.ErrSelect.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusBadRequest,
 			"time": domain2.CreatedAt(),

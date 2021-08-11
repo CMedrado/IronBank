@@ -2,9 +2,8 @@ package account
 
 import (
 	"encoding/json"
-	"errors"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
-	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
+	http_server "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -33,7 +32,7 @@ func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	l.WithFields(log.Fields{
 		"type":       http.StatusCreated,
 		"request_id": response,
-		"time":       domain2.CreatedAt(),
+		"time":       domain.CreatedAt(),
 	}).Info("account created successfully!")
 
 	w.WriteHeader(http.StatusCreated)
@@ -48,23 +47,20 @@ type errorStruct struct {
 }
 
 func (e errorStruct) errorCreate(err error) {
-	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-	if errors.Is(err, domain2.ErrAccountExists) || errors.Is(err, domain2.ErrInsert) || errors.Is(err, domain2.ErrSelect) || errors.Is(err, domain2.ErrBalanceAbsent) {
+	ErrJson := http_server.ErrorsResponse{Errors: err.Error()}
+	if err.Error() == domain.ErrAccountExists.Error() ||
+		err.Error() == domain.ErrInsert.Error() ||
+		err.Error() == domain.ErrSelect.Error() ||
+		err.Error() == domain.ErrBalanceAbsent.Error() ||
+		err.Error() == domain.ErrInvalidCPF.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusBadRequest,
-			"time": domain2.CreatedAt(),
+			"time": domain.CreatedAt(),
 		}).Error(err)
 		e.w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(e.w).Encode(ErrJson)
-	} else if err.Error() == domain2.ErrInvalidCPF.Error() {
-		e.l.WithFields(log.Fields{
-			"type": http.StatusNotAcceptable,
-			"time": domain2.CreatedAt(),
-		}).Error(err)
-		e.w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
-		e.w.WriteHeader(http.StatusBadRequest)
+		e.w.WriteHeader(http.StatusInternalServerError)
 	}
 	return
 }

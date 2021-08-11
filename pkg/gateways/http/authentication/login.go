@@ -2,7 +2,6 @@ package authentication
 
 import (
 	"encoding/json"
-	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
@@ -34,7 +33,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		e.errorLogin(err)
 		return
 	}
-	err, token := s.login.AuthenticatedLogin(cpf, requestBody.Secret, account)
+	err, token := s.login.AuthenticatedLogin(requestBody.Secret, account)
 	if err != nil {
 		e.errorLogin(err)
 		return
@@ -61,14 +60,14 @@ type errorStruct struct {
 func (e errorStruct) errorLogin(err error) {
 	if err != nil {
 		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-		if errors.Is(err, domain2.ErrLogin) {
+		if err.Error() == domain2.ErrLogin.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 				"time": domain2.CreatedAt(),
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if errors.Is(err, domain2.ErrInsert) || errors.Is(err, domain2.ErrSelect) {
+		} else if err.Error() == domain2.ErrInsert.Error() || err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusBadRequest,
 				"time": domain2.CreatedAt(),

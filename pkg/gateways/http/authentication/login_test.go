@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -72,7 +73,8 @@ func TestHandler_Login(t *testing.T) {
 	for _, tc := range logint {
 		t.Run(tc.name, func(t *testing.T) {
 			s := new(Handler)
-			s.login = &TokenUseCaseMock{AccountUsecaseMock{}}
+			s.login = &TokenUseCaseMock{}
+			s.account = &AccountUsecaseMock{}
 			logger := logrus.New()
 			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 			Lentry := logrus.NewEntry(logger)
@@ -95,41 +97,14 @@ func TestHandler_Login(t *testing.T) {
 }
 
 type TokenUseCaseMock struct {
-	AccountList AccountUsecaseMock
 }
 
-func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string) {
+func (uc TokenUseCaseMock) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
 	secretHash := domain2.CreateHash(secret)
-	account := domain2.Account{}
-	accounts, _ := uc.AccountList.GetAccounts()
-	for _, a := range accounts {
-		if a.CPF == cpf {
-			account = a
-		}
-	}
-	if len(cpf) != 11 && len(cpf) != 14 {
+	if account == (entities.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
-	if len(cpf) == 14 {
-		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
-			if account.CPF != cpf {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			if account.Secret != secret {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			if account == (domain2.Account{}) {
-				return errors.New("given secret or CPF are incorrect"), ""
-			}
-			return nil, "passou"
-		} else {
-			return errors.New("given secret or CPF are incorrect"), ""
-		}
-	}
-	if account == (domain2.Account{}) {
-		return errors.New("given secret or CPF are incorrect"), ""
-	}
-	if account.CPF != cpf {
+	if account.CPF != account.CPF {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
 	if account.Secret != secretHash {
@@ -138,8 +113,8 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(cpf, secret string) (error, string
 	return nil, "passou"
 }
 
-func (uc TokenUseCaseMock) GetTokenID(_ uuid.UUID) (domain2.Token, error) {
-	return domain2.Token{}, nil
+func (uc TokenUseCaseMock) GetTokenID(_ uuid.UUID) (entities.Token, error) {
+	return entities.Token{}, nil
 }
 
 type AccountUsecaseMock struct {
@@ -180,9 +155,9 @@ func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
 	return 0, nil
 }
 
-func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
+func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:41:46.813816-03:00")
-	return []domain2.Account{
+	return []entities.Account{
 		{
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Rafael",
@@ -202,8 +177,8 @@ func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
 	}, nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.ID == id {
@@ -214,12 +189,12 @@ func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error
 	return account, nil
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ domain2.Account, _ domain2.Account) error {
+func (uc *AccountUsecaseMock) UpdateBalance(_ entities.Account, _ entities.Account) error {
 	return nil
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.CPF == cpf {

@@ -3,7 +3,7 @@ package account
 import (
 	"bytes"
 	"errors"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -22,14 +22,14 @@ func TestHandler_CreateAccount(t *testing.T) {
 		path         string
 		body         string
 		response     int
-		responsebody string
+		responseBody string
 	}{
 		{
 			name:         "Should successfully create an account with formatted CPF",
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Rafael", "cpf": "081.313.910-43", "secret": "tatatal", "balance": 5000}`,
-			responsebody: `{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa"}` + "\n",
+			responseBody: `{"id":"f7ee7351-4c96-40ca-8cd8-37434810ddfa"}` + "\n",
 			response:     http.StatusCreated,
 		},
 		{
@@ -37,7 +37,7 @@ func TestHandler_CreateAccount(t *testing.T) {
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Lucas", "cpf": "38453162093", "secret": "jax", "balance": 3000}`,
-			responsebody: `{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4"}` + "\n",
+			responseBody: `{"id":"a505b1f9-ac4c-45aa-be43-8614a227a9d4"}` + "\n",
 			response:     http.StatusCreated,
 		},
 		{
@@ -45,16 +45,8 @@ func TestHandler_CreateAccount(t *testing.T) {
 			method:       "POST",
 			path:         "/accounts",
 			body:         `{"name": "Rafael", "cpf": "08131.391043", "secret": "tatatal", "balance": 5000}`,
-			response:     http.StatusNotAcceptable,
-			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
-		},
-		{
-			name:         "should unsuccessfully create an account when CPF is invalid",
-			method:       "POST",
-			path:         "/accounts",
-			body:         `{"name": "Rafael", "cpf": "08131.391.0-43", "secret": "tatatal", "balance": 5000}`,
-			response:     http.StatusNotAcceptable,
-			responsebody: `{"errors":"given cpf is invalid"}` + "\n",
+			response:     http.StatusBadRequest,
+			responseBody: `{"errors":"given cpf is invalid"}` + "\n",
 		},
 		{
 			name:         "should unsuccessfully create an account when balance is invalid",
@@ -62,7 +54,7 @@ func TestHandler_CreateAccount(t *testing.T) {
 			path:         "/accounts",
 			body:         `{"name": "Rafael", "cpf": "08131391043", "secret": "tatatal", "balance": -5}`,
 			response:     http.StatusBadRequest,
-			responsebody: `{"errors":"given the balance amount is invalid"}` + "\n",
+			responseBody: `{"errors":"given the balance amount is invalid"}` + "\n",
 		},
 		{
 			name:     "should unsuccessfully create an account when json is invalid",
@@ -90,8 +82,8 @@ func TestHandler_CreateAccount(t *testing.T) {
 				t.Errorf("unexpected error, wantErr= %d; gotErr= %d", tc.response, responseRecorder.Code)
 			}
 
-			if responseRecorder.Body.String() != tc.responsebody && tc.responsebody != "" {
-				t.Errorf("expected an %s but got %s", tc.responsebody, responseRecorder.Body.String())
+			if responseRecorder.Body.String() != tc.responseBody && tc.responseBody != "" {
+				t.Errorf("expected an %s but got %s", tc.responseBody, responseRecorder.Body.String())
 			}
 		})
 	}
@@ -140,9 +132,9 @@ func (uc AccountUsecaseMock) GetBalance(_ string) (int, error) {
 	}
 }
 
-func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
+func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:41:46.813816-03:00")
-	return []domain2.Account{
+	return []entities.Account{
 		{
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Rafael",
@@ -162,8 +154,8 @@ func (uc AccountUsecaseMock) GetAccounts() ([]domain2.Account, error) {
 	}, nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.ID == id {
@@ -174,12 +166,12 @@ func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (domain2.Account, error
 	return account, nil
 }
 
-func (uc *AccountUsecaseMock) UpdateBalance(_ domain2.Account, _ domain2.Account) error {
+func (uc *AccountUsecaseMock) UpdateBalance(_ entities.Account, _ entities.Account) error {
 	return nil
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (domain2.Account, error) {
-	account := domain2.Account{}
+func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (entities.Account, error) {
+	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {
 		if a.CPF == cpf {

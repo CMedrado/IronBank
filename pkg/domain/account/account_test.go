@@ -1,7 +1,7 @@
 package account
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"testing"
 	"time"
@@ -105,7 +105,7 @@ func TestGetBalance(t *testing.T) {
 		},
 		{
 			name:    "should unsuccessfully get balance when ID is invalid",
-			in:      "f7ee7351-4c96-40ca-8cd8-37434810ddfa",
+			in:      "f7ee7351-4c96-40ca-8cd8-37434810ddfs",
 			wantErr: true,
 		},
 	}
@@ -134,12 +134,12 @@ func TestGetBalance(t *testing.T) {
 type AccountRepoMock struct {
 }
 
-func (uc AccountRepoMock) SaveAccount(_ domain2.Account) error {
+func (uc AccountRepoMock) SaveAccount(_ entities.Account) error {
 	return nil
 }
 
-func (uc AccountRepoMock) ReturnAccounts() ([]domain2.Account, error) {
-	return []domain2.Account{
+func (uc AccountRepoMock) ReturnAccounts() ([]entities.Account, error) {
+	return []entities.Account{
 		{
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Rafael",
@@ -159,13 +159,13 @@ func (uc AccountRepoMock) ReturnAccounts() ([]domain2.Account, error) {
 	}, nil
 }
 
-func (uc AccountRepoMock) ChangeBalance(person1, person2 domain2.Account) error {
+func (uc AccountRepoMock) ChangeBalance(person1, person2 entities.Account) error {
 	return nil
 }
 
-func (uc AccountRepoMock) ReturnAccountID(id uuid.UUID) (domain2.Account, error) {
+func (uc AccountRepoMock) ReturnAccountID(id uuid.UUID) (entities.Account, error) {
 	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Lucas",
 			CPF:       "08131391043",
@@ -174,8 +174,8 @@ func (uc AccountRepoMock) ReturnAccountID(id uuid.UUID) (domain2.Account, error)
 			CreatedAt: time.Now(),
 		}, nil
 	}
-	if id == uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa") {
-		return domain2.Account{
+	if id == uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4") {
+		return entities.Account{
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Rafael",
 			CPF:       "38453162093",
@@ -184,19 +184,19 @@ func (uc AccountRepoMock) ReturnAccountID(id uuid.UUID) (domain2.Account, error)
 			CreatedAt: time.Now(),
 		}, nil
 	}
-	return domain2.Account{}, nil
+	return entities.Account{}, nil
 }
 
-func (uc AccountRepoMock) ReturnAccountCPF(cpf string) (domain2.Account, error) {
+func (uc AccountRepoMock) ReturnAccountCPF(cpf string) (entities.Account, error) {
 	cpf2 := "08131392043"
 	cpf3 := "38453162093"
 	if cpf == cpf2 {
 		if I == 0 {
 			I = 1
-			return domain2.Account{}, nil
+			return entities.Account{}, nil
 		}
 		if I != 0 {
-			return domain2.Account{
+			return entities.Account{
 				ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 				Name:      "Lucas",
 				CPF:       "08131391043",
@@ -207,7 +207,7 @@ func (uc AccountRepoMock) ReturnAccountCPF(cpf string) (domain2.Account, error) 
 		}
 	}
 	if cpf == cpf3 {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Rafael",
 			CPF:       "38453162093",
@@ -217,5 +217,5 @@ func (uc AccountRepoMock) ReturnAccountCPF(cpf string) (domain2.Account, error) 
 		}, nil
 
 	}
-	return domain2.Account{}, nil
+	return entities.Account{}, nil
 }

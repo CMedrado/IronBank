@@ -1,7 +1,8 @@
 package transfer
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/file/transfer"
 	transfer2 "github.com/CMedrado/DesafioStone/pkg/gateways/http/transfer"
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should successfully transfer amount",
 			in: CreateTransferInput{
-				Token:                "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+				Token:                "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6MzlhNzBhOTQtYTgyZC00ZGI4LTg3YWUtYmQ5MDBjNmE3YzA0",
 				AccountDestinationID: "a61227cf-a857-4bc6-8fcd-ad97cdad382a",
 				Amount:               300,
 			},
@@ -38,7 +39,7 @@ func TestMakeTransfers(t *testing.T) {
 		{
 			name: "should unsuccessfully transfer amount when there is wrong token",
 			in: CreateTransferInput{
-				Token:                "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTETRmZmUtYTdlZC0yMjQ5M3E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+				Token:                "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M3E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRiYzdm",
 				AccountDestinationID: "75432539-c5ba-46d3-9690-44985b516da7",
 				Amount:               300,
 			},
@@ -83,47 +84,15 @@ func TestMakeTransfers(t *testing.T) {
 				StoredTransfer: TransferRepoMock{},
 			}
 			accountOriginID, tokenOriginID, gotErr := transfer2.DecoderToken(testCase.in.Token)
-			if gotErr != nil {
+			if gotErr == nil {
 				accountOrigin, gotErr := SearchAccount(accountOriginID)
-				if !testCase.wantErr && gotErr != nil {
-					t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
-				}
-
-				if testCase.wantErr && gotErr == nil {
-					t.Error("wanted err but got nil")
-				}
-
-				if gotErr != nil {
+				if gotErr == nil {
 					accountToken, gotErr := GetTokenID(tokenOriginID)
-					if !testCase.wantErr && gotErr != nil {
-						t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
-					}
-
-					if testCase.wantErr && gotErr == nil {
-						t.Error("wanted err but got nil")
-					}
-
-					if gotErr != nil {
+					if gotErr == nil {
 						accountDestinationIdUUID, gotErr := uuid.Parse(testCase.in.AccountDestinationID)
-						if !testCase.wantErr && gotErr != nil {
-							t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
-						}
-
-						if testCase.wantErr && gotErr == nil {
-							t.Error("wanted err but got nil")
-						}
-
-						if gotErr != nil {
+						if gotErr == nil {
 							accountDestination, gotErr := SearchAccount(accountDestinationIdUUID)
-							if !testCase.wantErr && gotErr != nil {
-								t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
-							}
-
-							if testCase.wantErr && gotErr == nil {
-								t.Error("wanted err but got nil")
-							}
-
-							if gotErr != nil {
+							if gotErr == nil {
 								gotErr, gotTransfer, _, _ := usecase.CreateTransfers(accountOriginID, accountToken, testCase.in.Token, accountOrigin, accountDestination, testCase.in.Amount, accountDestinationIdUUID)
 								if !testCase.wantErr && gotErr != nil {
 									t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -192,11 +161,11 @@ func TestMakeGetTransfers(t *testing.T) {
 	}
 }
 
-func SearchAccount(id uuid.UUID) (domain2.Account, error) {
+func SearchAccount(id uuid.UUID) (entities.Account, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
 	time2, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:15:58.201088Z")
 	if id == uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc") {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
 			Name:      "Lucas",
 			CPF:       "38453162093",
@@ -206,7 +175,7 @@ func SearchAccount(id uuid.UUID) (domain2.Account, error) {
 		}, nil
 	}
 	if id == uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a") {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
 			Name:      "Rafael",
 			CPF:       "08131391043",
@@ -215,14 +184,14 @@ func SearchAccount(id uuid.UUID) (domain2.Account, error) {
 			CreatedAt: time2,
 		}, nil
 	}
-	return domain2.Account{}, nil
+	return entities.Account{}, domain.ErrAccountExists
 }
 
-func GetAccountCPF(cpf string) (domain2.Account, error) {
+func GetAccountCPF(cpf string) (entities.Account, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
 	time2, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:15:58.201088Z")
 	if cpf == "38453162093" {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
 			Name:      "Lucas",
 			CPF:       "38453162093",
@@ -232,7 +201,7 @@ func GetAccountCPF(cpf string) (domain2.Account, error) {
 		}, nil
 	}
 	if cpf == "08131391043" {
-		return domain2.Account{
+		return entities.Account{
 			ID:        uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
 			Name:      "Rafael",
 			CPF:       "08131391043",
@@ -241,36 +210,36 @@ func GetAccountCPF(cpf string) (domain2.Account, error) {
 			CreatedAt: time2,
 		}, nil
 	}
-	return domain2.Account{}, nil
+	return entities.Account{}, nil
 }
 
-func GetTokenID(id uuid.UUID) (domain2.Token, error) {
+func GetTokenID(id uuid.UUID) (entities.Token, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:27:44.933365Z")
 	time2, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T15:15:58.201088Z")
 	if i == 0 {
 		i++
-		return domain2.Token{
+		return entities.Token{
 			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
 			IdAccount: uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
 			CreatedAt: time1,
 		}, nil
 	}
 	if id == uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a") {
-		return domain2.Token{
+		return entities.Token{
 			ID:        uuid.MustParse("40ccb980-538f-4a1d-b1c8-566da5888f45"),
 			IdAccount: uuid.MustParse("a61227cf-a857-4bc6-8fcd-ad97cdad382a"),
 			CreatedAt: time2,
 		}, nil
 	}
-	return domain2.Token{}, nil
+	return entities.Token{}, nil
 }
 
 type TransferRepoMock struct {
 }
 
-func (uc TransferRepoMock) ReturnTransfer(id uuid.UUID) ([]domain2.Transfer, error) {
+func (uc TransferRepoMock) ReturnTransfer(id uuid.UUID) ([]entities.Transfer, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
-	return []domain2.Transfer{
+	return []entities.Transfer{
 		{
 			ID:                   uuid.MustParse("47399f23-2093-4dde-b32f-990cac27630e"),
 			OriginAccountID:      uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),
@@ -281,6 +250,6 @@ func (uc TransferRepoMock) ReturnTransfer(id uuid.UUID) ([]domain2.Transfer, err
 	}, nil
 }
 
-func (uc TransferRepoMock) SaveTransfer(_ domain2.Transfer) error {
+func (uc TransferRepoMock) SaveTransfer(_ entities.Transfer) error {
 	return nil
 }

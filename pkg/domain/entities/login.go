@@ -1,4 +1,4 @@
-package entries
+package entities
 
 type Login struct {
 	CPF    string `json:"cpf"`

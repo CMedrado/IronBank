@@ -1,7 +1,7 @@
 package account
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entries"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 )
 
@@ -10,7 +10,7 @@ type CreateResponse struct {
 }
 
 type GetAccountsResponse struct {
-	Accounts []entries.Account `json:"accounts"`
+	Accounts []entities.Account `json:"accounts"`
 }
 
 type BalanceResponse struct {

@@ -1,7 +1,7 @@
 package transfer
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entries"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 )
 
@@ -10,9 +10,9 @@ type TransferResponse struct {
 }
 
 type GetTransfersResponse struct {
-	Transfers []entries.Transfer `json:"transfers"`
+	Transfers []entities.Transfer `json:"transfers"`
 }
 
 type GetAccountsResponse struct {
-	Accounts []entries.Account `json:"accounts"`
+	Accounts []entities.Account `json:"accounts"`
 }

@@ -2,10 +2,10 @@ package accounts
 
 import (
 	"context"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entries"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
-func (a *Storage) ChangeBalance(personDomain1, personDomain2 entries.Account) error {
+func (a *Storage) ChangeBalance(personDomain1, personDomain2 entities.Account) error {
 	person1 := ChangeAccountDomain(personDomain1)
 	person2 := ChangeAccountDomain(personDomain2)
 	statement := `UPDATE accounts

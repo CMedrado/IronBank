@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/CMedrado/DesafioStone/pkg/common/configuration"
 	account2 "github.com/CMedrado/DesafioStone/pkg/domain/account"
 	authentication2 "github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	transfer2 "github.com/CMedrado/DesafioStone/pkg/domain/transfer"
@@ -21,7 +23,7 @@ import (
 )
 
 func main() {
-	config, err := LoadConfigs()
+	config, err := configuration.LoadConfigs()
 	if err != nil {
 		fmt.Printf("something went wrong when reading config env vars: %v\n", err)
 		os.Exit(1)
@@ -83,19 +85,19 @@ func openFiles(dbFileNameAccount string, dbFileNameToken string, dbFileNameTrans
 	dbAccount, err := os.OpenFile(dbFileNameAccount, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		lentry.Fatal("problem opening %s %v", dbFileNameAccount, err)
+		lentry.Fatalf("problem opening %s %v", dbFileNameAccount, err)
 	}
 
 	dbToken, err := os.OpenFile(dbFileNameToken, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		lentry.Fatal("problem opening %s %v", dbFileNameToken, err)
+		lentry.Fatalf("problem opening %s %v", dbFileNameToken, err)
 	}
 
 	dbTransfer, err := os.OpenFile(dbFileNameTransfer, os.O_RDWR|os.O_CREATE, 0666)
 
 	if err != nil {
-		lentry.Fatal("problem opening %s %v", dbFileNameTransfer, err)
+		lentry.Fatalf("problem opening %s %v", dbFileNameTransfer, err)
 	}
 
 	return dbAccount, dbToken, dbTransfer

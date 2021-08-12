@@ -125,7 +125,7 @@ func TestMakeGetTransfers(t *testing.T) {
 		{
 			name: "should successfully get transfers",
 			in: CreateTransferInput{
-				Token: "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+				Token: "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6MzlhNzBhOTQtYTgyZC00ZGI4LTg3YWUtYmQ5MDBjNmE3YzA0",
 			},
 			wantErr: false,
 		},

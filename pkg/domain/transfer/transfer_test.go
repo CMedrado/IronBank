@@ -17,8 +17,6 @@ type CreateTransferInput struct {
 	Amount               int
 }
 
-var i = 0
-
 func TestMakeTransfers(t *testing.T) {
 
 	tt := []struct {
@@ -216,8 +214,7 @@ func GetAccountCPF(cpf string) (entities.Account, error) {
 func GetTokenID(id uuid.UUID) (entities.Token, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T09:27:44.933365Z")
 	time2, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-08-02T15:15:58.201088Z")
-	if i == 0 {
-		i++
+	if id == uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04") {
 		return entities.Token{
 			ID:        uuid.MustParse("39a70a94-a82d-4db8-87ae-bd900c6a7c04"),
 			IdAccount: uuid.MustParse("6b1941db-ce17-4ffe-a7ed-22493a926bbc"),

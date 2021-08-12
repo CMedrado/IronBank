@@ -5,6 +5,6 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod tidy
 COPY . .
-RUN go build -o api main.go
+RUN go build -o api ./cmd/main.go
 ENTRYPOINT ./api
 EXPOSE 5000

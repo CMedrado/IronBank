@@ -4,3 +4,4 @@
 *.json
 token.db.json
 accounts.db.json
+Dockerfile

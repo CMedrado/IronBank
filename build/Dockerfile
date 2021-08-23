@@ -1,10 +1,7 @@
 FROM golang:1.16.5
-MAINTAINER rafaelmedrado
+LABEL maintainer=rafaelmedrado
 WORKDIR app
-COPY ../go.mod .
-COPY ../go.sum .
+COPY . .
 RUN go mod tidy
-COPY .. .
-RUN go build -o ../cmd/main.go
+RUN go build -o api cmd/main.go
 ENTRYPOINT ./api
-EXPOSE 5000

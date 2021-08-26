@@ -1,4 +1,4 @@
-<img src="/home/rafael/Downloads/The Iron Bank of Braavos by Arthur Bozzonet.jpeg" alt="The Iron Bank of Braavos" width="280" align="right" />
+<img src="theironbankofbraavosby.jpeg" alt="The Iron Bank of Braavos" width="280" align="right" />
 
 # 🏦 The Iron Bank of Braavos
 Welcome to the Iron Bank of Braavos.<br />

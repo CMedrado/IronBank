@@ -7,9 +7,9 @@ Make your transactions and your credit requests but remember the Iron Bank will 
 
 ## 💻 About
 
-The API was created to simulate a digital bank, through account management. It was built following the RESTful API
+The API was created to simulate a digital bank, through account management. It was built following the RESTful API.
 Design and clean architecture concepts. <br />
-Public image available on [Docker Hub](https://hub.docker.com/r/rafaelcmedrado/desafio)
+Public image available on [Docker Hub](https://hub.docker.com/r/rafaelcmedrado/desafio).
 
 ## Table of Contents
 
@@ -18,41 +18,25 @@ Public image available on [Docker Hub](https://hub.docker.com/r/rafaelcmedrado/d
 * [Features](#-features)
 * [How It Works](#-how-it-works)
     * [Application / Dependencies](#-application--dependencies)
-    * [Environment Variables](#-environment-variables)
     * [How to Begin](#-how-to-begin)
-        * [Makefile](#makefile)
+       * [Makefile](#makefile)
+    * [Environment Variables](#-environment-variables)
     * [Technologies](#-technologies)
     * [Endpoints](#-endpoints)
-        * [Accounts](#accounts)
-        * [Login](#login)
-        * [Transfer](#transfer)
-* [Credits](#-credits)
+    * [Accounts](#accounts)
+    * [Login](#login)
+    * [Transfer](#transfer)
+* [Acknowledgements](#-acknowledgements)
 
 ### ⚙️ Features
 
-- [x] Create an Account
-- [x] Getting Accounts
-- [x] Authenticate users
-- [x] Transfer between accounts
-- [x] Get transfer list
+- [x] Create an Account.
+- [x] Getting Accounts.
+- [x] Authenticate users.
+- [x] Transfer between accounts.
+- [x] Get transfer list.
 
-### 🚀 How It Works
-
-This project is just the back end part.
-
-### 🔢 Environment Variables
-
-| Name                      | Description                                                | Examples             |
-|---------------------------|------------------------------------------------------------|----------------------|
-| API_PORT                  | Port that will be listened on for the new request          | 5000                 |    
-| API_LOG_LEVEL             | Structured api log level                                   | INFO                 |
-| DB_PROTOCOL               | DB instance protocol                                       | postgres             |
-| DB_USERNAME               | DB instance user                                           | postgres             |
-| DB_SECRET                 | DB instance password                                       | example              |
-| DB_HOST                   | DB instance host                                           | db                   |
-| DB_PORT                   | DB instance port                                           | 5432                 |
-| DB_DATABASE               | DB instance's default database name                        | desafio              |
-| DB_OPTIONS                | Options placed for the db                                  | sslmode=disable      |
+## 🚀 How It Works
 
 ### 🚧 Application / Dependencies
 
@@ -60,9 +44,9 @@ Before starting, you will need to have the following tools installed on your mac
 [Git](https://git-scm.com), [Golang](https://golang.org/dl/), [PostgreSQL](https://www.postgresql.org/).
 
 I recommend having an editor to work with code like [VSCode](https://code.visualstudio.com/) and having an api client
-like [Postman](https://www.postman.com/downloads/)
+like [Postman](https://www.postman.com/downloads/).
 
-The Api is delivered in containers using [Docker](https://www.docker.com/)
+The Api is delivered in containers using [Docker](https://www.docker.com/).
 
 ### 🎲 How to Begin
 
@@ -81,14 +65,28 @@ $ Make run-local
 
 ### Makefile
 
-There are three commands to be used as a shortcut
+There are three commands to be used as a shortcut.
 
 - Make build-image:
-    - This shortcut corresponds to "docker build -t rafaelcmedrado/desafio:latest -f build/Dockerfile ."
+    - This shortcut corresponds to "docker build -t rafaelcmedrado/desafio:latest -f build/Dockerfile .".
 - Make push-image:
-    - This shortcut corresponds to "docker push rafaelcmedrado/desafio:latest"
+    - This shortcut corresponds to "docker push rafaelcmedrado/desafio:latest".
 - Make run-local:
-    - This shortcut corresponds to "docker-compose -f deploy/local/docker-compose.yml up"
+    - This shortcut corresponds to "docker-compose -f deploy/local/docker-compose.yml up".
+  
+### 🔢 Environment Variables
+
+| Name                      | Description                                                | Examples             |
+|---------------------------|------------------------------------------------------------|----------------------|
+| API_PORT                  | Port that will be listened on for the new request          | 5000                 |    
+| API_LOG_LEVEL             | Structured api log level                                   | INFO                 |
+| DB_PROTOCOL               | DB instance protocol                                       | postgres             |
+| DB_USERNAME               | DB instance user                                           | postgres             |
+| DB_SECRET                 | DB instance password                                       | example              |
+| DB_HOST                   | DB instance host                                           | db                   |
+| DB_PORT                   | DB instance port                                           | 5432                 |
+| DB_DATABASE               | DB instance's default database name                        | desafio              |
+| DB_OPTIONS                | Options placed for the db                                  | sslmode=disable      |
 
 ### 🛠 Technologies
 
@@ -104,15 +102,11 @@ The following tools were used in the construction of the project:
 
 ### 📎 Endpoints
 
-  - ID format is uuid
-  - Token format is basic64
-
 #### Accounts
 
-- `POST /accounts` - Create an Account
+- `POST /accounts` - Account creation endpoint.
 
-    - To make the request, pass through json the customer's name, the amount that will deposit, the customer's cpf and
-      the password that he will use as a form of access.
+    - To make the request, pass through json.
   
     - Request Example:
       ```bash
@@ -131,41 +125,17 @@ The following tools were used in the construction of the project:
       }
       ```
       
-    - When the cpf has already been used by another account, the error will be returned:
-       ```bash
-      {
-          "errors": "given cpf is already used" 
-      }
-      ```   
-          
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to insert"
-      }
-      ```
-      
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to select"
-      }
-      ```
-      
-    - When the balance amount on account creation is less than 0, the error will be returned:
-      ```bash
-      {
-          "errors": "given the balance amount is invalid"
-      }
-      ```
-      
-    - When the cpf entered to create the account is wrong, the error will be returned:
-      ```bash
-      {
-          "errors": "given cpf is invalid"
-      }
-      ```
-- `GET /accounts` - Get the list of accounts
+    - Possible Errors:
+
+      | Error Code       | Body JSON                                       | Description                                              |
+      |------------------|-------------------------------------------------|----------------------------------------------------------|
+      | 400  Bad Request | "errors": "given cpf is already used"           | The `cpf` has already been used by another account.      |
+      | 400  Bad Request | "errors": "unable to insert"                    | The database is unable to insert.                        |
+      | 400 Bad Request  | "errors": "unable to select"                    | The database is unable to select.                        |
+      | 400 Bad Request  | "errors": "given the balance amount is invalid" | The `balance` amount on account creation is less than 0. |
+      | 400 Bad Request  | "errors": "given cpf is invalid"                | The `cpf` entered to create the account is wrong.        |
+
+- `GET /accounts` - Account listing endpoint.
 
     - It is not necessary to request.
   
@@ -192,15 +162,13 @@ The following tools were used in the construction of the project:
       ]
       }
       ```
+    - Possible Errors:
+
+      | Error Code      | Body JSON                    | Description                       |
+      |---------------- |------------------------------|-----------------------------------|
+      | 400 Bad Request | "errors": "unable to insert" | The database is unable to insert. |
       
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {                                        
-          "errors": "unable to insert"
-      }
-      ```
-      
-- `GET /accounts/{id}/balance` - Get account balance
+- `GET /accounts/{id}/balance` - Account balance display endpoint.
 
     - It is not necessary to request.
   
@@ -210,35 +178,21 @@ The following tools were used in the construction of the project:
           "balance": 1000
       }
       ```
-      
-    - When the entered id is not valid, the error will be returned:
-       ```bash
-      {
-          "errors": "given id is invalid"
-      }
-      ```   
-          
-    - When the uuid cannot be converted because there is an error in the uuid, the error will be returned:
-      ```bash
-      {
-          "errors": "given the UUID is incorrect"
-      }
-      ```
-      
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to select"
-      }
-      ```
+    - Possible Errors:
+
+      |      Error Code    |            Body JSON                    |    Description                                                      |
+      |--------------------|-----------------------------------------|---------------------------------------------------------------------|
+      | 400 Bad Request    | "errors": "given the UUID is incorrect" | The UUID cannot be converted because there is an error in the UUID. |
+      | 400 Bad Request    | "errors": "unable to select"            | The database is unable to select.                                   |
+      | 406 Not Acceptable | "errors": "given id is invalid"         | The entered `id` is not valid.                                      |
 
 #### Login
 
-- `POST /login` - authenticate the user
+- `POST /login` - Account authentication endpoint.
 
-    - To make the request, pass through json the user's cpf and the user's access password.
+    - To make the request, pass through json.
   
-    - This function returns a token of type base64 to be placed in headers as a form of authentication
+    - This function returns a token of type base64 to be placed in headers as a form of authentication.
   
     - Request Example:
       ```bash
@@ -254,31 +208,17 @@ The following tools were used in the construction of the project:
           "token": "MjYvMDgvMjAyMSAxNDo1NjoyMjo2MTExMDI5MS03ZGIyLTRkNmYtYWMwZS1kOWViN2IyNjliYzQ6YTNjYzQ1MjAtYzE2YS00YjViLTllYzMtYWU4NWVkZGFhOWJh"
       }
       ```
-      
-    - When the cpf or password is wrong , the error will be returned:
-       ```bash
-      {
-          "errors": "given secret or CPF are incorrect"               
-      }
-      ```    
-         
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to insert"
-      }
-      ```
-      
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to select"
-      }
-      ```
+    - Possible Errors:
+
+      |      Error Code  |            Body JSON                          |    Description                    |
+      |------------------|-----------------------------------------------|-----------------------------------|
+      | 401 Unauthorized | "errors": "given secret or CPF are incorrect" | THe `cpf` or `password` is wrong. |
+      | 400 Bad Request  | "errors": "unable to insert"                  | The database is unable to insert. |
+      | 400 Bad Request  | "errors": "unable to select"                  | The database is unable to select. |
 
 #### Transfer
 
-- `GET /transfers` - get the list of transfers from the authenticated user.
+- `GET /transfers` - Account transfer listing endpoint.
 
     - Requires basic type `Authorization` credential header entry.
   
@@ -298,41 +238,20 @@ The following tools were used in the construction of the project:
       ]
       }
       ```
+  - Possible Errors:
+
+     |   Error Code     |            Body JSON                    |    Description                                                      |
+     |------------------|-----------------------------------------|---------------------------------------------------------------------|
+     | 400 Bad Request  | "errors": "given id is invalid"         | The entered `id` is not valid.                                      |
+     | 400 Bad Request  | "errors": "given the UUID is incorrect" | The UUID cannot be converted because there is an error in the UUID. |
+     | 400 Bad Request  | "errors": "unable to select"            | The database is unable to select.                                   |
+     | 401 Unauthorized | "errors": "given token is invalid"      | The passed token is not correct.                                    |
       
-    - When the entered id is not valid, the error will be returned:
-       ```bash
-      {
-          "errors": "given id is invalid"
-      }
-      ```     
-        
-    - When the uuid cannot be converted because there is an error in the uuid, the error will be returned:
-      ```bash
-      {
-          "errors": "given the UUID is incorrect"
-      }
-      ```
-      
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to select"
-      }
-      ```
-      
-    - When the passed token is not correct, the error will be returned:
-      ```bash
-      {
-          "errors": "given token is invalid"          
-      }
-      ```
-      
-- `POST /transfers` - transfers from one Account to another.
+- `POST /transfers` - Transfer creation endpoint between accounts.
 
     - Requires basic type `Authorization` credential header entry.
   
-    - To make the request, pass through json the id of the user who will receive the transfer and the amount that will
-      be transferred.
+    - To make the request, pass through json.
   
     - Request Example:
       ```bash
@@ -348,71 +267,22 @@ The following tools were used in the construction of the project:
           "id": "593ab439-7866-4215-b608-27e610748da8"
       }
       ```
-      
-    - When the entered id is not valid, the error will be returned:
-       ```bash
-      {
-          "errors": "given id is invalid"
-      }
-      ```   
-    
-    - When the uuid cannot be converted because there is an error in the uuid, the error will be returned:
-      ```bash
-      {
-          "errors": "given the UUID is incorrect"
-      }
-      ```
-      
-    - When the database is unable to insert, the error will be returned:
-      ```bash
-      {
-          "errors": "unable to select"
-      }
-      ```
-      
-    - When the passed token is not correct, the error will be returned:
-      ```bash
-      {
-          "errors": "given token is invalid"          
-      }
-      ```
-      
-    - When the origin account has no balance, the error will be returned:
-       ```bash
-      {
-          "errors": "given account without balance"    
-      }
-      ```     
-        
-    - When past amount is less than zero, the error will be returned:
-      ```bash
-      {
-          "errors": "given amount is invalid"
-      }
-      ```
-      
-    - When the two accounts are the same, the error will be returned:
-      ```bash
-      {
-          "errors": "given account is the same as the account destination"
-      }
-      ```
-      
-    - When the destination account id does not exist, the error will be returned:
-      ```bash
-      {
-          "errors": "given account destination id is invalid"      
-      }
-      ```
-      
-    - When the entered id is not valid, the error will be returned:
-       ```bash
-      {
-          "errors": "given id is invalid"
-      }
-      ```  
 
-## ✅ Credits
+    - Possible Errors:
+
+      |   Error Code       |            Body JSON                                             |    Description                                                      |
+      |--------------------|------------------------------------------------------------------|---------------------------------------------------------------------|
+      | 406 Not Acceptable | "errors": "given id is invalid"                                  | The entered `id` is not valid.                                      |
+      | 400 Bad Request    | "errors": "given the UUID is incorrect"                          | The UUID cannot be converted because there is an error in the UUID. |
+      | 400 Bad Request    | "errors": "unable to select"                                     | The database is unable to select.                                   |
+      | 400 Bad Request    | "errors": "unable to insert"                                     | The database is unable to insert.                                   |
+      | 401 Unauthorized   | "errors": "given token is invalid"                               | The passed `token` is not correct.                                  |
+      | 400 Bad Request    | "errors": "given account without balance"                        | The origin account has no `balance`.                                |
+      | 400 Bad Request    | "errors": "given amount is invalid"                              | The two accounts are the same.                                      |
+      | 400 Bad Request    | "errors": "given account is the same as the account destination" | The `amount` is less than zero.                                     |
+      | 401 Unauthorized   | "errors": "given account destination id is invalid"              | The entered `id` is not valid.                                      |
+
+## ✅ Acknowledgements
 
 I thank all the authors and content available by the application developers and my
 mentor [Pedro](https://github.com/pedroyremolo) for guiding me in creating the project.

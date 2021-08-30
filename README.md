@@ -60,18 +60,18 @@ $ cd DesafioStone
 # Run the application
 $ Make run-local
 
-# The server will start on port:5000 - go to <http://localhost:3333>
+# The server will start on port:5000 - go to <http://localhost:5000>
 ```
 
 ### Makefile
 
 There are three commands to be used as a shortcut.
 
-- Make build-image:
+- make build-image:
     - This shortcut corresponds to "docker build -t rafaelcmedrado/desafio:latest -f build/Dockerfile .".
-- Make push-image:
+- make push-image:
     - This shortcut corresponds to "docker push rafaelcmedrado/desafio:latest".
-- Make run-local:
+- make run-local:
     - This shortcut corresponds to "docker-compose -f deploy/local/docker-compose.yml up".
   
 ### 🔢 Environment Variables
@@ -106,7 +106,7 @@ The following tools were used in the construction of the project:
 
 - `POST /accounts` - Account creation endpoint.
 
-    - To make the request, pass through json.
+    - The request and response bodies will be in json.
   
     - Request Example:
       ```bash
@@ -137,7 +137,7 @@ The following tools were used in the construction of the project:
 
 - `GET /accounts` - Account listing endpoint.
 
-    - It is not necessary to request.
+    - It is not necessary to send body request and the response body will be by json.
   
     - Response Example:
       ```bash
@@ -170,7 +170,7 @@ The following tools were used in the construction of the project:
       
 - `GET /accounts/{id}/balance` - Account balance display endpoint.
 
-    - It is not necessary to request.
+    - It is not necessary to send body request only the id by url and the response body will be by json.
   
     - Response Example:
       ```bash
@@ -190,7 +190,7 @@ The following tools were used in the construction of the project:
 
 - `POST /login` - Account authentication endpoint.
 
-    - To make the request, pass through json.
+    - The request and response bodies will be in json.
   
     - This function returns a token of type base64 to be placed in headers as a form of authentication.
   
@@ -222,7 +222,7 @@ The following tools were used in the construction of the project:
 
     - Requires basic type `Authorization` credential header entry.
   
-    - It is not necessary to request.
+    - It is not necessary to send body request and the response body will be by json.
   
     - Response Example:
       ```bash  
@@ -251,7 +251,7 @@ The following tools were used in the construction of the project:
 
     - Requires basic type `Authorization` credential header entry.
   
-    - To make the request, pass through json.
+    - The request of the body and the response will be in json.
   
     - Request Example:
       ```bash

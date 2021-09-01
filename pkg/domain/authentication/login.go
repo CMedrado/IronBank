@@ -5,10 +5,13 @@ import (
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
 type UseCase struct {
 	StoredToken Repository
+	logger      *logrus.Entry
 }
 
 // AuthenticatedLogin authenticates the account and returns a token
@@ -40,4 +43,8 @@ func (uc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
 		return entities.Token{}, domain2.ErrInsert
 	}
 	return token, nil
+}
+
+func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
+	return &UseCase{StoredToken: repository, logger: log}
 }

@@ -4,10 +4,13 @@ import (
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
 type UseCase struct {
 	StoredTransfer Repository
+	logger         *logrus.Entry
 }
 
 // GetTransfers returns all account transfers
@@ -61,4 +64,8 @@ func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entit
 		return domain2.ErrInsert, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	return nil, id, accountOrigin, accountDestination
+}
+
+func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
+	return &UseCase{StoredTransfer: repository, logger: log}
 }

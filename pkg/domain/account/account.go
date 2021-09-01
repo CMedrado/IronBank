@@ -4,10 +4,13 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
 type UseCase struct {
 	StoredAccount Repository
+	logger        *logrus.Entry
 }
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
@@ -93,4 +96,8 @@ func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestinat
 		return domain.ErrUpdate
 	}
 	return nil
+}
+
+func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
+	return &UseCase{StoredAccount: repository, logger: log}
 }

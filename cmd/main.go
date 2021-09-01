@@ -52,12 +52,12 @@ func main() {
 	accountStorage := accounts.NewStored(pool, lentry)
 	accountToken := token.NewStored(pool, lentry)
 	accountTransfer := transfer.NewStored(pool, lentry)
-	accountUseCase := account2.UseCase{StoredAccount: accountStorage}
-	loginUseCase := authentication2.UseCase{StoredToken: accountToken}
-	transferUseCase := transfer2.UseCase{StoredTransfer: accountTransfer}
-	accountHandler := account.NewHandler(&accountUseCase, lentry)
-	loginHandler := authentication.NewHandler(&accountUseCase, &loginUseCase, lentry)
-	transferHandler := transfer3.NewHandler(&accountUseCase, &loginUseCase, &transferUseCase, lentry)
+	accountUseCase := account2.NewUseCase(accountStorage, lentry)
+	loginUseCase := authentication2.NewUseCase(accountToken, lentry)
+	transferUseCase := transfer2.NewUseCase(accountTransfer, lentry)
+	accountHandler := account.NewHandler(accountUseCase, lentry)
+	loginHandler := authentication.NewHandler(accountUseCase, loginUseCase, lentry)
+	transferHandler := transfer3.NewHandler(accountUseCase, loginUseCase, transferUseCase, lentry)
 	server := http2.NewAPI(accountHandler, loginHandler, transferHandler, lentry)
 
 	serverLog := lentry.WithField("Port", config.Api.Port)

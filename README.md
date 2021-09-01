@@ -170,7 +170,7 @@ The following tools were used in the construction of the project:
       
 - `GET /accounts/{id}/balance` - Account balance display endpoint.
 
-    - It is not necessary to send body request only the id by url and the response body will be by json.
+    - It is not necessary to send request body only the id by url and the response body will be by json.
   
     - Response Example:
       ```bash
@@ -222,7 +222,7 @@ The following tools were used in the construction of the project:
 
     - Requires basic type `Authorization` credential header entry.
   
-    - It is not necessary to send body request and the response body will be by json.
+    - It is not necessary to send request body and the response body will be by json.
   
     - Response Example:
       ```bash  

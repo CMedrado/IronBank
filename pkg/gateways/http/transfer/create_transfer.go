@@ -124,10 +124,7 @@ func (e errorStruct) errorCreate(err error) {
 		if err.Error() == transfer.ErrWithoutBalance.Error() ||
 			err.Error() == transfer.ErrInvalidAmount.Error() ||
 			err.Error() == transfer.ErrSameAccount.Error() ||
-			err.Error() == domain2.ErrInsert.Error() ||
-			err.Error() == domain2.ErrParse.Error() ||
-			err.Error() == domain2.ErrSelect.Error() ||
-			err.Error() == transfer.ErrInvalidDestinationID.Error() {
+			err.Error() == domain2.ErrParse.Error() {
 			e.l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain2.CreatedAt(),
@@ -142,13 +139,23 @@ func (e errorStruct) errorCreate(err error) {
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrInvalidID.Error() {
+		} else if err.Error() == domain2.ErrInvalidID.Error() ||
+			err.Error() == transfer.ErrInvalidDestinationID.Error() {
 			e.l.WithFields(log.Fields{
-				"type":          http.StatusNotAcceptable,
+				"type":          http.StatusNotFound,
 				"time":          domain2.CreatedAt(),
 				"request_token": e.token,
 			}).Error(err)
-			e.w.WriteHeader(http.StatusNotAcceptable)
+			e.w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(e.w).Encode(ErrJson)
+		} else if err.Error() == domain2.ErrInsert.Error() ||
+			err.Error() == domain2.ErrSelect.Error() {
+			e.l.WithFields(log.Fields{
+				"type":          http.StatusInternalServerError,
+				"time":          domain2.CreatedAt(),
+				"request_token": e.token,
+			}).Error(err)
+			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)

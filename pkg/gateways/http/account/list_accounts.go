@@ -32,9 +32,9 @@ func (e errorStruct) errorList(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
 	if err.Error() == domain2.ErrInsert.Error() {
 		e.l.WithFields(log.Fields{
-			"type": http.StatusBadRequest,
+			"type": http.StatusInternalServerError,
 		}).Error(err)
-		e.w.WriteHeader(http.StatusBadRequest)
+		e.w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
 		e.w.WriteHeader(http.StatusBadRequest)

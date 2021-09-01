@@ -36,18 +36,18 @@ func (e errorStruct) errorBalance(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
 	if err.Error() == domain2.ErrInvalidID.Error() {
 		e.l.WithFields(log.Fields{
-			"type":       http.StatusNotAcceptable,
+			"type":       http.StatusNotFound,
 			"request_id": e.id,
 			"time":       domain2.CreatedAt(),
 		}).Error(err)
-		e.w.WriteHeader(http.StatusNotAcceptable)
+		e.w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(e.w).Encode(ErrJson)
 	} else if err.Error() == domain2.ErrParse.Error() || err.Error() == domain2.ErrSelect.Error() {
 		e.l.WithFields(log.Fields{
-			"type": http.StatusBadRequest,
+			"type": http.StatusInternalServerError,
 			"time": domain2.CreatedAt(),
 		}).Error(err)
-		e.w.WriteHeader(http.StatusBadRequest)
+		e.w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
 		e.w.WriteHeader(http.StatusBadRequest)

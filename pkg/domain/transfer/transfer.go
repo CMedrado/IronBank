@@ -114,7 +114,7 @@ func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entit
 			"accountDestinationId": accountDestinationIdUUID,
 			"where":                "checkExistID",
 		}).Error(err)
-		return domain2.ErrInvalidDestinationID, uuid.UUID{}, entities.Account{}, entities.Account{}
+		return ErrInvalidDestinationID, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	accountOrigin.Balance = accountOrigin.Balance - amount

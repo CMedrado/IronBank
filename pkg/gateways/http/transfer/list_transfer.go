@@ -2,7 +2,6 @@ package transfer
 
 import (
 	"encoding/json"
-	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
@@ -24,17 +23,21 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 		e.errorList(err)
 		return
 	}
+	accountOrigin, err := s.account.SearchAccount(accountOriginID)
+	if err != nil {
+		e.errorList(err)
+		return
+	}
 	accountToken, err := s.login.GetTokenID(tokenID)
 	if err != nil {
 		e.errorList(err)
 		return
 	}
-	Transfers, err := s.transfer.GetTransfers(accountOriginID, accountToken, token)
+	Transfers, err := s.transfer.GetTransfers(accountOrigin, accountToken, token)
 	if err != nil {
 		e.errorList(err)
 		return
 	}
-
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
 		"time": domain2.CreatedAt(),
@@ -55,12 +58,12 @@ func (e errorStruct) errorList(err error) {
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if errors.Is(err, domain2.ErrSelect) || errors.Is(err, domain2.ErrParse) || errors.Is(err, domain2.ErrInsert) {
+		} else if err.Error() == domain2.ErrSelect.Error() || err.Error() == domain2.ErrInsert.Error() {
 			e.l.WithFields(log.Fields{
-				"type": http.StatusBadRequest,
+				"type": http.StatusInternalServerError,
 				"time": domain2.CreatedAt(),
 			}).Error(err)
-			e.w.WriteHeader(http.StatusBadRequest)
+			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrAccountExists.Error() {
 			e.l.WithFields(log.Fields{

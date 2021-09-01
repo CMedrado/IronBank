@@ -80,10 +80,10 @@ func (e errorStruct) errorLogin(err error) {
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInsert.Error() || err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
-				"type": http.StatusBadRequest,
+				"type": http.StatusInternalServerError,
 				"time": domain2.CreatedAt(),
 			}).Error(err)
-			e.w.WriteHeader(http.StatusBadRequest)
+			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)

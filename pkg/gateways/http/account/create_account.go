@@ -58,8 +58,16 @@ func (e errorStruct) errorCreate(err error) {
 		}).Error(err)
 		e.w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(e.w).Encode(ErrJson)
-	} else {
+	} else if err.Error() == domain.ErrInsert.Error() ||
+		err.Error() == domain.ErrSelect.Error() {
+		e.l.WithFields(log.Fields{
+			"type": http.StatusInternalServerError,
+			"time": domain.CreatedAt(),
+		}).Error(err)
 		e.w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(e.w).Encode(ErrJson)
+	} else {
+		e.w.WriteHeader(http.StatusBadRequest)
 	}
 	return
 }

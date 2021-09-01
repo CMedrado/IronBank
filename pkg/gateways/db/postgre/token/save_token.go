@@ -2,7 +2,10 @@ package token
 
 import (
 	"context"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 func (a *Storage) SaveToken(token entities.Token) error {
@@ -13,6 +16,11 @@ func (a *Storage) SaveToken(token entities.Token) error {
 		return nil
 	}
 	if err != nil {
+		a.log.WithFields(log.Fields{
+			"module": "saveToken",
+			"type":   http.StatusInternalServerError,
+			"time":   domain.CreatedAt(),
+		}).Error(err)
 		return err
 	}
 	return nil

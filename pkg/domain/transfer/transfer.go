@@ -15,12 +15,28 @@ type UseCase struct {
 
 // GetTransfers returns all account transfers
 func (auc UseCase) GetTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string) ([]entities.Transfer, error) {
+	l := auc.logger.WithFields(logrus.Fields{
+		"module": "getTransfers",
+	})
 	err := CheckToken(token, accountToken)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "checkToken",
+		}).Error(err)
 		return []entities.Transfer{}, err
+
 	}
 	transfers, err := auc.StoredTransfer.ReturnTransfer(accountOriginID)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":            http.StatusBadRequest,
+			"time":            domain2.CreatedAt(),
+			"accountOriginID": accountOriginID,
+			"where":           "returnTransfer",
+		}).Error(err)
 		return []entities.Transfer{}, domain2.ErrSelect
 	}
 	return transfers, nil
@@ -28,28 +44,63 @@ func (auc UseCase) GetTransfers(accountOriginID uuid.UUID, accountToken entities
 
 // CreateTransfers create and transfers, returns the id of the created transfer
 func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
+	l := auc.logger.WithFields(logrus.Fields{
+		"module": "getTransfers",
+	})
 	err := CheckAmount(amount)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":   http.StatusBadRequest,
+			"time":   domain2.CreatedAt(),
+			"amount": amount,
+			"where":  "checkAmount",
+		}).Error(err)
 		return err, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	err = CheckToken(token, accountToken)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":         http.StatusBadRequest,
+			"time":         domain2.CreatedAt(),
+			"token":        token,
+			"accountToken": accountToken.CreatedAt.Format("02/01/2006 15:04:05") + ":" + accountToken.IdAccount.String() + ":" + accountToken.ID.String(),
+			"where":        "checkToken",
+		}).Error(err)
 		return err, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	err = CheckCompareID(accountOriginID, accountDestinationIdUUID)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":                 http.StatusBadRequest,
+			"time":                 domain2.CreatedAt(),
+			"accountOriginId":      accountOriginID,
+			"accountDestinationId": accountDestinationIdUUID,
+			"where":                "checkCompareID",
+		}).Error(err)
 		return err, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	err = CheckAccountBalance(accountOrigin.Balance, amount)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":   http.StatusBadRequest,
+			"time":   domain2.CreatedAt(),
+			"amount": amount,
+			"where":  "checkAccountBalance",
+		}).Error(err)
 		return err, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	err = domain2.CheckExistID(accountDestination)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":                 http.StatusBadRequest,
+			"time":                 domain2.CreatedAt(),
+			"accountDestinationId": accountDestinationIdUUID,
+			"where":                "checkExistID",
+		}).Error(err)
 		return domain2.ErrInvalidDestinationID, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
@@ -61,6 +112,11 @@ func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entit
 	transfer := entities.Transfer{ID: id, OriginAccountID: accountOriginID, DestinationAccountID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
 	err = auc.StoredTransfer.SaveTransfer(transfer)
 	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":  http.StatusInternalServerError,
+			"time":  domain2.CreatedAt(),
+			"where": "saveTransfer",
+		}).Error(err)
 		return domain2.ErrInsert, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	return nil, id, accountOrigin, accountDestination

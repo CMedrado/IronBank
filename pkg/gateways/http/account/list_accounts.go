@@ -24,7 +24,7 @@ func (s *Handler) ListAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
-	}).Info("lis the accounts successfully!")
+	}).Info("list the accounts successfully!")
 	json.NewEncoder(w).Encode(response)
 }
 

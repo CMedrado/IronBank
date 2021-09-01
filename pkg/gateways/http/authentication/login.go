@@ -3,6 +3,7 @@ package authentication
 import (
 	"encoding/json"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -25,11 +26,21 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	e := errorStruct{l: l, w: w}
 	err, cpf := domain2.CheckCPF(requestBody.CPF)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"where": "checkCPF",
+		}).Error(err)
 		e.errorLogin(err)
 		return
 	}
 	account, err := s.account.GetAccountCPF(cpf)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"where": "getAccountCPF",
+		}).Error(err)
 		e.errorLogin(err)
 		return
 	}

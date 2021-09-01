@@ -3,6 +3,8 @@ package transfer
 import (
 	"encoding/json"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
+	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -22,30 +24,61 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	l := s.logger.WithFields(log.Fields{
 		"module": "https",
 		"method": "processTransfer",
+		"token":  token,
 	})
 	e := errorStruct{l: l, token: token, w: w}
 	accountOriginID, tokenOriginID, err := DecoderToken(token)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "decoderToken",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountOrigin, err := s.account.SearchAccount(accountOriginID)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "searchAccount",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountToken, err := s.login.GetTokenID(tokenOriginID)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "getTokenID",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountDestinationIdUUID, err := uuid.Parse(requestBody.AccountDestinationID)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "Parse",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountDestination, err := s.account.SearchAccount(accountDestinationIdUUID)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "searchAccount",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
@@ -56,6 +89,12 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.account.UpdateBalance(accountOrigin, accountDestination)
 	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusInternalServerError,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "searchAccount",
+		}).Error(err)
 		e.errorCreate(err)
 		return
 	}

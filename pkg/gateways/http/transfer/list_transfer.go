@@ -62,6 +62,20 @@ func (e errorStruct) errorList(err error) {
 			}).Error(err)
 			e.w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(e.w).Encode(ErrJson)
+		} else if err.Error() == domain2.ErrAccountExists.Error() {
+			e.l.WithFields(log.Fields{
+				"type": http.StatusNotFound,
+				"time": domain2.CreatedAt(),
+			}).Error(err)
+			e.w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(e.w).Encode(ErrJson)
+		} else if err.Error() == domain2.ErrParse.Error() {
+			e.l.WithFields(log.Fields{
+				"type": http.StatusBadRequest,
+				"time": domain2.CreatedAt(),
+			}).Error(err)
+			e.w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)
 		}

@@ -14,7 +14,7 @@ type UseCase struct {
 }
 
 // GetTransfers returns all account transfers
-func (auc UseCase) GetTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string) ([]entities.Transfer, error) {
+func (auc UseCase) GetTransfers(accountOrigin entities.Account, accountToken entities.Token, token string) ([]entities.Transfer, error) {
 	l := auc.logger.WithFields(logrus.Fields{
 		"module": "getTransfers",
 	})
@@ -29,12 +29,25 @@ func (auc UseCase) GetTransfers(accountOriginID uuid.UUID, accountToken entities
 		return []entities.Transfer{}, err
 
 	}
-	transfers, err := auc.StoredTransfer.ReturnTransfer(accountOriginID)
+
+	err = domain2.CheckAccountExistence(accountOrigin)
+	if err != nil {
+		l.WithFields(logrus.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "checkAccountExistence",
+		}).Error(err)
+		return []entities.Transfer{}, err
+
+	}
+
+	transfers, err := auc.StoredTransfer.ReturnTransfer(accountOrigin.ID)
 	if err != nil {
 		l.WithFields(logrus.Fields{
 			"type":            http.StatusBadRequest,
 			"time":            domain2.CreatedAt(),
-			"accountOriginID": accountOriginID,
+			"accountOriginID": accountOrigin.ID,
 			"where":           "returnTransfer",
 		}).Error(err)
 		return []entities.Transfer{}, domain2.ErrSelect

@@ -20,6 +20,6 @@ type LoginUseCase interface {
 }
 
 type TransferUseCase interface {
-	GetTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string) ([]entities.Transfer, error)
+	GetTransfers(accountOrigin entities.Account, accountToken entities.Token, token string) ([]entities.Transfer, error)
 	CreateTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account)
 }

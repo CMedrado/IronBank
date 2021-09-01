@@ -31,7 +31,7 @@ func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (
 			"time":  domain2.CreatedAt(),
 			"where": "checkLogin",
 		}).Error(err)
-		return domain2.ErrLogin, ""
+		return ErrLogin, ""
 	}
 
 	now := domain2.CreatedAt()

@@ -127,13 +127,13 @@ The following tools were used in the construction of the project:
       
     - Possible Errors:
 
-      | Error Code       | Body JSON                                       | Description                                              |
-      |------------------|-------------------------------------------------|----------------------------------------------------------|
-      | 400  Bad Request | "errors": "given cpf is already used"           | The `cpf` has already been used by another account.      |
-      | 400  Bad Request | "errors": "unable to insert"                    | The database is unable to insert.                        |
-      | 400 Bad Request  | "errors": "unable to select"                    | The database is unable to select.                        |
-      | 400 Bad Request  | "errors": "given the balance amount is invalid" | The `balance` amount on account creation is less than 0. |
-      | 400 Bad Request  | "errors": "given cpf is invalid"                | The `cpf` entered to create the account is wrong.        |
+      | Error Code                | Body JSON                                                                | Description                                              |
+      |---------------------------|--------------------------------------------------------------------------|----------------------------------------------------------|
+      | 400 Bad Request           | "errors": "given cpf is already used"                                    | The `cpf` has already been used by another account.      |
+      | 400 Bad Request           | "errors": "given the balance amount is invalid"                          | The `balance` amount on account creation is less than 0. |
+      | 400 Bad Request           | "errors": "given cpf is invalid"                                         | The `cpf` entered to create the account is wrong.        |
+      | 500 Internal Server Error | "errors": "there was an error trying the insert command in the database" | The database is unable to insert.                        |
+      | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select.                        |
 
 - `GET /accounts` - Account listing endpoint.
 
@@ -164,9 +164,9 @@ The following tools were used in the construction of the project:
       ```
     - Possible Errors:
 
-      | Error Code      | Body JSON                    | Description                       |
-      |---------------- |------------------------------|-----------------------------------|
-      | 400 Bad Request | "errors": "unable to insert" | The database is unable to insert. |
+      | Error Code                | Body JSON                                                                | Description                       |
+      |---------------------------|--------------------------------------------------------------------------|-----------------------------------|
+      | 500 Internal Server Error | "errors": "there was an error trying the insert command in the database" | The database is unable to insert. |
       
 - `GET /accounts/{id}/balance` - Account balance display endpoint.
 
@@ -180,11 +180,11 @@ The following tools were used in the construction of the project:
       ```
     - Possible Errors:
 
-      |      Error Code    |            Body JSON                    |    Description                                                      |
-      |--------------------|-----------------------------------------|---------------------------------------------------------------------|
-      | 400 Bad Request    | "errors": "given the UUID is incorrect" | The UUID cannot be converted because there is an error in the UUID. |
-      | 400 Bad Request    | "errors": "unable to select"            | The database is unable to select.                                   |
-      | 406 Not Acceptable | "errors": "given id is invalid"         | The entered `id` is not valid.                                      |
+      |      Error Code           |            Body JSON                                                     |    Description                                                    |
+      |---------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------|
+      | 400 Bad Request           | "errors": "given the UUID is incorrect"                                  | The UUID cannot be converted because there is an error in the ID. |
+      | 404 Not Found             | "errors": "given id is invalid"                                          | The entered `id` is not valid.                                    |
+      | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select.                                 |
 
 #### Login
 
@@ -210,13 +210,13 @@ The following tools were used in the construction of the project:
       ```
     - Possible Errors:
 
-      |      Error Code  |            Body JSON                          |    Description                    |
-      |------------------|-----------------------------------------------|-----------------------------------|
-      | 401 Unauthorized | "errors": "given secret or CPF are incorrect" | THe `cpf` or `password` is wrong. |
-      | 400 Bad Request  | "errors": "unable to insert"                  | The database is unable to insert. |
-      | 400 Bad Request  | "errors": "unable to select"                  | The database is unable to select. |
+      |      Error Code           |            Body JSON                                                     |    Description                    |
+      |---------------------------|--------------------------------------------------------------------------|-----------------------------------|
+      | 401 Unauthorized          | "errors": "given secret or CPF are incorrect"                            | THe `cpf` or `password` is wrong. |
+      | 500 Internal Server Error | "errors": "there was an error trying the insert command in the database" | The database is unable to insert. |
+      | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select. |
 
-#### Transfer
+#### Transfer             
 
 - `GET /transfers` - Account transfer listing endpoint.
 
@@ -238,14 +238,14 @@ The following tools were used in the construction of the project:
       ]
       }
       ```
-  - Possible Errors:
+    - Possible Errors:
 
-     |   Error Code     |            Body JSON                    |    Description                                                      |
-     |------------------|-----------------------------------------|---------------------------------------------------------------------|
-     | 400 Bad Request  | "errors": "given id is invalid"         | The entered `id` is not valid.                                      |
-     | 400 Bad Request  | "errors": "given the UUID is incorrect" | The UUID cannot be converted because there is an error in the UUID. |
-     | 400 Bad Request  | "errors": "unable to select"            | The database is unable to select.                                   |
-     | 401 Unauthorized | "errors": "given token is invalid"      | The passed token is not correct.                                    |
+       |   Error Code              |            Body JSON                                                     |    Description                                                    |
+       |---------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------|
+       | 400 Bad Request           | "errors": "given the UUID is incorrect"                                  | The UUID cannot be converted because there is an error in the ID. |
+       | 401 Unauthorized          | "errors": "given token is invalid"                                       | The passed token is not correct.                                  |
+       | 404 Not Found             | "this account does not exist"                                            | when the given account is not empty.                              |
+       | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select.                                 |
       
 - `POST /transfers` - Transfer creation endpoint between accounts.
 
@@ -270,17 +270,17 @@ The following tools were used in the construction of the project:
 
     - Possible Errors:
 
-      |   Error Code       |            Body JSON                                             |    Description                                                      |
-      |--------------------|------------------------------------------------------------------|---------------------------------------------------------------------|
-      | 406 Not Acceptable | "errors": "given id is invalid"                                  | The entered `id` is not valid.                                      |
-      | 400 Bad Request    | "errors": "given the UUID is incorrect"                          | The UUID cannot be converted because there is an error in the UUID. |
-      | 400 Bad Request    | "errors": "unable to select"                                     | The database is unable to select.                                   |
-      | 400 Bad Request    | "errors": "unable to insert"                                     | The database is unable to insert.                                   |
-      | 401 Unauthorized   | "errors": "given token is invalid"                               | The passed `token` is not correct.                                  |
-      | 400 Bad Request    | "errors": "given account without balance"                        | The origin account has no `balance`.                                |
-      | 400 Bad Request    | "errors": "given amount is invalid"                              | The two accounts are the same.                                      |
-      | 400 Bad Request    | "errors": "given account is the same as the account destination" | The `amount` is less than zero.                                     |
-      | 401 Unauthorized   | "errors": "given account destination id is invalid"              | The entered `id` is not valid.                                      |
+      |   Error Code              |            Body JSON                                                     |    Description                                                    |
+      |---------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------|
+      | 400 Bad Request           | "errors": "given the UUID is incorrect"                                  | The UUID cannot be converted because there is an error in the ID. |
+      | 400 Bad Request           | "errors": "given account without balance"                                | The origin account has no `balance`.                              |
+      | 400 Bad Request           | "errors": "given amount is invalid"                                      | The two accounts are the same.                                    |
+      | 400 Bad Request           | "errors": "given account is the same as the account destination"         | The `amount` is less than zero.                                   |
+      | 401 Unauthorized          | "errors": "given token is invalid"                                       | The passed `token` is not correct.                                |
+      | 404 Not Found             | "errors": "given id is invalid"                                          | The entered `id` is not valid.                                    |
+      | 404 Not Found             | "errors": "given account destination id is invalid"                      | The entered `id` is not valid.                                    |
+      | 500 Internal Server Error | "errors": "there was an error trying the insert command in the database" | The database is unable to insert.                                 |
+      | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select.                                 |
 
 ## ✅ Acknowledgements
 

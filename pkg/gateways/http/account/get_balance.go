@@ -42,12 +42,19 @@ func (e errorStruct) errorBalance(err error) {
 		}).Error(err)
 		e.w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(e.w).Encode(ErrJson)
-	} else if err.Error() == domain2.ErrParse.Error() || err.Error() == domain2.ErrSelect.Error() {
+	} else if err.Error() == domain2.ErrSelect.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusInternalServerError,
 			"time": domain2.CreatedAt(),
 		}).Error(err)
 		e.w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(e.w).Encode(ErrJson)
+	} else if err.Error() == domain2.ErrParse.Error() {
+		e.l.WithFields(log.Fields{
+			"type": http.StatusBadRequest,
+			"time": domain2.CreatedAt(),
+		}).Error(err)
+		e.w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
 		e.w.WriteHeader(http.StatusBadRequest)

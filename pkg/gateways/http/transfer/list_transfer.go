@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
+	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -58,14 +59,14 @@ func (e errorStruct) errorList(err error) {
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrSelect.Error() || err.Error() == domain2.ErrInsert.Error() {
+		} else if err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusInternalServerError,
 				"time": domain2.CreatedAt(),
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrAccountExists.Error() {
+		} else if err.Error() == transfer.ErrAccountExist.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusNotFound,
 				"time": domain2.CreatedAt(),

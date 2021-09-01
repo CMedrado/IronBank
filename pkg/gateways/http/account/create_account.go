@@ -49,7 +49,7 @@ type errorStruct struct {
 
 func (e errorStruct) errorCreate(err error) {
 	ErrJson := http_server.ErrorsResponse{Errors: err.Error()}
-	if err.Error() == domain.ErrAccountExists.Error() ||
+	if err.Error() == account.ErrAccountExists.Error() ||
 		err.Error() == account.ErrBalanceAbsent.Error() ||
 		err.Error() == domain.ErrInvalidCPF.Error() {
 		e.l.WithFields(log.Fields{

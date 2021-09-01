@@ -37,8 +37,8 @@ func (auc UseCase) GetTransfers(accountOrigin entities.Account, accountToken ent
 			"time":  domain2.CreatedAt(),
 			"token": token,
 			"where": "checkAccountExistence",
-		}).Error(err)
-		return []entities.Transfer{}, err
+		}).Error(ErrAccountExist)
+		return []entities.Transfer{}, ErrAccountExist
 
 	}
 

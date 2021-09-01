@@ -80,8 +80,9 @@ func TestMakeTransfers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
+				logger:         lentry,
 			}
-			accountOriginID, tokenOriginID, gotErr := transfer2.DecoderToken(testCase.in.Token)
+			accountOriginID, tokenOriginID, gotErr := authentication.DecoderToken(testCase.in.Token)
 			if gotErr == nil {
 				accountOrigin, gotErr := SearchAccount(accountOriginID)
 				if gotErr == nil {
@@ -113,7 +114,9 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
-
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+	lentry := logrus.NewEntry(logger)
 	var tt = []struct {
 		name    string
 		in      CreateTransferInput
@@ -139,8 +142,9 @@ func TestMakeGetTransfers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
+				logger:         lentry,
 			}
-			accountOriginID, tokenID, gotErr := transfer2.DecoderToken(testCase.in.Token)
+			accountOriginID, tokenID, gotErr := authentication.DecoderToken(testCase.in.Token)
 			accountToken, gotErr := GetTokenID(tokenID)
 			gotTransfer, gotErr := usecase.GetTransfers(accountOriginID, accountToken, testCase.in.Token)
 

@@ -1,4 +1,4 @@
-package transfer
+package authentication
 
 import (
 	"encoding/base64"

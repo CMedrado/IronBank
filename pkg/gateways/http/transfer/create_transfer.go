@@ -27,7 +27,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		"token":  token,
 	})
 	e := errorStruct{l: l, token: token, w: w}
-	accountOriginID, tokenOriginID, err := DecoderToken(token)
+	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
 	if err != nil {
 		l.WithFields(log.Fields{
 			"type":  http.StatusBadRequest,

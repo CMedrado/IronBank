@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -18,7 +19,7 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 	})
 	w.Header().Set("content-type", "application/json")
 	e := errorStruct{l: l, token: token, w: w}
-	accountOriginID, tokenID, err := DecoderToken(token)
+	accountOriginID, tokenID, err := authentication.DecoderToken(token)
 	if err != nil {
 		e.errorList(err)
 		return

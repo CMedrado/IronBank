@@ -11,7 +11,7 @@ func CheckLogin(accountOrigin entities.Account, newLogin entities.Login) error {
 		return domain2.ErrInvalidCPF
 	}
 	if accountOrigin.Secret != newLogin.Secret {
-		return domain2.ErrInvalidSecret
+		return ErrInvalidSecret
 	}
 	return nil
 }

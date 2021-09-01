@@ -71,7 +71,7 @@ type errorStruct struct {
 func (e errorStruct) errorLogin(err error) {
 	if err != nil {
 		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-		if err.Error() == domain2.ErrLogin.Error() {
+		if err.Error() == authentication.ErrLogin.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 				"time": domain2.CreatedAt(),

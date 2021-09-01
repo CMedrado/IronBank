@@ -56,7 +56,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 			"cpf":   balance,
 			"where": "checkBalance",
 		}).Error(err)
-		return uuid.UUID{}, domain.ErrBalanceAbsent
+		return uuid.UUID{}, ErrBalanceAbsent
 	}
 	id, _ := domain.Random()
 	secretHash := domain.CreateHash(secret)
@@ -147,7 +147,7 @@ func (auc UseCase) GetAccountCPF(cpf string) (entities.Account, error) {
 func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestination entities.Account) error {
 	err := auc.StoredAccount.ChangeBalance(accountOrigin, accountDestination)
 	if err != nil {
-		return domain.ErrUpdate
+		return ErrUpdate
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package account
 import (
 	"encoding/json"
 	"github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/account"
 	http_server "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -48,10 +49,10 @@ type errorStruct struct {
 
 func (e errorStruct) errorCreate(err error) {
 	ErrJson := http_server.ErrorsResponse{Errors: err.Error()}
-	if err.Error() == domain.ErrAccountExists.Error() ||
+	if err.Error() == account.ErrAccountExists.Error() ||
 		err.Error() == domain.ErrInsert.Error() ||
 		err.Error() == domain.ErrSelect.Error() ||
-		err.Error() == domain.ErrBalanceAbsent.Error() ||
+		err.Error() == account.ErrBalanceAbsent.Error() ||
 		err.Error() == domain.ErrInvalidCPF.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusBadRequest,

@@ -121,13 +121,13 @@ type errorStruct struct {
 func (e errorStruct) errorCreate(err error) {
 	if err != nil {
 		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-		if err.Error() == domain2.ErrWithoutBalance.Error() ||
-			err.Error() == domain2.ErrInvalidAmount.Error() ||
-			err.Error() == domain2.ErrSameAccount.Error() ||
+		if err.Error() == transfer.ErrWithoutBalance.Error() ||
+			err.Error() == transfer.ErrInvalidAmount.Error() ||
+			err.Error() == transfer.ErrSameAccount.Error() ||
 			err.Error() == domain2.ErrInsert.Error() ||
 			err.Error() == domain2.ErrParse.Error() ||
 			err.Error() == domain2.ErrSelect.Error() ||
-			err.Error() == domain2.ErrInvalidDestinationID.Error() {
+			err.Error() == transfer.ErrInvalidDestinationID.Error() {
 			e.l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain2.CreatedAt(),

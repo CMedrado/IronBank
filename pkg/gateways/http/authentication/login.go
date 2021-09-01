@@ -54,7 +54,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		"type":           http.StatusOK,
 		"time":           domain2.CreatedAt(),
 		"response_token": token,
-	}).Info("balance handled sucessfully!")
+	}).Info("sucessfully authentificated!")
 
 	response := TokenResponse{Token: token}
 

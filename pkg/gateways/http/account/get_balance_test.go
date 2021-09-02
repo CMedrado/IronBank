@@ -29,7 +29,7 @@ func TestHandler_GetBalance(t *testing.T) {
 			name:         "should unsuccessfully get balance when ID is invalid",
 			method:       "GET",
 			path:         "/accounts/3848/balance",
-			response:     http.StatusNotAcceptable,
+			response:     http.StatusNotFound,
 			responsebody: `{"errors":"given id is invalid"}` + "\n",
 		},
 	}

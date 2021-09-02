@@ -30,7 +30,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusUnauthorized,
 			"time":  domain2.CreatedAt(),
 			"token": token,
 			"where": "decoderToken",
@@ -41,7 +41,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	accountOrigin, err := s.account.SearchAccount(accountOriginID)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusInternalServerError,
 			"time":  domain2.CreatedAt(),
 			"token": token,
 			"where": "searchAccount",
@@ -52,7 +52,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	accountToken, err := s.login.GetTokenID(tokenOriginID)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusInternalServerError,
 			"time":  domain2.CreatedAt(),
 			"token": token,
 			"where": "getTokenID",
@@ -74,7 +74,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	accountDestination, err := s.account.SearchAccount(accountDestinationIdUUID)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusInternalServerError,
 			"time":  domain2.CreatedAt(),
 			"token": token,
 			"where": "searchAccount",

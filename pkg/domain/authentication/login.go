@@ -27,10 +27,10 @@ func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (
 	err := CheckLogin(account, newLogin)
 	if err != nil {
 		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusUnauthorized,
 			"time":  domain2.CreatedAt(),
 			"where": "checkLogin",
-		}).Error(err)
+		}).Error(ErrLogin)
 		return ErrLogin, ""
 	}
 

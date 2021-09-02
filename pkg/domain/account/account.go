@@ -38,7 +38,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 		}).Error(err)
 		return uuid.UUID{}, err
 	}
-	err = domain.CheckAccountExistence(account)
+	err = CheckAccountExistence(account)
 	if err != nil {
 		l.WithFields(logrus.Fields{
 			"type":  http.StatusBadRequest,
@@ -78,7 +78,7 @@ func (auc *UseCase) GetBalance(id string) (int, error) {
 
 	if err != nil {
 		l.WithFields(logrus.Fields{
-			"type":  http.StatusInternalServerError,
+			"type":  http.StatusBadRequest,
 			"time":  domain.CreatedAt(),
 			"id":    id,
 			"where": "parse",

@@ -7,5 +7,4 @@ var (
 	ErrInvalidAmount        = errors.New("given amount is invalid")
 	ErrSameAccount          = errors.New("given account is the same as the account destination")
 	ErrInvalidDestinationID = errors.New("given account destination id is invalid")
-	ErrAccountExist         = errors.New("this account does not exist")
 )

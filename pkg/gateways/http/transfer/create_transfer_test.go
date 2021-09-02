@@ -46,7 +46,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			method:       "POST",
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da5","amount": 300}`,
-			response:     http.StatusBadRequest,
+			response:     http.StatusNotFound,
 			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
@@ -117,7 +117,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 type TransferUsecaseMock struct {
 }
 
-func (uc *TransferUsecaseMock) GetTransfers(_ uuid.UUID, _ entities.Token, token string) ([]entities.Transfer, error) {
+func (uc *TransferUsecaseMock) GetTransfers(_ entities.Account, _ entities.Token, token string) ([]entities.Transfer, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
 	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" == token {
 		return []entities.Transfer{

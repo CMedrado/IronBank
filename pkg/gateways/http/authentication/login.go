@@ -27,17 +27,17 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	err, cpf := domain2.CheckCPF(requestBody.CPF)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusUnauthorized,
 			"time":  domain2.CreatedAt(),
 			"where": "checkCPF",
-		}).Error(err)
-		e.errorLogin(err)
+		}).Error(authentication.ErrLogin)
+		e.errorLogin(authentication.ErrLogin)
 		return
 	}
 	account, err := s.account.GetAccountCPF(cpf)
 	if err != nil {
 		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
+			"type":  http.StatusUnauthorized,
 			"time":  domain2.CreatedAt(),
 			"where": "getAccountCPF",
 		}).Error(err)

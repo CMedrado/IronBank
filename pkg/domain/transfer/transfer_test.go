@@ -1,11 +1,12 @@
 package transfer
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain"
+	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/file/transfer"
-	transfer2 "github.com/CMedrado/DesafioStone/pkg/gateways/http/transfer"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
 )
@@ -18,7 +19,9 @@ type CreateTransferInput struct {
 }
 
 func TestMakeTransfers(t *testing.T) {
-
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+	lentry := logrus.NewEntry(logger)
 	tt := []struct {
 		name                    string
 		in                      CreateTransferInput
@@ -145,8 +148,9 @@ func TestMakeGetTransfers(t *testing.T) {
 				logger:         lentry,
 			}
 			accountOriginID, tokenID, gotErr := authentication.DecoderToken(testCase.in.Token)
+			accountOrigin, _ := SearchAccount(accountOriginID)
 			accountToken, gotErr := GetTokenID(tokenID)
-			gotTransfer, gotErr := usecase.GetTransfers(accountOriginID, accountToken, testCase.in.Token)
+			gotTransfer, gotErr := usecase.GetTransfers(accountOrigin, accountToken, testCase.in.Token)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -186,7 +190,7 @@ func SearchAccount(id uuid.UUID) (entities.Account, error) {
 			CreatedAt: time2,
 		}, nil
 	}
-	return entities.Account{}, domain.ErrAccountExists
+	return entities.Account{}, domain2.ErrInvalidID
 }
 
 func GetAccountCPF(cpf string) (entities.Account, error) {

@@ -3,6 +3,7 @@ package authentication
 import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
 )
@@ -13,6 +14,9 @@ type CreateLoginInput struct {
 }
 
 func TestAuthenticatedLogin(t *testing.T) {
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
+	lentry := logrus.NewEntry(logger)
 	tt := []struct {
 		name    string
 		in      CreateLoginInput
@@ -64,6 +68,7 @@ func TestAuthenticatedLogin(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredToken: LoginRepoMock{},
+				logger:      lentry,
 			}
 			account := GetAccountCPF(testCase.in.CPF)
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.Secret, account)

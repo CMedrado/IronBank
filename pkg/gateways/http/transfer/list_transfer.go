@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
-	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -66,7 +65,7 @@ func (e errorStruct) errorList(err error) {
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == transfer.ErrAccountExist.Error() {
+		} else if err.Error() == domain2.ErrInvalidID.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusNotFound,
 				"time": domain2.CreatedAt(),

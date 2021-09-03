@@ -243,6 +243,7 @@ The following tools were used in the construction of the project:
        |   Error Code              |            Body JSON                                                     |    Description                                                    |
        |---------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------|
        | 400 Bad Request           | "errors": "given the UUID is incorrect"                                  | The UUID cannot be converted because there is an error in the ID. |
+       | 400 Bad Request           | "errors": "given the credential is not basic"                            | The credential used is different from the Basic credential.       |
        | 401 Unauthorized          | "errors": "given token is invalid"                                       | The passed token is not correct.                                  |
        | 404 Not Found             | "this account does not exist"                                            | when the given account is not empty.                              |
        | 500 Internal Server Error | "errors": "there was an error trying the select command in the database" | The database is unable to select.                                 |
@@ -276,6 +277,7 @@ The following tools were used in the construction of the project:
       | 400 Bad Request           | "errors": "given account without balance"                                | The origin account has no `balance`.                              |
       | 400 Bad Request           | "errors": "given amount is invalid"                                      | The two accounts are the same.                                    |
       | 400 Bad Request           | "errors": "given account is the same as the account destination"         | The `amount` is less than zero.                                   |
+      | 400 Bad Request           | "errors": "given the credential is not basic"                            | The credential used is different from the Basic credential.       |
       | 401 Unauthorized          | "errors": "given token is invalid"                                       | The passed `token` is not correct.                                |
       | 404 Not Found             | "errors": "given id is invalid"                                          | The entered `id` is not valid.                                    |
       | 404 Not Found             | "errors": "given account destination id is invalid"                      | The entered `id` is not valid.                                    |

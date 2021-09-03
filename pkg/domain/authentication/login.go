@@ -6,7 +6,6 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type UseCase struct {
@@ -16,21 +15,12 @@ type UseCase struct {
 
 // AuthenticatedLogin authenticates the account and returns a token
 func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
-	l := auc.logger.WithFields(logrus.Fields{
-		"module": "authenticatedLogin",
-	})
-
 	secretHash := domain2.CreateHash(secret)
 
 	newLogin := entities.Login{CPF: account.CPF, Secret: secretHash}
 
 	err := CheckLogin(account, newLogin)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusUnauthorized,
-			"time":  domain2.CreatedAt(),
-			"where": "checkLogin",
-		}).Error(ErrLogin)
 		return ErrLogin, ""
 	}
 
@@ -41,11 +31,6 @@ func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (
 	save := entities.Token{ID: idToken, IdAccount: account.ID, CreatedAt: now}
 	err = auc.StoredToken.SaveToken(save)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain2.CreatedAt(),
-			"where": "saveToken",
-		}).Error(err)
 		return domain2.ErrInsert, ""
 	}
 	return nil, encoded

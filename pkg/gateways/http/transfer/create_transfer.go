@@ -25,73 +25,36 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	l := s.logger.WithFields(log.Fields{
 		"module": "https",
 		"method": "processTransfer",
-		"token":  token,
 	})
 	e := errorStruct{l: l, token: token, w: w}
 
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "checkcredential",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 
 	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusUnauthorized,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "decoderToken",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountOrigin, err := s.account.SearchAccount(accountOriginID)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "searchAccount",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountToken, err := s.login.GetTokenID(tokenOriginID)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "getTokenID",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountDestinationIdUUID, err := uuid.Parse(requestBody.AccountDestinationID)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "Parse",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
 	accountDestination, err := s.account.SearchAccount(accountDestinationIdUUID)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "searchAccount",
-		}).Error(err)
 		e.errorCreate(err)
 		return
 	}
@@ -101,22 +64,10 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = s.account.UpdateBalance(accountOrigin, accountDestination)
-	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain2.CreatedAt(),
-			"token": token,
-			"where": "searchAccount",
-		}).Error(err)
-		e.errorCreate(err)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 
 	l.WithFields(log.Fields{
-		"type":       http.StatusCreated,
-		"time":       domain2.CreatedAt(),
-		"request_id": id,
+		"type": http.StatusCreated,
 	}).Info("create transfer successfully!")
 
 	response := TransferResponse{ID: id}
@@ -140,34 +91,27 @@ func (e errorStruct) errorCreate(err error) {
 			err.Error() == domain2.ErrParse.Error() ||
 			err.Error() == ErrInvalidCredential.Error() {
 			e.l.WithFields(log.Fields{
-				"type":          http.StatusBadRequest,
-				"time":          domain2.CreatedAt(),
-				"request_token": e.token,
+				"type": http.StatusBadRequest,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInvalidToken.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
-				"time": domain2.CreatedAt(),
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInvalidID.Error() ||
 			err.Error() == transfer.ErrInvalidDestinationID.Error() {
 			e.l.WithFields(log.Fields{
-				"type":          http.StatusNotFound,
-				"time":          domain2.CreatedAt(),
-				"request_token": e.token,
+				"type": http.StatusNotFound,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInsert.Error() ||
 			err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
-				"type":          http.StatusInternalServerError,
-				"time":          domain2.CreatedAt(),
-				"request_token": e.token,
+				"type": http.StatusInternalServerError,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)

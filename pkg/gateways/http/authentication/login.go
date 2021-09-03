@@ -26,21 +26,11 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	e := errorStruct{l: l, w: w}
 	err, cpf := domain2.CheckCPF(requestBody.CPF)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusUnauthorized,
-			"time":  domain2.CreatedAt(),
-			"where": "checkCPF",
-		}).Error(authentication.ErrLogin)
 		e.errorLogin(authentication.ErrLogin)
 		return
 	}
 	account, err := s.account.GetAccountCPF(cpf)
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type":  http.StatusUnauthorized,
-			"time":  domain2.CreatedAt(),
-			"where": "getAccountCPF",
-		}).Error(err)
 		e.errorLogin(err)
 		return
 	}
@@ -51,9 +41,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	l.WithFields(log.Fields{
-		"type":           http.StatusOK,
-		"time":           domain2.CreatedAt(),
-		"response_token": token,
+		"type": http.StatusOK,
 	}).Info("sucessfully authentificated!")
 
 	response := TokenResponse{Token: token}
@@ -74,14 +62,12 @@ func (e errorStruct) errorLogin(err error) {
 		if err.Error() == authentication.ErrLogin.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
-				"time": domain2.CreatedAt(),
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInsert.Error() || err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusInternalServerError,
-				"time": domain2.CreatedAt(),
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(e.w).Encode(ErrJson)

@@ -33,7 +33,6 @@ func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	l.WithFields(log.Fields{
 		"type":       http.StatusCreated,
 		"request_id": response,
-		"time":       domain.CreatedAt(),
 	}).Info("account created successfully!")
 
 	w.WriteHeader(http.StatusCreated)
@@ -54,7 +53,6 @@ func (e errorStruct) errorCreate(err error) {
 		err.Error() == domain.ErrInvalidCPF.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusBadRequest,
-			"time": domain.CreatedAt(),
 		}).Error(err)
 		e.w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(e.w).Encode(ErrJson)
@@ -62,7 +60,6 @@ func (e errorStruct) errorCreate(err error) {
 		err.Error() == domain.ErrSelect.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusInternalServerError,
-			"time": domain.CreatedAt(),
 		}).Error(err)
 		e.w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(e.w).Encode(ErrJson)

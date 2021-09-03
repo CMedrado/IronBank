@@ -14,12 +14,13 @@ import (
 func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	var requestBody TransfersRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
-	token := r.Header.Get("Authorization")
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	header := r.Header.Get("Authorization")
+
+	token, err := CheckCredential(header)
 
 	l := s.logger.WithFields(log.Fields{
 		"module": "https",
@@ -27,6 +28,18 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		"token":  token,
 	})
 	e := errorStruct{l: l, token: token, w: w}
+
+	if err != nil {
+		l.WithFields(log.Fields{
+			"type":  http.StatusBadRequest,
+			"time":  domain2.CreatedAt(),
+			"token": token,
+			"where": "checkcredential",
+		}).Error(err)
+		e.errorCreate(err)
+		return
+	}
+
 	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
 	if err != nil {
 		l.WithFields(log.Fields{
@@ -124,7 +137,8 @@ func (e errorStruct) errorCreate(err error) {
 		if err.Error() == transfer.ErrWithoutBalance.Error() ||
 			err.Error() == transfer.ErrInvalidAmount.Error() ||
 			err.Error() == transfer.ErrSameAccount.Error() ||
-			err.Error() == domain2.ErrParse.Error() {
+			err.Error() == domain2.ErrParse.Error() ||
+			err.Error() == ErrInvalidCredential.Error() {
 			e.l.WithFields(log.Fields{
 				"type":          http.StatusBadRequest,
 				"time":          domain2.CreatedAt(),

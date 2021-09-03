@@ -20,7 +20,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	}
 	header := r.Header.Get("Authorization")
 
-	token, err := CheckCredential(header)
+	token, err := CheckAuthorizationHeaderType(header)
 
 	l := s.logger.WithFields(log.Fields{
 		"module": "https",

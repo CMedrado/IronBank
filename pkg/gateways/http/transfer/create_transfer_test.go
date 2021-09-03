@@ -30,7 +30,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			body:         `{"account_destination_id":"a61227cf-a857-4bc6-8fcd-ad97cdad382a","amount": 500}`,
 			response:     http.StatusCreated,
 			responsebody: `{"id":"c5424440-4737-4e03-86d2-3adac90ddd20"}` + "\n",
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 		},
 		{
 			name:         "should unsuccessfully transfer amount when there is wrong token",
@@ -38,7 +38,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 300}`,
 			response:     http.StatusUnauthorized,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMeQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMeQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given token is invalid"}` + "\n",
 		},
 		{
@@ -47,7 +47,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da5","amount": 300}`,
 			response:     http.StatusNotFound,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account destination id is invalid"}` + "\n",
 		},
 		{
@@ -56,7 +56,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": -5}`,
 			response:     http.StatusBadRequest,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given amount is invalid"}` + "\n",
 		},
 		{
@@ -65,7 +65,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"75432539-c5ba-46d3-9690-44985b516da7","amount": 60000}`,
 			response:     http.StatusBadRequest,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account without balance"}` + "\n",
 		},
 		{
@@ -74,7 +74,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"6b1941db-ce17-4ffe-a7ed-22493a926bbc","amount": 300}`,
 			response:     http.StatusBadRequest,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given account is the same as the account destination"}` + "\n",
 		},
 		{
@@ -83,7 +83,16 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:     "/transfers",
 			body:     `{"account"0}`,
 			response: http.StatusBadRequest,
-			token:    "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:    "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+		},
+		{
+			name:         "should successfully transfer amount",
+			method:       "POST",
+			path:         "/transfers",
+			body:         `{"account_destination_id":"a61227cf-a857-4bc6-8fcd-ad97cdad382a","amount": 500}`,
+			response:     http.StatusBadRequest,
+			responsebody: `{"errors":"given the credential is not basic"}` + "\n",
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 		},
 	}
 	for _, tc := range createtransfer {

@@ -24,7 +24,7 @@ func TestHandler_ListTransfers(t *testing.T) {
 			method:       "GET",
 			path:         "/transfers",
 			response:     http.StatusOK,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"transfers":[{"id":"47399f23-2093-4dde-b32f-990cac27630e","origin_account_id":"6b1941db-ce17-4ffe-a7ed-22493a926bbc","destination_account_id":"a61227cf-a857-4bc6-8fcd-ad97cdad382a","amount":150,"created_at":"2021-07-20T15:17:25.933365Z"}]}` + "\n",
 		},
 		{
@@ -32,8 +32,16 @@ func TestHandler_ListTransfers(t *testing.T) {
 			method:       "GET",
 			path:         "/transfers",
 			response:     http.StatusUnauthorized,
-			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMeQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			token:        "Basic MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMeQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 			responsebody: `{"errors":"given token is invalid"}` + "\n",
+		},
+		{
+			name:         "should successfully get transfers",
+			method:       "GET",
+			path:         "/transfers",
+			response:     http.StatusBadRequest,
+			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
+			responsebody: `{"errors":"given the credential is not basic"}` + "\n",
 		},
 	}
 	for _, tc := range gettransfer {

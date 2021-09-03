@@ -5,7 +5,6 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type UseCase struct {
@@ -15,47 +14,20 @@ type UseCase struct {
 
 //CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
 func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error) {
-	l := auc.logger.WithFields(logrus.Fields{
-		"module": "createAccount",
-	})
 	err, cpf := domain.CheckCPF(cpf)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"cpf":   cpf,
-			"where": "checkCPF",
-		}).Error(err)
 		return uuid.UUID{}, err
 	}
 	account, err := auc.GetAccountCPF(cpf)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"cpf":   cpf,
-			"where": "getAccountCPF",
-		}).Error(err)
 		return uuid.UUID{}, err
 	}
 	err = CheckAccountExistence(account)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"cpf":   cpf,
-			"where": "checkAccountExistence",
-		}).Error(err)
 		return uuid.UUID{}, err
 	}
 	err = CheckBalance(balance)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"cpf":   balance,
-			"where": "checkBalance",
-		}).Error(err)
 		return uuid.UUID{}, ErrBalanceAbsent
 	}
 	id, _ := domain.Random()
@@ -70,41 +42,19 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 
 //GetBalance requests the salary for the Story by sending the ID
 func (auc *UseCase) GetBalance(id string) (int, error) {
-	l := auc.logger.WithFields(logrus.Fields{
-		"module": "GetBalance",
-	})
-
 	idUUID, err := uuid.Parse(id)
 
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"id":    id,
-			"where": "parse",
-		}).Error(err)
 		return 0, domain.ErrParse
 	}
 
 	account, err := auc.SearchAccount(idUUID)
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain.CreatedAt(),
-			"id":    id,
-			"where": "searchAccount",
-		}).Error(err)
 		return 0, err
 	}
 	err = domain.CheckExistID(account)
 
 	if err != nil {
-		l.WithFields(logrus.Fields{
-			"type":  http.StatusBadRequest,
-			"time":  domain.CreatedAt(),
-			"id":    id,
-			"where": "checkExistID",
-		}).Error(err)
 		return 0, err
 	}
 
@@ -116,11 +66,6 @@ func (auc *UseCase) GetAccounts() ([]entities.Account, error) {
 	accounts, err := auc.StoredAccount.ReturnAccounts()
 
 	if err != nil {
-		auc.logger.WithFields(logrus.Fields{
-			"type":  http.StatusInternalServerError,
-			"time":  domain.CreatedAt(),
-			"where": "returnAccounts",
-		}).Error(err)
 		return []entities.Account{}, domain.ErrInsert
 	}
 

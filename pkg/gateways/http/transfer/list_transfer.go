@@ -13,7 +13,7 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	header := r.Header.Get("Authorization")
 
-	token, err := CheckCredential(header)
+	token, err := CheckAuthorizationHeaderType(header)
 
 	l := s.logger.WithFields(log.Fields{
 		"module": "https",

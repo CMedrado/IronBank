@@ -3,5 +3,5 @@ package transfer
 import "errors"
 
 var (
-	ErrInvalidCredential = errors.New("given the credential is not basic")
+	ErrInvalidCredential = errors.New("given the authorization header type is not basic")
 )

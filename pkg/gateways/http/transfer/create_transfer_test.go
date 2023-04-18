@@ -3,14 +3,16 @@ package transfer
 import (
 	"bytes"
 	"errors"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+
+	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 func TestHandler_CreateTransfer(t *testing.T) {
@@ -91,7 +93,7 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			path:         "/transfers",
 			body:         `{"account_destination_id":"a61227cf-a857-4bc6-8fcd-ad97cdad382a","amount": 500}`,
 			response:     http.StatusBadRequest,
-			responsebody: `{"errors":"given the credential is not basic"}` + "\n",
+			responsebody: `{"errors":"given the authorization header type is not basic"}` + "\n",
 			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
 		},
 	}

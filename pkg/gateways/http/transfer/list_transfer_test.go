@@ -2,11 +2,12 @@ package transfer
 
 import (
 	"bytes"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func TestHandler_ListTransfers(t *testing.T) {
@@ -41,7 +42,7 @@ func TestHandler_ListTransfers(t *testing.T) {
 			path:         "/transfers",
 			response:     http.StatusBadRequest,
 			token:        "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm",
-			responsebody: `{"errors":"given the credential is not basic"}` + "\n",
+			responsebody: `{"errors":"given the authorization header type is not basic"}` + "\n",
 		},
 	}
 	for _, tc := range gettransfer {

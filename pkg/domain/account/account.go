@@ -1,18 +1,26 @@
 package account
 
+import "C"
 import (
+	"context"
+	"errors"
+
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
+
 	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
+	redis2 "github.com/CMedrado/DesafioStone/pkg/gateways/redis"
 )
 
 type UseCase struct {
 	StoredAccount Repository
 	logger        *logrus.Entry
+	redis         *redis.Client
 }
 
-//CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
+// CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
 func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error) {
 	err, cpf := domain.CheckCPF(cpf)
 	if err != nil {
@@ -40,7 +48,7 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	return id, err
 }
 
-//GetBalance requests the salary for the Story by sending the ID
+// GetBalance requests the salary for the Story by sending the ID
 func (auc *UseCase) GetBalance(id string) (int, error) {
 	idUUID, err := uuid.Parse(id)
 
@@ -61,7 +69,7 @@ func (auc *UseCase) GetBalance(id string) (int, error) {
 	return account.Balance, nil
 }
 
-//GetAccounts returns all API accounts
+// GetAccounts returns all API accounts
 func (auc *UseCase) GetAccounts() ([]entities.Account, error) {
 	accounts, err := auc.StoredAccount.ReturnAccounts()
 
@@ -82,11 +90,25 @@ func (auc UseCase) SearchAccount(id uuid.UUID) (entities.Account, error) {
 }
 
 func (auc UseCase) GetAccountCPF(cpf string) (entities.Account, error) {
-	accounts, err := auc.StoredAccount.ReturnAccountCPF(cpf)
-	if err != nil {
-		return entities.Account{}, domain.ErrSelect
+	account, err := redis2.Get(context.Background(), cpf, auc.redis)
+
+	if err != nil && !errors.Is(err, domain.ErrAccountNotFound) {
+		return entities.Account{}, err
 	}
-	return accounts, nil
+
+	if errors.Is(err, domain.ErrAccountNotFound) {
+		auc.logger.Print("Storing")
+		account, err = auc.StoredAccount.ReturnAccountCPF(cpf)
+		if err != nil {
+			return entities.Account{}, domain.ErrSelect
+		}
+		err = redis2.Set(context.Background(), account, auc.redis)
+		if err != nil {
+			return entities.Account{}, err
+		}
+	}
+
+	return account, nil
 }
 
 func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestination entities.Account) error {
@@ -97,6 +119,6 @@ func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestinat
 	return nil
 }
 
-func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
-	return &UseCase{StoredAccount: repository, logger: log}
+func NewUseCase(repository Repository, log *logrus.Entry, redis *redis.Client) *UseCase {
+	return &UseCase{StoredAccount: repository, logger: log, redis: redis}
 }

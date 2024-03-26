@@ -1,10 +1,11 @@
 package transfer
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type UseCase struct {

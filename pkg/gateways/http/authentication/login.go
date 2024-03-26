@@ -2,11 +2,13 @@ package authentication
 
 import (
 	"encoding/json"
+	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -42,13 +44,17 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
-	}).Info("sucessfully authentificated!")
+	}).Info("successfully authentificated!")
 
 	response := TokenResponse{Token: token}
 
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		e.errorLogin(err)
+		return
+	}
 }
 
 type errorStruct struct {
@@ -64,13 +70,13 @@ func (e errorStruct) errorLogin(err error) {
 				"type": http.StatusUnauthorized,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInsert.Error() || err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusInternalServerError,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)
 		}

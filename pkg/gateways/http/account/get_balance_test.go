@@ -2,11 +2,12 @@ package account
 
 import (
 	"bytes"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func TestHandler_GetBalance(t *testing.T) {

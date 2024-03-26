@@ -2,10 +2,12 @@ package authentication
 
 import (
 	"encoding/base64"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+
+	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type UseCase struct {

@@ -3,14 +3,20 @@ package authentication
 import (
 	"bytes"
 	"errors"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+
+	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+)
+
+var (
+	cpfIncorrect = `{"errors":"given secret or CPF are incorrect"}` + "\n"
 )
 
 func TestHandler_Login(t *testing.T) {
@@ -44,7 +50,7 @@ func TestHandler_Login(t *testing.T) {
 			path:         "/login",
 			body:         `{"cpf": "38453162793", "Secret": "jax"}`,
 			response:     http.StatusUnauthorized,
-			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
+			responsebody: cpfIncorrect,
 		},
 		{
 			name:         "should unsuccessfully create an account when CPF is invalid",
@@ -52,7 +58,7 @@ func TestHandler_Login(t *testing.T) {
 			path:         "/login",
 			body:         `{"cpf": "384531.62793", "Secret": "jax"}`,
 			response:     http.StatusUnauthorized,
-			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
+			responsebody: cpfIncorrect,
 		},
 		{
 			name:         "should unsuccessfully authenticated login when secret is not correct",
@@ -60,7 +66,7 @@ func TestHandler_Login(t *testing.T) {
 			path:         "/login",
 			body:         `{"cpf": "081.313.910-43", "Secret": "call"}`,
 			response:     http.StatusUnauthorized,
-			responsebody: `{"errors":"given secret or CPF are incorrect"}` + "\n",
+			responsebody: cpfIncorrect,
 		},
 		{
 			name:     "should unsuccessfully authenticated login when json is invalid",
@@ -104,9 +110,9 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(secret string, account entities.Ac
 	if account == (entities.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
-	if account.CPF != account.CPF {
-		return errors.New("given secret or CPF are incorrect"), ""
-	}
+	//if account.CPF != account.CPF {
+	//	return errors.New("given secret or CPF are incorrect"), ""
+	//}
 	if account.Secret != secretHash {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}

@@ -6,3 +6,7 @@ type CreateRequest struct {
 	Secret  string `json:"secret"`
 	Balance int    `json:"balance"`
 }
+
+type GetRequest struct {
+	CPF string `json:"cpf"`
+}

@@ -6,6 +6,7 @@ type AccountHandler interface {
 	CreateAccount(w http.ResponseWriter, r *http.Request)
 	ListAccounts(w http.ResponseWriter, r *http.Request)
 	GetBalance(w http.ResponseWriter, r *http.Request)
+	GetAccount(w http.ResponseWriter, r *http.Request)
 }
 
 type LoginHandler interface {

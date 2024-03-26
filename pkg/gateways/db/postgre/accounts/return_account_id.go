@@ -2,8 +2,10 @@ package accounts
 
 import (
 	"context"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+
 	"github.com/google/uuid"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 func (a *Storage) ReturnAccountID(id uuid.UUID) (entities.Account, error) {

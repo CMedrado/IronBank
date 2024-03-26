@@ -10,9 +10,10 @@ services:
     env_file:
       - .env
     ports:
-      - 5000:5000
+      - "5001:5001"
     depends_on:
       - db
+      - redis
   db:
     image: postgres:11
     networks:
@@ -32,7 +33,12 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@ol.com
       PGADMIN_DEFAULT_PASSWORD: senha#123
-
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - bd
 networks:
   bd: { }
 volumes:

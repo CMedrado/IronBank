@@ -2,8 +2,10 @@ package token
 
 import (
 	"context"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+
 	"github.com/google/uuid"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 func (a *Storage) ReturnTokenID(id uuid.UUID) (entities.Token, error) {

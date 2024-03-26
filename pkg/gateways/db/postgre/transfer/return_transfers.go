@@ -2,8 +2,10 @@ package transfer
 
 import (
 	"context"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+
 	"github.com/google/uuid"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 func (a *Storage) ReturnTransfer(id uuid.UUID) ([]entities.Transfer, error) {
@@ -16,7 +18,10 @@ func (a *Storage) ReturnTransfer(id uuid.UUID) ([]entities.Transfer, error) {
 	var transfer entities.Transfer
 	var transfers []entities.Transfer
 	for rows.Next() {
-		rows.Scan(&transfer.ID, &transfer.OriginAccountID, &transfer.DestinationAccountID, &transfer.Amount, &transfer.CreatedAt)
+		err = rows.Scan(&transfer.ID, &transfer.OriginAccountID, &transfer.DestinationAccountID, &transfer.Amount, &transfer.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
 		transfers = append(transfers, transfer)
 	}
 	return transfers, nil

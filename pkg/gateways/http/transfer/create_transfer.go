@@ -2,13 +2,15 @@ package transfer
 
 import (
 	"encoding/json"
+	"net/http"
+
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
-	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +66,10 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = s.account.UpdateBalance(accountOrigin, accountDestination)
+	if err != nil {
+		e.errorCreate(err)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 
 	l.WithFields(log.Fields{
@@ -73,7 +79,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	response := TransferResponse{ID: id}
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 type errorStruct struct {
@@ -94,27 +100,27 @@ func (e errorStruct) errorCreate(err error) {
 				"type": http.StatusBadRequest,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInvalidToken.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusUnauthorized,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInvalidID.Error() ||
 			err.Error() == transfer.ErrInvalidDestinationID.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusNotFound,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInsert.Error() ||
 			err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusInternalServerError,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)
 		}

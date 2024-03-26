@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 

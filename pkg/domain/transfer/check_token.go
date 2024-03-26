@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"encoding/base64"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )

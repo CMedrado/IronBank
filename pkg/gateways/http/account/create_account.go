@@ -2,11 +2,13 @@ package account
 
 import (
 	"encoding/json"
+	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
 	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/account"
 	http_server "github.com/CMedrado/DesafioStone/pkg/gateways/http"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +39,7 @@ func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 type errorStruct struct {
@@ -55,16 +57,15 @@ func (e errorStruct) errorCreate(err error) {
 			"type": http.StatusBadRequest,
 		}).Error(err)
 		e.w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(e.w).Encode(ErrJson)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	} else if err.Error() == domain.ErrInsert.Error() ||
 		err.Error() == domain.ErrSelect.Error() {
 		e.l.WithFields(log.Fields{
 			"type": http.StatusInternalServerError,
 		}).Error(err)
 		e.w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(e.w).Encode(ErrJson)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
 		e.w.WriteHeader(http.StatusBadRequest)
 	}
-	return
 }

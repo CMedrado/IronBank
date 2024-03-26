@@ -3,13 +3,15 @@ package account
 import (
 	"bytes"
 	"errors"
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 var Aux = 0

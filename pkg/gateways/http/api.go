@@ -1,9 +1,10 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type API struct {
@@ -28,6 +29,7 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	router.HandleFunc("/accounts", s.account.CreateAccount).Methods("POST")
 	router.HandleFunc("/login", s.Login.Login).Methods("POST")
 	router.HandleFunc("/transfers", s.transfer.ListTransfers).Methods("GET")
+	router.HandleFunc("/account", s.account.GetAccount).Methods("GET")
 	router.HandleFunc("/transfers", s.transfer.CreateTransfer).Methods("POST")
 
 	s.Handler = router

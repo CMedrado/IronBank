@@ -15,6 +15,10 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
+var (
+	secret = "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" // #nosec
+)
+
 func TestHandler_CreateTransfer(t *testing.T) {
 	createtransfer := []struct {
 		name         string
@@ -130,7 +134,7 @@ type TransferUsecaseMock struct {
 
 func (uc *TransferUsecaseMock) GetTransfers(_ entities.Account, _ entities.Token, token string) ([]entities.Transfer, error) {
 	time1, _ := time.Parse("2006-01-02T15:04:05.999999999Z07:00", "2021-07-20T15:17:25.933365Z")
-	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" == token {
+	if secret == token {
 		return []entities.Transfer{
 			{
 				ID:                   uuid.MustParse("47399f23-2093-4dde-b32f-990cac27630e"),
@@ -149,7 +153,7 @@ func (uc TransferUsecaseMock) CreateTransfers(accountOriginID uuid.UUID, _ entit
 	if amount <= 0 {
 		return errors.New("given amount is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
-	if "MDIvMDgvMjAyMSAwOToyNzo0NDo2YjE5NDFkYi1jZTE3LTRmZmUtYTdlZC0yMjQ5M2E5MjZiYmM6YmQxODIxZTQtM2I5YS00M2RjLWJkZGUtNjBiM2QyMTRhYzdm" != token {
+	if secret != token {
 		return errors.New("given token is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	if accountOriginID == accountDestinationIdUUID {
@@ -173,9 +177,9 @@ func (uc TokenUseCaseMock) AuthenticatedLogin(secret string, account entities.Ac
 	if account == (entities.Account{}) {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}
-	if account.CPF != account.CPF {
-		return errors.New("given secret or CPF are incorrect"), ""
-	}
+	//if account.CPF != account.CPF {
+	//	return errors.New("given secret or CPF are incorrect"), ""
+	//}
 	if account.Secret != secretHash {
 		return errors.New("given secret or CPF are incorrect"), ""
 	}

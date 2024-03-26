@@ -2,7 +2,6 @@ package token
 
 import (
 	"github.com/google/uuid"
-	"io"
 )
 
 type Tokens []Token
@@ -12,14 +11,14 @@ type Token struct {
 	Token string    `json:"token"`
 }
 
-type StoredToken struct {
-	dataBase io.ReadWriteSeeker
-	tokens   Tokens
-}
+//type StoredToken struct {
+//	dataBase io.ReadWriteSeeker
+//	tokens   Tokens
+//}
 
-func NewStoredToked(dataBase io.ReadWriteSeeker) *StoredToken {
-	dataBase.Seek(0, 0)
-	token, _ := NewToken(dataBase)
-
-	return &StoredToken{dataBase: dataBase, tokens: token}
-}
+//func NewStoredToked(dataBase io.ReadWriteSeeker) *StoredToken {
+//	dataBase.Seek(0, 0)
+//	token, _ := NewToken(dataBase)
+//
+//	return &StoredToken{dataBase: dataBase, tokens: token}
+//}

@@ -2,11 +2,13 @@ package transfer
 
 import (
 	"encoding/json"
+	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +56,7 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 	}).Info("transfers handled successfully!")
 	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e errorStruct) errorList(err error) {
@@ -65,25 +67,25 @@ func (e errorStruct) errorList(err error) {
 				"type": http.StatusUnauthorized,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusUnauthorized)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrSelect.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusInternalServerError,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrInvalidID.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusNotFound,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else if err.Error() == domain2.ErrParse.Error() || err.Error() == ErrInvalidCredential.Error() {
 			e.l.WithFields(log.Fields{
 				"type": http.StatusBadRequest,
 			}).Error(err)
 			e.w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(e.w).Encode(ErrJson)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)
 		}

@@ -2,7 +2,6 @@ package account
 
 import (
 	"github.com/google/uuid"
-	"io"
 )
 
 type Accounts []Account
@@ -16,14 +15,14 @@ type Account struct {
 	CreatedAt string    `json:"created_at"`
 }
 
-type StoredAccount struct {
-	dataBase io.ReadWriteSeeker
-	accounts Accounts
-}
+//type StoredAccount struct {
+//	dataBase io.ReadWriteSeeker
+//	accounts Accounts
+//}
 
-func NewStoredAccount(dataBase io.ReadWriteSeeker) *StoredAccount {
-	dataBase.Seek(0, 0)
-	accounts, _ := NewAccount(dataBase)
-
-	return &StoredAccount{dataBase: dataBase, accounts: accounts}
-}
+//func NewStoredAccount(dataBase io.ReadWriteSeeker) *StoredAccount {
+//	dataBase.Seek(0, 0)
+//	accounts, _ := NewAccount(dataBase)
+//
+//	return &StoredAccount{dataBase: dataBase, accounts: accounts}
+//}

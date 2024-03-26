@@ -1,11 +1,15 @@
 package account
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type CreateAccountTestInput struct {
@@ -75,7 +79,7 @@ func TestCreateAccount(t *testing.T) {
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
 			//test
-			useCase := UseCase{AccountRepoMock{}, lentry}
+			useCase := UseCase{StoredAccount: AccountRepoMock{}, logger: lentry}
 			gotID, gotErr := useCase.CreateAccount(testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
 
 			//assert
@@ -98,6 +102,9 @@ func TestGetBalance(t *testing.T) {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	lentry := logrus.NewEntry(logger)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
+	})
 	tt := []struct {
 		name    string
 		in      string
@@ -119,7 +126,7 @@ func TestGetBalance(t *testing.T) {
 
 	for _, testCase := range tt {
 		t.Run(testCase.name, func(t *testing.T) {
-			usecase := UseCase{AccountRepoMock{}, lentry}
+			usecase := UseCase{StoredAccount: AccountRepoMock{}, logger: lentry, redis: rdb}
 			gotBalance, gotErr := usecase.GetBalance(testCase.in)
 
 			//assert

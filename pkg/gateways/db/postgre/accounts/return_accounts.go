@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
@@ -15,7 +16,10 @@ func (a *Storage) ReturnAccounts() ([]entities.Account, error) {
 	var account entities.Account
 	var accounts []entities.Account
 	for rows.Next() {
-		rows.Scan(&account.ID, &account.Name, &account.CPF, &account.Secret, &account.Balance, &account.CreatedAt)
+		err = rows.Scan(&account.ID, &account.Name, &account.CPF, &account.Secret, &account.Balance, &account.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
 		accounts = append(accounts, account)
 	}
 	return accounts, nil

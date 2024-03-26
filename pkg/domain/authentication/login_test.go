@@ -1,11 +1,13 @@
 package authentication
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type CreateLoginInput struct {

@@ -2,7 +2,6 @@ package transfer
 
 import (
 	"github.com/google/uuid"
-	"io"
 )
 
 type Transfers []Transfer
@@ -15,14 +14,14 @@ type Transfer struct {
 	CreatedAt            string    `json:"created_at"`
 }
 
-type StoredTransferAccount struct {
-	dataBase  io.ReadWriteSeeker
-	transfers Transfers
-}
+//type StoredTransferAccount struct {
+//	dataBase  io.ReadWriteSeeker
+//	transfers Transfers
+//}
 
-func NewStoredTransfer(dataBase io.ReadWriteSeeker) *StoredTransferAccount {
-	dataBase.Seek(0, 0)
-	transfers, _ := NewTransfer(dataBase)
-
-	return &StoredTransferAccount{dataBase: dataBase, transfers: transfers}
-}
+//func NewStoredTransfer(dataBase io.ReadWriteSeeker) *StoredTransferAccount {
+//	dataBase.Seek(0, 0)
+//	transfers, _ := NewTransfer(dataBase)
+//
+//	return &StoredTransferAccount{dataBase: dataBase, transfers: transfers}
+//}

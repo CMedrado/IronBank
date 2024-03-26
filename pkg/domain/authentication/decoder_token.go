@@ -2,9 +2,11 @@ package authentication
 
 import (
 	"encoding/base64"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/google/uuid"
 	"strings"
+
+	"github.com/google/uuid"
+
+	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 )
 
 // DecoderToken returns the ID that was inside an encrypted code

@@ -5,4 +5,4 @@ push-image: build-image
 	docker push rafaelcmedrado/desafio:latest
 
 run-local:
-	docker-compose -f deploy/local/docker-compose.yml up
+	docker-compose -f deploy/local/docker-compose.yml up --build --force-recreate

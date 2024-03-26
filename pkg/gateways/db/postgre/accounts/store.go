@@ -1,10 +1,11 @@
 package accounts
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 type Account struct {

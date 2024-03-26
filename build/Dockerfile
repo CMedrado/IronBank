@@ -1,4 +1,4 @@
-FROM golang:1.16.5
+FROM golang:1.20
 LABEL maintainer=rafaelmedrado
 WORKDIR app
 COPY . .

@@ -2,10 +2,12 @@ package account
 
 import (
 	"encoding/json"
+	"net/http"
+
+	log "github.com/sirupsen/logrus"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
-	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 func (s *Handler) ListAccounts(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +27,7 @@ func (s *Handler) ListAccounts(w http.ResponseWriter, r *http.Request) {
 	l.WithFields(log.Fields{
 		"type": http.StatusOK,
 	}).Info("list the accounts successfully!")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e errorStruct) errorList(err error) {
@@ -35,7 +37,7 @@ func (e errorStruct) errorList(err error) {
 			"type": http.StatusInternalServerError,
 		}).Error(err)
 		e.w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(e.w).Encode(ErrJson)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	} else {
 		e.w.WriteHeader(http.StatusBadRequest)
 	}

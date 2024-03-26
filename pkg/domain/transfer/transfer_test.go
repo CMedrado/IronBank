@@ -1,14 +1,16 @@
 package transfer
 
 import (
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/file/transfer"
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-	"testing"
-	"time"
 )
 
 type CreateTransferInput struct {
@@ -147,9 +149,9 @@ func TestMakeGetTransfers(t *testing.T) {
 				StoredTransfer: TransferRepoMock{},
 				logger:         lentry,
 			}
-			accountOriginID, tokenID, gotErr := authentication.DecoderToken(testCase.in.Token)
+			accountOriginID, tokenID, _ := authentication.DecoderToken(testCase.in.Token)
 			accountOrigin, _ := SearchAccount(accountOriginID)
-			accountToken, gotErr := GetTokenID(tokenID)
+			accountToken, _ := GetTokenID(tokenID)
 			gotTransfer, gotErr := usecase.GetTransfers(accountOrigin, accountToken, testCase.in.Token)
 
 			if !testCase.wantErr && gotErr != nil {

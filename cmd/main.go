@@ -3,6 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/redis/go-redis/v9"
+	"github.com/sirupsen/logrus"
+
 	"github.com/CMedrado/DesafioStone/pkg/common/configuration"
 	account2 "github.com/CMedrado/DesafioStone/pkg/domain/account"
 	authentication2 "github.com/CMedrado/DesafioStone/pkg/domain/authentication"
@@ -15,11 +23,6 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/account"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/authentication"
 	transfer3 "github.com/CMedrado/DesafioStone/pkg/gateways/http/transfer"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"time"
 )
 
 func main() {
@@ -38,6 +41,12 @@ func main() {
 	logger.SetLevel(logLevel)
 	lentry := logrus.NewEntry(logger)
 
+	client := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
 	dbURL := config.Database.GetUrl()
 	err = postgre.RunMigrations(dbURL)
 	if err != nil {
@@ -52,7 +61,7 @@ func main() {
 	accountStorage := accounts.NewStored(pool, lentry)
 	accountToken := token.NewStored(pool, lentry)
 	accountTransfer := transfer.NewStored(pool, lentry)
-	accountUseCase := account2.NewUseCase(accountStorage, lentry)
+	accountUseCase := account2.NewUseCase(accountStorage, lentry, client)
 	loginUseCase := authentication2.NewUseCase(accountToken, lentry)
 	transferUseCase := transfer2.NewUseCase(accountTransfer, lentry)
 	accountHandler := account.NewHandler(accountUseCase, lentry)
@@ -63,7 +72,7 @@ func main() {
 	serverLog := lentry.WithField("Port", config.Api.Port)
 	serverLog.Info("starting the server!")
 	address := fmt.Sprintf(":%s", config.Api.Port)
-	if err := http.ListenAndServe(address, server); err != nil {
+	if err = http.ListenAndServe(address, server); err != nil { //nolint:gosec
 		lentry.Fatalf("could not hear on port %s: %v", config.Api.Port, err)
 	}
 	serverLog.Info("shutting down the server")
@@ -81,24 +90,24 @@ func getDbPool(dburl string) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func openFiles(dbFileNameAccount string, dbFileNameToken string, dbFileNameTransfer string, lentry *logrus.Entry) (*os.File, *os.File, *os.File) {
-	dbAccount, err := os.OpenFile(dbFileNameAccount, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		lentry.Fatalf("problem opening %s %v", dbFileNameAccount, err)
-	}
-
-	dbToken, err := os.OpenFile(dbFileNameToken, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		lentry.Fatalf("problem opening %s %v", dbFileNameToken, err)
-	}
-
-	dbTransfer, err := os.OpenFile(dbFileNameTransfer, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		lentry.Fatalf("problem opening %s %v", dbFileNameTransfer, err)
-	}
-
-	return dbAccount, dbToken, dbTransfer
-}
+//func openFiles(dbFileNameAccount string, dbFileNameToken string, dbFileNameTransfer string, lentry *logrus.Entry) (*os.File, *os.File, *os.File) {
+//	dbAccount, err := os.OpenFile(dbFileNameAccount, os.O_RDWR|os.O_CREATE, 0666)
+//
+//	if err != nil {
+//		lentry.Fatalf("problem opening %s %v", dbFileNameAccount, err)
+//	}
+//
+//	dbToken, err := os.OpenFile(dbFileNameToken, os.O_RDWR|os.O_CREATE, 0666)
+//
+//	if err != nil {
+//		lentry.Fatalf("problem opening %s %v", dbFileNameToken, err)
+//	}
+//
+//	dbTransfer, err := os.OpenFile(dbFileNameTransfer, os.O_RDWR|os.O_CREATE, 0666)
+//
+//	if err != nil {
+//		lentry.Fatalf("problem opening %s %v", dbFileNameTransfer, err)
+//	}
+//
+//	return dbAccount, dbToken, dbTransfer
+//}

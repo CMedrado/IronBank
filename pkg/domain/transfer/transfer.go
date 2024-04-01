@@ -1,7 +1,11 @@
 package transfer
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 
 	"github.com/CMedrado/DesafioStone/pkg/domain"
@@ -11,6 +15,7 @@ import (
 type UseCase struct {
 	StoredTransfer Repository
 	logger         *logrus.Entry
+	redis          *redis.Client
 }
 
 // GetTransfers returns all account transfers
@@ -35,7 +40,7 @@ func (auc UseCase) GetTransfers(accountOrigin entities.Account, accountToken ent
 }
 
 // CreateTransfers create and transfers, returns the id of the created transfer
-func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
+func (auc UseCase) CreateTransfers(ctx context.Context, accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
 	err := CheckAmount(amount)
 	if err != nil {
 		return err, uuid.UUID{}, entities.Account{}, entities.Account{}
@@ -71,9 +76,36 @@ func (auc UseCase) CreateTransfers(accountOriginID uuid.UUID, accountToken entit
 	if err != nil {
 		return domain.ErrInsert, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
+
+	if err = auc.redis.PFAdd(ctx, "transfers_statistic", fmt.Sprint(transfer.ID)).Err(); err != nil {
+		return fmt.Errorf("error no pf add", err, fmt.Sprint(transfer.ID)), uuid.UUID{}, entities.Account{}, entities.Account{}
+	}
+
+	if err = auc.redis.ZIncrBy(ctx, "transfers_rank", 1, fmt.Sprint(accountOriginID)).Err(); err != nil {
+		return fmt.Errorf("error no zincrby", err), uuid.UUID{}, entities.Account{}, entities.Account{}
+	}
+
 	return nil, id, accountOrigin, accountDestination
 }
 
-func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
-	return &UseCase{StoredTransfer: repository, logger: log}
+func (auc *UseCase) GetStatisticTransfer(ctx context.Context) (int64, error) {
+	statistic, err := auc.redis.PFCount(ctx, "transfers_statistic").Result()
+	if err != nil {
+		return 0, domain.ErrGetRedis
+	}
+
+	return statistic, nil
+}
+
+func (auc *UseCase) GetRankTransfer(ctx context.Context) ([]string, error) {
+	res14, err := auc.redis.ZRange(ctx, "transfers_rank", 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return res14, nil
+}
+
+func NewUseCase(repository Repository, log *logrus.Entry, redis *redis.Client) *UseCase {
+	return &UseCase{StoredTransfer: repository, logger: log, redis: redis}
 }

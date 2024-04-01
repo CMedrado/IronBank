@@ -1,10 +1,13 @@
 package transfer
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
@@ -24,6 +27,9 @@ func TestMakeTransfers(t *testing.T) {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	lentry := logrus.NewEntry(logger)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
+	})
 	tt := []struct {
 		name                    string
 		in                      CreateTransferInput
@@ -86,6 +92,7 @@ func TestMakeTransfers(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
 				logger:         lentry,
+				redis:          rdb,
 			}
 			accountOriginID, tokenOriginID, gotErr := authentication.DecoderToken(testCase.in.Token)
 			if gotErr == nil {
@@ -97,7 +104,7 @@ func TestMakeTransfers(t *testing.T) {
 						if gotErr == nil {
 							accountDestination, gotErr := SearchAccount(accountDestinationIdUUID)
 							if gotErr == nil {
-								gotErr, gotTransfer, _, _ := usecase.CreateTransfers(accountOriginID, accountToken, testCase.in.Token, accountOrigin, accountDestination, testCase.in.Amount, accountDestinationIdUUID)
+								gotErr, gotTransfer, _, _ := usecase.CreateTransfers(context.Background(), accountOriginID, accountToken, testCase.in.Token, accountOrigin, accountDestination, testCase.in.Amount, accountDestinationIdUUID)
 								if !testCase.wantErr && gotErr != nil {
 									t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
 								}
@@ -122,6 +129,9 @@ func TestMakeGetTransfers(t *testing.T) {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
 	lentry := logrus.NewEntry(logger)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
+	})
 	var tt = []struct {
 		name    string
 		in      CreateTransferInput
@@ -148,6 +158,7 @@ func TestMakeGetTransfers(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
 				logger:         lentry,
+				redis:          rdb,
 			}
 			accountOriginID, tokenID, _ := authentication.DecoderToken(testCase.in.Token)
 			accountOrigin, _ := SearchAccount(accountOriginID)

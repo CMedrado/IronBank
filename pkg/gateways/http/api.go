@@ -31,6 +31,8 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	router.HandleFunc("/transfers", s.transfer.ListTransfers).Methods("GET")
 	router.HandleFunc("/account", s.account.GetAccount).Methods("GET")
 	router.HandleFunc("/transfers", s.transfer.CreateTransfer).Methods("POST")
+	router.HandleFunc("/transfers/statistic", s.transfer.GetStatisticTransfers).Methods("GET")
+	router.HandleFunc("/transfers/rank", s.transfer.GetRankTransfer).Methods("GET")
 
 	s.Handler = router
 

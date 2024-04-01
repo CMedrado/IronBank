@@ -1,17 +1,20 @@
 package domain
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	"context"
+
 	"github.com/google/uuid"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type AccountUseCase interface {
-	CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error)
+	CreateAccount(ctx context.Context, name string, cpf string, secret string, balance int) (uuid.UUID, error)
 	GetBalance(id string) (int, error)
 	GetAccounts() ([]entities.Account, error)
 	SearchAccount(id uuid.UUID) (entities.Account, error)
 	UpdateBalance(accountOrigin entities.Account, accountDestination entities.Account) error
-	GetAccountCPF(cpf string) (entities.Account, error)
+	GetAccountCPF(ctx context.Context, cpf string) (entities.Account, error)
 }
 
 type LoginUseCase interface {
@@ -21,5 +24,7 @@ type LoginUseCase interface {
 
 type TransferUseCase interface {
 	GetTransfers(accountOrigin entities.Account, accountToken entities.Token, token string) ([]entities.Transfer, error)
-	CreateTransfers(accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account)
+	CreateTransfers(ctx context.Context, accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account)
+	GetStatisticTransfer(ctx context.Context) (int64, error)
+	GetRankTransfer(ctx context.Context) ([]string, error)
 }

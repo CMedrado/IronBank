@@ -22,7 +22,7 @@ func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		"module": "https",
 		"method": "processAccount",
 	})
-	idAccount, err := s.account.CreateAccount(requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
+	idAccount, err := s.account.CreateAccount(r.Context(), requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
 	w.Header().Set("Content-Type", "application/json")
 	e := errorStruct{l: l, w: w}
 	if err != nil {

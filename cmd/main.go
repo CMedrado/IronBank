@@ -63,7 +63,7 @@ func main() {
 	accountTransfer := transfer.NewStored(pool, lentry)
 	accountUseCase := account2.NewUseCase(accountStorage, lentry, client)
 	loginUseCase := authentication2.NewUseCase(accountToken, lentry)
-	transferUseCase := transfer2.NewUseCase(accountTransfer, lentry)
+	transferUseCase := transfer2.NewUseCase(accountTransfer, lentry, client)
 	accountHandler := account.NewHandler(accountUseCase, lentry)
 	loginHandler := authentication.NewHandler(accountUseCase, loginUseCase, lentry)
 	transferHandler := transfer3.NewHandler(accountUseCase, loginUseCase, transferUseCase, lentry)

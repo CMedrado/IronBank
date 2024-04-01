@@ -37,7 +37,7 @@ func (s *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		e.errorGet(domain.ErrInvalidCPF)
 		return
 	}
-	account, err := s.account.GetAccountCPF(cpf)
+	account, err := s.account.GetAccountCPF(r.Context(), cpf)
 	if err != nil {
 		e.errorGet(err)
 		return

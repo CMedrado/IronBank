@@ -21,23 +21,27 @@ type UseCase struct {
 }
 
 // CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balance int) (uuid.UUID, error) {
+func (auc *UseCase) CreateAccount(ctx context.Context, name string, cpf string, secret string, balance int) (uuid.UUID, error) {
 	err, cpf := domain.CheckCPF(cpf)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	account, err := auc.GetAccountCPF(cpf)
+
+	account, err := auc.GetAccountCPF(ctx, cpf)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
+
 	err = CheckAccountExistence(account)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
+
 	err = CheckBalance(balance)
 	if err != nil {
 		return uuid.UUID{}, ErrBalanceAbsent
 	}
+
 	id, _ := domain.Random()
 	secretHash := domain.CreateHash(secret)
 	newAccount := entities.Account{ID: id, Name: name, CPF: cpf, Secret: secretHash, Balance: balance, CreatedAt: domain.CreatedAt()}
@@ -45,6 +49,12 @@ func (auc *UseCase) CreateAccount(name string, cpf string, secret string, balanc
 	if err != nil {
 		return uuid.UUID{}, domain.ErrInsert
 	}
+
+	_, err = auc.redis.ZAdd(ctx, "transfers", redis.Z{Member: id}).Result()
+	if err != nil {
+		auc.logger.Error("error add id account in redis:", err)
+	}
+
 	return id, err
 }
 
@@ -89,8 +99,8 @@ func (auc UseCase) SearchAccount(id uuid.UUID) (entities.Account, error) {
 	return account, nil
 }
 
-func (auc UseCase) GetAccountCPF(cpf string) (entities.Account, error) {
-	account, err := redis2.Get(context.Background(), cpf, auc.redis)
+func (auc UseCase) GetAccountCPF(ctx context.Context, cpf string) (entities.Account, error) {
+	account, err := redis2.Get(ctx, cpf, auc.redis)
 
 	if err != nil && !errors.Is(err, domain.ErrAccountNotFound) {
 		return entities.Account{}, err
@@ -102,7 +112,7 @@ func (auc UseCase) GetAccountCPF(cpf string) (entities.Account, error) {
 		if err != nil {
 			return entities.Account{}, domain.ErrSelect
 		}
-		err = redis2.Set(context.Background(), account, auc.redis)
+		err = redis2.Set(ctx, account, auc.redis)
 		if err != nil {
 			return entities.Account{}, err
 		}

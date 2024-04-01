@@ -32,42 +32,52 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error check autorization header type", err)
 		return
 	}
 
 	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error decoder token", err)
 		return
 	}
+
 	accountOrigin, err := s.account.SearchAccount(accountOriginID)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error search account, account id", err)
 		return
 	}
+
 	accountToken, err := s.login.GetTokenID(tokenOriginID)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error get token id", err)
 		return
 	}
 	accountDestinationIdUUID, err := uuid.Parse(requestBody.AccountDestinationID)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error parse", err)
 		return
 	}
 	accountDestination, err := s.account.SearchAccount(accountDestinationIdUUID)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error search account, account destination id", err)
 		return
 	}
-	err, id, accountOrigin, accountDestination := s.transfer.CreateTransfers(accountOriginID, accountToken, token, accountOrigin, accountDestination, requestBody.Amount, accountDestinationIdUUID)
+	err, id, accountOrigin, accountDestination := s.transfer.CreateTransfers(r.Context(), accountOriginID, accountToken, token, accountOrigin, accountDestination, requestBody.Amount, accountDestinationIdUUID)
 	if err != nil {
 		e.errorCreate(err)
 		return
 	}
+
 	err = s.account.UpdateBalance(accountOrigin, accountDestination)
 	if err != nil {
 		e.errorCreate(err)
+		l.Error("error update balance", err)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -123,6 +133,7 @@ func (e errorStruct) errorCreate(err error) {
 			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		} else {
 			e.w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(e.w).Encode(ErrJson)
 		}
 		return
 	}

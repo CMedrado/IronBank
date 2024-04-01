@@ -16,3 +16,11 @@ type GetTransfersResponse struct {
 type GetAccountsResponse struct {
 	Accounts []entities.Account `json:"accounts"`
 }
+
+type GetStatisticTransfersResponse struct {
+	Transfers int64 `json:"transfers_count"`
+}
+
+type GetRankTransfersResponse struct {
+	Transfers []string `json:"transfers_rank"`
+}

@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -149,7 +150,7 @@ func (uc *TransferUsecaseMock) GetTransfers(_ entities.Account, _ entities.Token
 	return []entities.Transfer{}, errors.New("given token is invalid")
 }
 
-func (uc TransferUsecaseMock) CreateTransfers(accountOriginID uuid.UUID, _ entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
+func (uc TransferUsecaseMock) CreateTransfers(_ context.Context, accountOriginID uuid.UUID, _ entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account) {
 	if amount <= 0 {
 		return errors.New("given amount is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
@@ -166,6 +167,14 @@ func (uc TransferUsecaseMock) CreateTransfers(accountOriginID uuid.UUID, _ entit
 		return errors.New("given account destination id is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20"), accountOrigin, accountDestination
+}
+
+func (uc *TransferUsecaseMock) GetStatisticTransfer(_ context.Context) (int64, error) {
+	return 10, nil
+}
+
+func (uc *TransferUsecaseMock) GetRankTransfer(_ context.Context) ([]string, error) {
+	return []string{}, nil
 }
 
 type TokenUseCaseMock struct {
@@ -201,7 +210,7 @@ func (uc TokenUseCaseMock) GetTokenID(id uuid.UUID) (entities.Token, error) {
 type AccountUsecaseMock struct {
 }
 
-func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (uuid.UUID, error) {
+func (uc AccountUsecaseMock) CreateAccount(_ context.Context, name string, cpf string, _ string, balance int) (uuid.UUID, error) {
 	if len(cpf) != 11 && len(cpf) != 14 {
 		return uuid.UUID{}, errors.New("given cpf is invalid")
 	}
@@ -274,7 +283,7 @@ func (uc *AccountUsecaseMock) UpdateBalance(_ entities.Account, _ entities.Accou
 	return nil
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (entities.Account, error) {
+func (uc AccountUsecaseMock) GetAccountCPF(_ context.Context, cpf string) (entities.Account, error) {
 	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {

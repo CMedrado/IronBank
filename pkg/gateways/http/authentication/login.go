@@ -31,7 +31,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		e.errorLogin(authentication.ErrLogin)
 		return
 	}
-	account, err := s.account.GetAccountCPF(cpf)
+	account, err := s.account.GetAccountCPF(r.Context(), cpf)
 	if err != nil {
 		e.errorLogin(err)
 		return

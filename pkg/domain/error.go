@@ -9,6 +9,7 @@ var (
 	ErrInvalidToken    = errors.New("given token is invalid")
 	ErrInvalidID       = errors.New("given id is invalid")
 	ErrParse           = errors.New("given the UUID is incorrect")
+	ErrGetRedis        = errors.New("there was an error trying the get statistic tansfer in the redis")
 	ErrInsert          = errors.New("there was an error trying the insert command in the database")
 	ErrSelect          = errors.New("there was an error trying the select command in the database")
 	ErrAccountNotFound = errors.New("redis account not found")

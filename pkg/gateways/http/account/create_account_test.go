@@ -2,6 +2,7 @@ package account
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -94,7 +95,7 @@ func TestHandler_CreateAccount(t *testing.T) {
 type AccountUsecaseMock struct {
 }
 
-func (uc AccountUsecaseMock) CreateAccount(name string, cpf string, _ string, balance int) (uuid.UUID, error) {
+func (uc AccountUsecaseMock) CreateAccount(_ context.Context, name string, cpf string, _ string, balance int) (uuid.UUID, error) {
 	if len(cpf) != 11 && len(cpf) != 14 {
 		return uuid.UUID{}, errors.New("given cpf is invalid")
 	}
@@ -172,7 +173,7 @@ func (uc *AccountUsecaseMock) UpdateBalance(_ entities.Account, _ entities.Accou
 	return nil
 }
 
-func (uc AccountUsecaseMock) GetAccountCPF(cpf string) (entities.Account, error) {
+func (uc AccountUsecaseMock) GetAccountCPF(_ context.Context, cpf string) (entities.Account, error) {
 	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {

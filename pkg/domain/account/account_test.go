@@ -1,6 +1,7 @@
 package account
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -80,7 +81,7 @@ func TestCreateAccount(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			//test
 			useCase := UseCase{StoredAccount: AccountRepoMock{}, logger: lentry}
-			gotID, gotErr := useCase.CreateAccount(testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
+			gotID, gotErr := useCase.CreateAccount(context.Background(), testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
 
 			//assert
 			if !testCase.wantErr && gotErr != nil { // O teste falhará pois não queremos erro e obtivemos um

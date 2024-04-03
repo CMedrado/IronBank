@@ -2,16 +2,20 @@ package authentication
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
+	"github.com/CMedrado/DesafioStone/pkg/common/logger"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
 func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var requestBody LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
@@ -21,10 +25,10 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	l := s.logger.WithFields(log.Fields{
-		"module": "https",
-		"method": "processLogin",
-	})
+	l := logger.FromCtx(ctx).With(
+		zap.String("module", "handler"),
+		zap.String("method", "processLogin"),
+	)
 	e := errorStruct{l: l, w: w}
 	err, cpf := domain2.CheckCPF(requestBody.CPF)
 	if err != nil {
@@ -42,9 +46,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l.WithFields(log.Fields{
-		"type": http.StatusOK,
-	}).Info("successfully authentificated!")
+	l.With(zap.Any("type", http.StatusAccepted)).Info("successfully authentificated!")
 
 	response := TokenResponse{Token: token}
 
@@ -58,28 +60,22 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 type errorStruct struct {
-	l *log.Entry
+	l *zap.Logger
 	w http.ResponseWriter
 }
 
 func (e errorStruct) errorLogin(err error) {
-	if err != nil {
-		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-		if err.Error() == authentication.ErrLogin.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusUnauthorized,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrInsert.Error() || err.Error() == domain2.ErrSelect.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusInternalServerError,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusInternalServerError)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else {
-			e.w.WriteHeader(http.StatusBadRequest)
-		}
-		return
+	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
+	switch {
+	case errors.Is(err, authentication.ErrLogin):
+		e.w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	case errors.Is(err, domain2.ErrInsert) || errors.Is(err, domain2.ErrSelect):
+		e.w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	default:
+		e.l.Error("failed to login", zap.Error(err))
+		e.w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	}
 }

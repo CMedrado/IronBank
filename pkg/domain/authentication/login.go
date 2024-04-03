@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
@@ -12,7 +11,6 @@ import (
 
 type UseCase struct {
 	StoredToken Repository
-	logger      *logrus.Entry
 }
 
 // AuthenticatedLogin authenticates the account and returns a token
@@ -46,6 +44,6 @@ func (uc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
 	return token, nil
 }
 
-func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
-	return &UseCase{StoredToken: repository, logger: log}
+func NewUseCase(repository Repository) *UseCase {
+	return &UseCase{StoredToken: repository}
 }

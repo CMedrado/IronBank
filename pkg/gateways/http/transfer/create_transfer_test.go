@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 )
 
 var (
@@ -108,10 +108,6 @@ func TestHandler_CreateTransfer(t *testing.T) {
 			s.transfer = &TransferUsecaseMock{}
 			s.account = &AccountUsecaseMock{}
 			s.login = &TokenUseCaseMock{}
-			logger := logrus.New()
-			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-			Lentry := logrus.NewEntry(logger)
-			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			respondeRecorder := httptest.NewRecorder()
@@ -164,7 +160,7 @@ func (uc TransferUsecaseMock) CreateTransfers(_ context.Context, accountOriginID
 		return errors.New("given account without balance"), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	if (accountDestination == entities.Account{}) {
-		return errors.New("given account destination id is invalid"), uuid.UUID{}, entities.Account{}, entities.Account{}
+		return transfer.ErrInvalidDestinationID, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20"), accountOrigin, accountDestination
 }

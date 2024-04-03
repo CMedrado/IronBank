@@ -6,14 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
-
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/file/transfer"
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type CreateTransferInput struct {
@@ -24,9 +22,6 @@ type CreateTransferInput struct {
 }
 
 func TestMakeTransfers(t *testing.T) {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
 	})
@@ -91,7 +86,6 @@ func TestMakeTransfers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
-				logger:         lentry,
 				redis:          rdb,
 			}
 			accountOriginID, tokenOriginID, gotErr := authentication.DecoderToken(testCase.in.Token)
@@ -126,9 +120,6 @@ func TestMakeTransfers(t *testing.T) {
 }
 
 func TestMakeGetTransfers(t *testing.T) {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
 	})
@@ -157,7 +148,6 @@ func TestMakeGetTransfers(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredTransfer: TransferRepoMock{},
-				logger:         lentry,
 				redis:          rdb,
 			}
 			accountOriginID, tokenID, _ := authentication.DecoderToken(testCase.in.Token)

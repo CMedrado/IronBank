@@ -2,18 +2,17 @@ package authentication
 
 import (
 	"bytes"
+	"context"
 	"errors"
-	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	"github.com/google/uuid"
 )
 
 var (
@@ -49,7 +48,7 @@ func TestHandler_Login(t *testing.T) {
 			name:         "should unsuccessfully authenticated login when cpf is not registered",
 			method:       "POST",
 			path:         "/login",
-			body:         `{"cpf": "38453162793", "Secret": "jax"}`,
+			body:         `{"cpf": "38453162723", "Secret": "jax"}`,
 			response:     http.StatusUnauthorized,
 			responsebody: cpfIncorrect,
 		},
@@ -82,10 +81,6 @@ func TestHandler_Login(t *testing.T) {
 			s := new(Handler)
 			s.login = &TokenUseCaseMock{}
 			s.account = &AccountUsecaseMock{}
-			logger := logrus.New()
-			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-			Lentry := logrus.NewEntry(logger)
-			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			responseRecorder := httptest.NewRecorder()
@@ -109,13 +104,13 @@ type TokenUseCaseMock struct {
 func (uc TokenUseCaseMock) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
 	secretHash := domain2.CreateHash(secret)
 	if account == (entities.Account{}) {
-		return errors.New("given secret or CPF are incorrect"), ""
+		return authentication.ErrLogin, ""
 	}
 	//if account.CPF != account.CPF {
 	//	return errors.New("given secret or CPF are incorrect"), ""
 	//}
 	if account.Secret != secretHash {
-		return errors.New("given secret or CPF are incorrect"), ""
+		return authentication.ErrLogin, ""
 	}
 	return nil, "passou"
 }
@@ -169,7 +164,7 @@ func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Rafael",
 			CPF:       "38453162093",
-			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Secret:    "7edb360f06acaef2cc80dba16cf563f199d347db4443da04da0c8173e3f9e4ed",
 			Balance:   6000,
 			CreatedAt: time1,
 		},
@@ -177,7 +172,7 @@ func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Lucas",
 			CPF:       "08131391043",
-			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Secret:    "3cf4897608d8ae2d9ccd9e087be19fc7ba962b9ae38e784f1b770eea3394645f",
 			Balance:   5000,
 			CreatedAt: time1,
 		},

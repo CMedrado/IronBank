@@ -2,31 +2,32 @@ package transfer
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
+	"github.com/CMedrado/DesafioStone/pkg/common/logger"
 	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
 func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	w.Header().Set("content-type", "application/json")
 	header := r.Header.Get("Authorization")
 
 	token, err := CheckAuthorizationHeaderType(header)
 
-	l := s.logger.WithFields(log.Fields{
-		"module": "https",
-		"method": "processTransfer",
-	})
+	l := logger.FromCtx(ctx).With(
+		zap.String("module", "handler"),
+		zap.String("method", "listTransfers"),
+	)
 	e := errorStruct{l: l, token: token, w: w}
 
 	if err != nil {
-		l.WithFields(log.Fields{
-			"type": http.StatusBadRequest,
-		}).Error(err)
+		l.With(zap.Any("type", http.StatusBadRequest)).Error(err.Error())
 		e.errorCreate(err)
 		return
 	}
@@ -51,44 +52,31 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 		e.errorList(err)
 		return
 	}
-	l.WithFields(log.Fields{
-		"type": http.StatusOK,
-	}).Info("transfers handled successfully!")
+
+	l.With(zap.Any("type", http.StatusOK)).Info("list transfers successfully!")
 	response := GetTransfersResponse{Transfers: Transfers}
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e errorStruct) errorList(err error) {
-	if err != nil {
-		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-		if err.Error() == domain2.ErrInvalidToken.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusUnauthorized,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusUnauthorized)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrSelect.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusInternalServerError,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusInternalServerError)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrInvalidID.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusNotFound,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusNotFound)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else if err.Error() == domain2.ErrParse.Error() || err.Error() == ErrInvalidCredential.Error() {
-			e.l.WithFields(log.Fields{
-				"type": http.StatusBadRequest,
-			}).Error(err)
-			e.w.WriteHeader(http.StatusBadRequest)
-			_ = json.NewEncoder(e.w).Encode(ErrJson)
-		} else {
-			e.w.WriteHeader(http.StatusBadRequest)
-		}
-		return
+	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
+	switch {
+	case errors.Is(err, domain2.ErrInvalidToken):
+		e.w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	case errors.Is(err, domain2.ErrSelect):
+		e.w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	case errors.Is(err, domain2.ErrInvalidID):
+		e.w.WriteHeader(http.StatusNotFound)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	case errors.Is(err, domain2.ErrParse) || errors.Is(err, ErrInvalidCredential):
+		e.w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
+	default:
+		e.l.Error("failed to list transfers", zap.Error(err))
+		e.w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	}
 }

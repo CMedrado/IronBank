@@ -3,19 +3,21 @@ package http
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
+
+	"github.com/CMedrado/DesafioStone/pkg/common/logger"
 )
 
 type API struct {
 	account  AccountHandler
 	Login    LoginHandler
 	transfer TransferHandler
-	logger   *logrus.Entry
+	logger   *zap.Logger
 	http.Handler
 }
 
-func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler, logger *logrus.Entry) *API {
+func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler, logger *zap.Logger) *API {
 	s := new(API)
 
 	s.account = account
@@ -23,18 +25,41 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	s.transfer = transfer
 	s.logger = logger
 
-	router := mux.NewRouter()
-	router.HandleFunc("/accounts/{id}/balance", s.account.GetBalance).Methods("GET")
-	router.HandleFunc("/accounts", s.account.ListAccounts).Methods("GET")
-	router.HandleFunc("/accounts", s.account.CreateAccount).Methods("POST")
-	router.HandleFunc("/login", s.Login.Login).Methods("POST")
-	router.HandleFunc("/transfers", s.transfer.ListTransfers).Methods("GET")
-	router.HandleFunc("/account", s.account.GetAccount).Methods("GET")
-	router.HandleFunc("/transfers", s.transfer.CreateTransfer).Methods("POST")
-	router.HandleFunc("/transfers/statistic", s.transfer.GetStatisticTransfers).Methods("GET")
-	router.HandleFunc("/transfers/rank", s.transfer.GetRankTransfer).Methods("GET")
+	r := chi.NewRouter()
 
-	s.Handler = router
+	r.Use(requestLogger(logger))
+
+	// Directory
+	r.Route("/account", func(r chi.Router) {
+		r.Post("/", s.account.CreateAccount)
+		r.Get("/", s.account.ListAccounts)
+		r.Get("/{cpf}", s.account.GetAccount)
+		r.Get("/{id}/balance", s.account.GetBalance)
+	})
+
+	// Login
+	r.Post("/login", s.Login.Login)
+
+	// Transfers
+	r.Route("/transfers", func(r chi.Router) {
+		r.Post("/", s.transfer.CreateTransfer)
+		r.Get("/", s.transfer.ListTransfers)
+		r.Get("/transfers/statistic", s.transfer.GetStatisticTransfers)
+		r.Get("/transfers/rank", s.transfer.GetRankTransfer)
+	})
+
+	s.Handler = r
 
 	return s
+}
+
+func requestLogger(log *zap.Logger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(logger.WithCtx(r.Context(), log))
+			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(fn)
+	}
 }

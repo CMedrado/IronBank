@@ -4,10 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	"github.com/google/uuid"
 )
 
 type CreateLoginInput struct {
@@ -16,9 +14,6 @@ type CreateLoginInput struct {
 }
 
 func TestAuthenticatedLogin(t *testing.T) {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
 	tt := []struct {
 		name    string
 		in      CreateLoginInput
@@ -70,7 +65,6 @@ func TestAuthenticatedLogin(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			usecase := UseCase{
 				StoredToken: LoginRepoMock{},
-				logger:      lentry,
 			}
 			account := GetAccountCPF(testCase.in.CPF)
 			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.Secret, account)
@@ -96,7 +90,7 @@ func GetAccountCPF(cpf string) entities.Account {
 			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
 			Name:      "Lucas",
 			CPF:       "08131391043",
-			Secret:    "c74af74c69d81831a5703aefe9cb4199",
+			Secret:    "3cf4897608d8ae2d9ccd9e087be19fc7ba962b9ae38e784f1b770eea3394645f",
 			Balance:   5000,
 			CreatedAt: time.Now(),
 		}
@@ -106,7 +100,7 @@ func GetAccountCPF(cpf string) entities.Account {
 			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
 			Name:      "Rafael",
 			CPF:       "38453162093",
-			Secret:    "53b9e9679a8ea25880376080b76f98ad",
+			Secret:    "7edb360f06acaef2cc80dba16cf563f199d347db4443da04da0c8173e3f9e4ed",
 			Balance:   6000,
 			CreatedAt: time.Now(),
 		}

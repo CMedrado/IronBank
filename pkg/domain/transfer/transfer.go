@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 
 	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
@@ -14,7 +13,6 @@ import (
 
 type UseCase struct {
 	StoredTransfer Repository
-	logger         *logrus.Entry
 	redis          *redis.Client
 }
 
@@ -72,17 +70,18 @@ func (auc UseCase) CreateTransfers(ctx context.Context, accountOriginID uuid.UUI
 	id, _ := domain.Random()
 	createdAt := domain.CreatedAt()
 	transfer := entities.Transfer{ID: id, OriginAccountID: accountOriginID, DestinationAccountID: accountDestinationIdUUID, Amount: amount, CreatedAt: createdAt}
+
 	err = auc.StoredTransfer.SaveTransfer(transfer)
 	if err != nil {
 		return domain.ErrInsert, uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	if err = auc.redis.PFAdd(ctx, "transfers_statistic", fmt.Sprint(transfer.ID)).Err(); err != nil {
-		return fmt.Errorf("error no pf add", err, fmt.Sprint(transfer.ID)), uuid.UUID{}, entities.Account{}, entities.Account{}
+		return fmt.Errorf("error no pf add: %w", err), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	if err = auc.redis.ZIncrBy(ctx, "transfers_rank", 1, fmt.Sprint(accountOriginID)).Err(); err != nil {
-		return fmt.Errorf("error no zincrby", err), uuid.UUID{}, entities.Account{}, entities.Account{}
+		return fmt.Errorf("error no zincrby: %w", err), uuid.UUID{}, entities.Account{}, entities.Account{}
 	}
 
 	return nil, id, accountOrigin, accountDestination
@@ -106,6 +105,6 @@ func (auc *UseCase) GetRankTransfer(ctx context.Context) ([]string, error) {
 	return res14, nil
 }
 
-func NewUseCase(repository Repository, log *logrus.Entry, redis *redis.Client) *UseCase {
-	return &UseCase{StoredTransfer: repository, logger: log, redis: redis}
+func NewUseCase(repository Repository, redis *redis.Client) *UseCase {
+	return &UseCase{StoredTransfer: repository, redis: redis}
 }

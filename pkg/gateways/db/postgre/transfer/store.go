@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/sirupsen/logrus"
 )
 
 type Transfer struct {
@@ -18,10 +17,8 @@ type Transfer struct {
 
 type Storage struct {
 	pool *pgxpool.Pool
-
-	log *logrus.Entry
 }
 
-func NewStored(pool *pgxpool.Pool, log *logrus.Entry) *Storage {
-	return &Storage{pool: pool, log: log}
+func NewStored(pool *pgxpool.Pool) *Storage {
+	return &Storage{pool: pool}
 }

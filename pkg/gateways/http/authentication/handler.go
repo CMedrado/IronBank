@@ -1,14 +1,14 @@
 package authentication
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 )
 
 type Handler struct {
-	account domain2.AccountUseCase
-	login   domain2.LoginUseCase
+	account domain.AccountUseCase
+	login   domain.LoginUseCase
 }
 
-func NewHandler(accountUseCase domain2.AccountUseCase, useCase domain2.LoginUseCase) *Handler {
+func NewHandler(accountUseCase domain.AccountUseCase, useCase domain.LoginUseCase) *Handler {
 	return &Handler{account: accountUseCase, login: useCase}
 }

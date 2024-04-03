@@ -1,8 +1,9 @@
 package authentication
 
 import (
-	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 	"github.com/google/uuid"
+
+	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type Repository interface {

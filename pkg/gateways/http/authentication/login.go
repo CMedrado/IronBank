@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/CMedrado/DesafioStone/pkg/common/logger"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
@@ -19,39 +19,33 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var requestBody LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
-
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
 		zap.String("method", "processLogin"),
 	)
 	e := errorStruct{l: l, w: w}
-	err, cpf := domain2.CheckCPF(requestBody.CPF)
-	if err != nil {
-		e.errorLogin(authentication.ErrLogin)
-		return
-	}
-	account, err := s.account.GetAccountCPF(r.Context(), cpf)
+
+	account, err := s.account.GetAccountCPF(r.Context(), requestBody.CPF)
 	if err != nil {
 		e.errorLogin(err)
 		return
 	}
+
 	err, token := s.login.AuthenticatedLogin(requestBody.Secret, account)
 	if err != nil {
 		e.errorLogin(err)
 		return
 	}
 
-	l.With(zap.Any("type", http.StatusAccepted)).Info("successfully authentificated!")
-
 	response := TokenResponse{Token: token}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		e.errorLogin(err)
@@ -70,7 +64,7 @@ func (e errorStruct) errorLogin(err error) {
 	case errors.Is(err, authentication.ErrLogin):
 		e.w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
-	case errors.Is(err, domain2.ErrInsert) || errors.Is(err, domain2.ErrSelect):
+	case errors.Is(err, domain.ErrInsert) || errors.Is(err, domain.ErrSelect):
 		e.w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	default:

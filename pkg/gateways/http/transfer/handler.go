@@ -1,15 +1,15 @@
 package transfer
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 )
 
 type Handler struct {
-	account  domain2.AccountUseCase
-	login    domain2.LoginUseCase
-	transfer domain2.TransferUseCase
+	account  domain.AccountUseCase
+	login    domain.LoginUseCase
+	transfer domain.TransferUseCase
 }
 
-func NewHandler(accountUseCase domain2.AccountUseCase, loginUseCase domain2.LoginUseCase, useCase domain2.TransferUseCase) *Handler {
+func NewHandler(accountUseCase domain.AccountUseCase, loginUseCase domain.LoginUseCase, useCase domain.TransferUseCase) *Handler {
 	return &Handler{account: accountUseCase, login: loginUseCase, transfer: useCase}
 }

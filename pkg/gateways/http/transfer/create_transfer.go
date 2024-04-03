@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/CMedrado/DesafioStone/pkg/common/logger"
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
@@ -18,21 +18,22 @@ import (
 func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var requestBody TransfersRequest
+
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	header := r.Header.Get("Authorization")
 
-	token, err := CheckAuthorizationHeaderType(header)
+	header := r.Header.Get("Authorization")
 
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
 		zap.String("method", "createTransfer"),
 	)
-	e := errorStruct{l: l, token: token, w: w}
 
+	token, err := CheckAuthorizationHeaderType(header)
+	e := errorStruct{l: l, token: token, w: w}
 	if err != nil {
 		e.errorCreate(err)
 		l.Error("error check autorization header type", zap.Error(err))
@@ -87,13 +88,10 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	l.With(zap.Any("type", http.StatusOK)).Info("create transfer successfully!")
-
 	response := TransferResponse{ID: id}
-	w.WriteHeader(http.StatusCreated)
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(response)
 }
 
@@ -109,19 +107,19 @@ func (e errorStruct) errorCreate(err error) {
 	case errors.Is(err, transfer.ErrWithoutBalance) ||
 		errors.Is(err, transfer.ErrInvalidAmount) ||
 		errors.Is(err, transfer.ErrSameAccount) ||
-		errors.Is(err, domain2.ErrParse) ||
+		errors.Is(err, domain.ErrParse) ||
 		errors.Is(err, ErrInvalidCredential):
 		e.w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
-	case errors.Is(err, domain2.ErrInvalidToken):
+	case errors.Is(err, domain.ErrInvalidToken):
 		e.w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
-	case errors.Is(err, domain2.ErrInvalidID) ||
+	case errors.Is(err, domain.ErrInvalidID) ||
 		errors.Is(err, transfer.ErrInvalidDestinationID):
 		e.w.WriteHeader(http.StatusNotFound)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
-	case errors.Is(err, domain2.ErrInsert) ||
-		errors.Is(err, domain2.ErrSelect):
+	case errors.Is(err, domain.ErrInsert) ||
+		errors.Is(err, domain.ErrSelect):
 		e.w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	default:

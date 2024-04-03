@@ -8,30 +8,28 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/CMedrado/DesafioStone/pkg/common/logger"
-
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
 func (s *Handler) GetRankTransfer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	transfers, err := s.transfer.GetRankTransfer(r.Context())
-	response := GetRankTransfersResponse{Transfers: transfers}
-
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
 		zap.String("method", "getRankTransfer"),
 	)
 	e := errorStruct{l: l, w: w}
+
+	transfers, err := s.transfer.GetRankTransfer(r.Context())
 	if err != nil {
 		e.errorGetRankTransfer(err)
 		return
 	}
-	l.With(zap.Any("type", http.StatusOK)).Info("get the rank transfer successfully!")
+
+	response := GetRankTransfersResponse{Transfers: transfers}
+
+	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
 }
@@ -39,7 +37,7 @@ func (s *Handler) GetRankTransfer(w http.ResponseWriter, r *http.Request) {
 func (e errorStruct) errorGetRankTransfer(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
 	switch {
-	case errors.Is(err, domain2.ErrGetRedis):
+	case errors.Is(err, domain.ErrGetRedis):
 		e.w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	default:

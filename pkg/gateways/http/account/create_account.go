@@ -15,19 +15,21 @@ import (
 
 func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
 	var requestBody CreateRequest
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
 		zap.String("method", "createAccount"),
 	)
-	idAccount, err := s.account.CreateAccount(r.Context(), requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
-	w.Header().Set("Content-Type", "application/json")
+
 	e := errorStruct{l: l, w: w}
+	idAccount, err := s.account.CreateAccount(r.Context(), requestBody.Name, requestBody.CPF, requestBody.Secret, requestBody.Balance)
 	if err != nil {
 		e.errorCreate(err)
 		return
@@ -35,10 +37,8 @@ func (s *Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	response := CreateResponse{ID: idAccount}
 
-	l.With(zap.Any("request_id", response)).Info("account created successfully!")
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-
 	_ = json.NewEncoder(w).Encode(response)
 }
 

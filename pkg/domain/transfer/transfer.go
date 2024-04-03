@@ -34,6 +34,7 @@ func (auc UseCase) GetTransfers(accountOrigin entities.Account, accountToken ent
 	if err != nil {
 		return []entities.Transfer{}, domain.ErrSelect
 	}
+
 	return transfers, nil
 }
 

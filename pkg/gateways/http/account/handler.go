@@ -1,13 +1,13 @@
 package account
 
 import (
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 )
 
 type Handler struct {
-	account domain2.AccountUseCase
+	account domain.AccountUseCase
 }
 
-func NewHandler(useCase domain2.AccountUseCase) *Handler {
+func NewHandler(useCase domain.AccountUseCase) *Handler {
 	return &Handler{account: useCase}
 }

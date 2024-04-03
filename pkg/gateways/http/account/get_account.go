@@ -16,7 +16,6 @@ import (
 func (s *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requestCPF := mux.Vars(r)["cpf"]
-	w.Header().Set("Content-Type", "application/json")
 
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
@@ -24,19 +23,13 @@ func (s *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 	)
 	e := errorStruct{l: l, w: w, id: requestCPF}
 
-	err, cpf := domain.CheckCPF(requestCPF)
-	if err != nil {
-		e.errorGet(domain.ErrInvalidCPF)
-		return
-	}
-
-	account, err := s.account.GetAccountCPF(r.Context(), cpf)
+	account, err := s.account.GetAccountCPF(r.Context(), requestCPF)
 	if err != nil {
 		e.errorGet(err)
 		return
 	}
 
-	l.With(zap.Any("type", http.StatusOK), zap.String("request_id", cpf)).Info("get balance successfully!")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(account)
 }
@@ -44,6 +37,9 @@ func (s *Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 func (e errorStruct) errorGet(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
 	switch {
+	case errors.Is(err, domain.ErrInvalidCPF):
+		e.w.WriteHeader(http.StatusNotFound)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	case errors.Is(err, domain.ErrInsert) || errors.Is(err, domain.ErrSelect):
 		e.w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)

@@ -7,6 +7,7 @@ func CheckCPF(cpf string) (error, string) {
 	if len(cpf) != 11 && len(cpf) != 14 {
 		return ErrInvalidCPF, cpf
 	}
+
 	if len(cpf) == 14 {
 		if string([]rune(cpf)[3]) == "." && string([]rune(cpf)[7]) == "." && string([]rune(cpf)[11]) == "-" {
 			return nil, CpfReplace(cpf)
@@ -14,6 +15,7 @@ func CheckCPF(cpf string) (error, string) {
 			return ErrInvalidCPF, cpf
 		}
 	}
+
 	return nil, cpf
 }
 

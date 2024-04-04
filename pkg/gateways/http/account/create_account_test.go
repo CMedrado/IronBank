@@ -151,7 +151,7 @@ func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 	}, nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (entities.Account, error) {
+func (uc AccountUsecaseMock) GetAccountID(id uuid.UUID) (entities.Account, error) {
 	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {

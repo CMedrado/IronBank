@@ -36,7 +36,7 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountOrigin, err := s.account.SearchAccount(accountOriginID)
+	accountOrigin, err := s.account.GetAccountID(accountOriginID)
 	if err != nil {
 		e.errorList(err)
 		return

@@ -106,6 +106,6 @@ func (auc UseCase) GetRankTransfer(ctx context.Context) ([]string, error) {
 	return res14, nil
 }
 
-func NewUseCase(repository Repository, redis *redis.Client) *UseCase {
-	return &UseCase{StoredTransfer: repository, redis: redis}
+func NewUseCase(repository Repository, redis *redis.Client) UseCase {
+	return UseCase{StoredTransfer: repository, redis: redis}
 }

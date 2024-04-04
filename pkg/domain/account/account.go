@@ -120,6 +120,14 @@ func (auc UseCase) GetAccountCPF(ctx context.Context, cpf string) (entities.Acco
 	return account, nil
 }
 
+func (auc UseCase) GetAccountID(id uuid.UUID) (entities.Account, error) {
+	account, err := auc.StoredAccount.ReturnAccountID(id)
+	if err != nil {
+		return entities.Account{}, domain.ErrSelect
+	}
+	return account, nil
+}
+
 func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestination entities.Account) error {
 	err := auc.StoredAccount.ChangeBalance(accountOrigin, accountDestination)
 	if err != nil {
@@ -128,6 +136,6 @@ func (auc UseCase) UpdateBalance(accountOrigin entities.Account, accountDestinat
 	return nil
 }
 
-func NewUseCase(repository Repository, redis *redis.Client) *UseCase {
-	return &UseCase{StoredAccount: repository, redis: redis}
+func NewUseCase(repository Repository, redis *redis.Client) UseCase {
+	return UseCase{StoredAccount: repository, redis: redis}
 }

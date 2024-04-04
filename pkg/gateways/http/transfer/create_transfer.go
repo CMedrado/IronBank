@@ -47,10 +47,10 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountOrigin, err := s.account.SearchAccount(accountOriginID)
+	accountOrigin, err := s.account.GetAccountID(accountOriginID)
 	if err != nil {
 		e.errorCreate(err)
-		l.Error("error search account, account id", zap.Error(err))
+		l.Error("error get account id", zap.Error(err))
 		return
 	}
 
@@ -68,7 +68,7 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountDestination, err := s.account.SearchAccount(accountDestinationIdUUID)
+	accountDestination, err := s.account.GetAccountID(accountDestinationIdUUID)
 	if err != nil {
 		e.errorCreate(err)
 		l.Error("error search account, account destination id", zap.Error(err))

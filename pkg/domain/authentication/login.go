@@ -45,6 +45,6 @@ func (auc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
 	return token, nil
 }
 
-func NewUseCase(repository Repository) *UseCase {
-	return &UseCase{StoredToken: repository}
+func NewUseCase(repository Repository) UseCase {
+	return UseCase{StoredToken: repository}
 }

@@ -12,9 +12,9 @@ type AccountUseCase interface {
 	CreateAccount(ctx context.Context, name string, cpf string, secret string, balance int) (uuid.UUID, error)
 	GetBalance(id string) (int, error)
 	GetAccounts() ([]entities.Account, error)
-	SearchAccount(id uuid.UUID) (entities.Account, error)
 	UpdateBalance(accountOrigin entities.Account, accountDestination entities.Account) error
 	GetAccountCPF(ctx context.Context, cpf string) (entities.Account, error)
+	GetAccountID(id uuid.UUID) (entities.Account, error)
 }
 
 type LoginUseCase interface {

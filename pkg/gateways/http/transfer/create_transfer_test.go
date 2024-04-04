@@ -165,7 +165,7 @@ func (uc TransferUsecaseMock) CreateTransfers(_ context.Context, accountOriginID
 	return nil, uuid.MustParse("c5424440-4737-4e03-86d2-3adac90ddd20"), accountOrigin, accountDestination
 }
 
-func (uc *TransferUsecaseMock) GetStatisticTransfer(_ context.Context) (int64, error) {
+func (uc *TransferUsecaseMock) GetCountTransfer(_ context.Context) (int64, error) {
 	return 10, nil
 }
 

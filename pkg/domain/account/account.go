@@ -21,7 +21,7 @@ type UseCase struct {
 }
 
 // CreateAccount to receive Name, CPF and Secret and set up the account, creating ID and Created_at
-func (auc *UseCase) CreateAccount(ctx context.Context, name string, cpf string, secret string, balance int) (uuid.UUID, error) {
+func (auc UseCase) CreateAccount(ctx context.Context, name string, cpf string, secret string, balance int) (uuid.UUID, error) {
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
 		zap.String("method", "createAccount"),
@@ -32,8 +32,8 @@ func (auc *UseCase) CreateAccount(ctx context.Context, name string, cpf string, 
 		return uuid.UUID{}, err
 	}
 
-	account, err := auc.GetAccountCPF(ctx, cpf)
-	if err != nil {
+	account, err := redis2.Get(ctx, cpf, auc.redis)
+	if err != nil && !errors.Is(err, domain.ErrAccountNotFound) {
 		return uuid.UUID{}, err
 	}
 
@@ -65,15 +65,15 @@ func (auc *UseCase) CreateAccount(ctx context.Context, name string, cpf string, 
 }
 
 // GetBalance requests the salary for the Story by sending the ID
-func (auc *UseCase) GetBalance(id string) (int, error) {
+func (auc UseCase) GetBalance(id string) (int, error) {
 	idUUID, err := uuid.Parse(id)
 	if err != nil {
-		return 0, fmt.Errorf("given the UUID is incorrect", err)
+		return 0, fmt.Errorf("given the UUID is incorrect: %w", err)
 	}
 
-	account, err := auc.SearchAccount(idUUID)
+	account, err := auc.StoredAccount.ReturnAccountID(idUUID)
 	if err != nil {
-		return 0, err
+		return 0, domain.ErrSelect
 	}
 
 	err = domain.CheckExistID(account)
@@ -85,22 +85,13 @@ func (auc *UseCase) GetBalance(id string) (int, error) {
 }
 
 // GetAccounts returns all API accounts
-func (auc *UseCase) GetAccounts() ([]entities.Account, error) {
+func (auc UseCase) GetAccounts() ([]entities.Account, error) {
 	accounts, err := auc.StoredAccount.ReturnAccounts()
 	if err != nil {
 		return []entities.Account{}, domain.ErrSelect
 	}
 
 	return accounts, nil
-}
-
-// SearchAccount returns the account via the received ID
-func (auc UseCase) SearchAccount(id uuid.UUID) (entities.Account, error) {
-	account, err := auc.StoredAccount.ReturnAccountID(id)
-	if err != nil {
-		return entities.Account{}, domain.ErrSelect
-	}
-	return account, nil
 }
 
 func (auc UseCase) GetAccountCPF(ctx context.Context, cpf string) (entities.Account, error) {

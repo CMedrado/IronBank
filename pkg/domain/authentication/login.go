@@ -37,8 +37,8 @@ func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
-	token, err := uc.StoredToken.ReturnTokenID(id)
+func (auc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
+	token, err := auc.StoredToken.ReturnTokenID(id)
 	if err != nil {
 		return entities.Token{}, domain.ErrInsert
 	}

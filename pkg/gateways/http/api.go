@@ -30,7 +30,7 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	r.Use(requestLogger(logger))
 
 	// Directory
-	r.Route("/account", func(r chi.Router) {
+	r.Route("/accounts", func(r chi.Router) {
 		r.Post("/", s.account.CreateAccount)
 		r.Get("/", s.account.ListAccounts)
 		r.Get("/{cpf}", s.account.GetAccount)
@@ -44,8 +44,8 @@ func NewAPI(account AccountHandler, login LoginHandler, transfer TransferHandler
 	r.Route("/transfers", func(r chi.Router) {
 		r.Post("/", s.transfer.CreateTransfer)
 		r.Get("/", s.transfer.ListTransfers)
-		r.Get("/transfers/statistic", s.transfer.GetStatisticTransfers)
-		r.Get("/transfers/rank", s.transfer.GetRankTransfer)
+		r.Get("/count", s.transfer.GetCountTransfer)
+		r.Get("/rank", s.transfer.GetRankTransfer)
 	})
 
 	s.Handler = r

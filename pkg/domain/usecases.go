@@ -25,6 +25,6 @@ type LoginUseCase interface {
 type TransferUseCase interface {
 	GetTransfers(accountOrigin entities.Account, accountToken entities.Token, token string) ([]entities.Transfer, error)
 	CreateTransfers(ctx context.Context, accountOriginID uuid.UUID, accountToken entities.Token, token string, accountOrigin entities.Account, accountDestination entities.Account, amount int, accountDestinationIdUUID uuid.UUID) (error, uuid.UUID, entities.Account, entities.Account)
-	GetStatisticTransfer(ctx context.Context) (int64, error)
+	GetCountTransfer(ctx context.Context) (int64, error)
 	GetRankTransfer(ctx context.Context) ([]string, error)
 }

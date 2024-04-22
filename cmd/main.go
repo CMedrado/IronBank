@@ -5,20 +5,18 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
 	"github.com/CMedrado/DesafioStone/pkg/common/configuration"
+	logger2 "github.com/CMedrado/DesafioStone/pkg/common/logger"
 	account2 "github.com/CMedrado/DesafioStone/pkg/domain/account"
 	authentication2 "github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	transfer2 "github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/accounts"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/token"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/transfer"
+	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/entries"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/account"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/authentication"
@@ -31,15 +29,7 @@ func main() {
 		fmt.Printf("something went wrong when reading config env vars: %v\n", err)
 		os.Exit(1)
 	}
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	logLevel, err := logrus.ParseLevel(config.Api.LogLevel)
-	if err != nil {
-		fmt.Printf("informed log level on config is invalid: %v", err)
-		os.Exit(1)
-	}
-	logger.SetLevel(logLevel)
-	lentry := logrus.NewEntry(logger)
+	logger := logger2.CreateLogger()
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     "redis:6379",
@@ -50,30 +40,31 @@ func main() {
 	dbURL := config.Database.GetUrl()
 	err = postgre.RunMigrations(dbURL)
 	if err != nil {
-		lentry.Fatalf("failed to run migrations: %v\n", err)
+		logger.Error("failed to run migrations", zap.Error(err))
 	}
 
 	pool, err := getDbPool(dbURL)
 	if err != nil {
-		lentry.Fatalf("failed to get db connection pool: %v", err)
+		logger.Error("failed to get db connection pool", zap.Error(err))
 	}
 
-	accountStorage := accounts.NewStored(pool, lentry)
-	accountToken := token.NewStored(pool, lentry)
-	accountTransfer := transfer.NewStored(pool, lentry)
-	accountUseCase := account2.NewUseCase(accountStorage, lentry, client)
-	loginUseCase := authentication2.NewUseCase(accountToken, lentry)
-	transferUseCase := transfer2.NewUseCase(accountTransfer, lentry, client)
-	accountHandler := account.NewHandler(accountUseCase, lentry)
-	loginHandler := authentication.NewHandler(accountUseCase, loginUseCase, lentry)
-	transferHandler := transfer3.NewHandler(accountUseCase, loginUseCase, transferUseCase, lentry)
-	server := http2.NewAPI(accountHandler, loginHandler, transferHandler, lentry)
+	accountStorage := entries.NewStored(pool)
 
-	serverLog := lentry.WithField("Port", config.Api.Port)
+	accountUseCase := account2.NewUseCase(accountStorage, client)
+	loginUseCase := authentication2.NewUseCase(accountStorage)
+	transferUseCase := transfer2.NewUseCase(accountStorage, client)
+
+	accountHandler := account.NewHandler(accountUseCase)
+	loginHandler := authentication.NewHandler(loginUseCase)
+	transferHandler := transfer3.NewHandler(transferUseCase)
+
+	server := http2.NewAPI(accountHandler, loginHandler, transferHandler, logger)
+
+	serverLog := logger.With(zap.String("Port", config.Api.Port))
 	serverLog.Info("starting the server!")
 	address := fmt.Sprintf(":%s", config.Api.Port)
 	if err = http.ListenAndServe(address, server); err != nil { //nolint:gosec
-		lentry.Fatalf("could not hear on port %s: %v", config.Api.Port, err)
+		logger.Error("could not hear on port", zap.String("Port", config.Api.Port), zap.Error(err))
 	}
 	serverLog.Info("shutting down the server")
 }

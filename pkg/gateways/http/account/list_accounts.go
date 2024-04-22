@@ -2,43 +2,47 @@ package account
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/common/logger"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
 func (s *Handler) ListAccounts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	accounts, err := s.account.GetAccounts()
-	response := GetAccountsResponse{Accounts: accounts}
-	l := s.logger.WithFields(log.Fields{
-		"module": "https",
-		"method": "handleAccounts",
-	})
+	ctx := r.Context()
+
+	l := logger.FromCtx(ctx).With(
+		zap.String("module", "handler"),
+		zap.String("method", "listAccounts"),
+	)
 	e := errorStruct{l: l, w: w}
+
+	accounts, err := s.account.GetAccounts()
 	if err != nil {
 		e.errorList(err)
 		return
 	}
-	l.WithFields(log.Fields{
-		"type": http.StatusOK,
-	}).Info("list the accounts successfully!")
+
+	response := GetAccountsResponse{Accounts: accounts}
+
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (e errorStruct) errorList(err error) {
 	ErrJson := http2.ErrorsResponse{Errors: err.Error()}
-	if err.Error() == domain2.ErrInsert.Error() {
-		e.l.WithFields(log.Fields{
-			"type": http.StatusInternalServerError,
-		}).Error(err)
+	switch {
+	case errors.Is(err, domain.ErrSelect):
 		e.w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(e.w).Encode(ErrJson)
-	} else {
+	default:
+		e.l.Error("failed to list accounts", zap.Error(err))
 		e.w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(e.w).Encode(ErrJson)
 	}
 }

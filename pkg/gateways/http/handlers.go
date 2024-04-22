@@ -16,6 +16,6 @@ type LoginHandler interface {
 type TransferHandler interface {
 	ListTransfers(w http.ResponseWriter, r *http.Request)
 	CreateTransfer(w http.ResponseWriter, r *http.Request)
-	GetStatisticTransfers(w http.ResponseWriter, r *http.Request)
+	GetCountTransfer(w http.ResponseWriter, r *http.Request)
 	GetRankTransfer(w http.ResponseWriter, r *http.Request)
 }

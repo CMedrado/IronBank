@@ -5,9 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func TestHandler_ListTransfers(t *testing.T) {
@@ -49,12 +46,6 @@ func TestHandler_ListTransfers(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := new(Handler)
 			s.transfer = &TransferUsecaseMock{}
-			s.account = &AccountUsecaseMock{}
-			s.login = &TokenUseCaseMock{}
-			logger := logrus.New()
-			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-			Lentry := logrus.NewEntry(logger)
-			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			respondRecorder := httptest.NewRecorder()

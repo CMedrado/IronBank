@@ -1,4 +1,4 @@
-package accounts
+package entries
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
-func (a *Storage) ReturnAccountID(id uuid.UUID) (entities.Account, error) {
+func (a Storage) ReturnAccountID(id uuid.UUID) (entities.Account, error) {
 	var account entities.Account
 	statement := `SELECT * FROM accounts WHERE id=$1`
 	err := a.pool.QueryRow(context.Background(), statement, id).Scan(&account.ID, &account.Name, &account.CPF, &account.Secret, &account.Balance, &account.CreatedAt)

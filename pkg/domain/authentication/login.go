@@ -4,48 +4,57 @@ import (
 	"encoding/base64"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 
-	domain2 "github.com/CMedrado/DesafioStone/pkg/domain"
+	"github.com/CMedrado/DesafioStone/pkg/domain"
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
 type UseCase struct {
 	StoredToken Repository
-	logger      *logrus.Entry
 }
 
 // AuthenticatedLogin authenticates the account and returns a token
-func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
-	secretHash := domain2.CreateHash(secret)
+func (auc UseCase) AuthenticatedLogin(secret string, cpf string) (error, string) {
+	err, cpf := domain.CheckCPF(cpf)
+	if err != nil {
+		return err, ""
+	}
 
+	account, err := auc.StoredToken.ReturnAccountCPF(cpf)
+	if err != nil {
+		return err, ""
+	}
+
+	secretHash := domain.CreateHash(secret)
+	now := domain.CreatedAt()
+	idToken, _ := domain.Random()
 	newLogin := entities.Login{CPF: account.CPF, Secret: secretHash}
 
-	err := CheckLogin(account, newLogin)
+	err = CheckLogin(account, newLogin)
 	if err != nil {
 		return ErrLogin, ""
 	}
 
-	now := domain2.CreatedAt()
-	idToken, _ := domain2.Random()
 	token := now.Format("02/01/2006 15:04:05") + ":" + account.ID.String() + ":" + idToken.String()
 	encoded := base64.StdEncoding.EncodeToString([]byte(token))
 	save := entities.Token{ID: idToken, IdAccount: account.ID, CreatedAt: now}
+
 	err = auc.StoredToken.SaveToken(save)
 	if err != nil {
-		return domain2.ErrInsert, ""
+		return domain.ErrInsert, ""
 	}
+
 	return nil, encoded
 }
 
-func (uc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
-	token, err := uc.StoredToken.ReturnTokenID(id)
+func (auc UseCase) GetTokenID(id uuid.UUID) (entities.Token, error) {
+	token, err := auc.StoredToken.ReturnTokenID(id)
 	if err != nil {
-		return entities.Token{}, domain2.ErrInsert
+		return entities.Token{}, domain.ErrInsert
 	}
 	return token, nil
 }
 
-func NewUseCase(repository Repository, log *logrus.Entry) *UseCase {
-	return &UseCase{StoredToken: repository, logger: log}
+func NewUseCase(repository Repository) UseCase {
+	return UseCase{StoredToken: repository}
 }

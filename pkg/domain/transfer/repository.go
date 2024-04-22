@@ -8,4 +8,7 @@ import (
 type Repository interface {
 	ReturnTransfer(id uuid.UUID) ([]entities.Transfer, error)
 	SaveTransfer(transfer entities.Transfer) error
+	ReturnAccountID(id uuid.UUID) (entities.Account, error)
+	ReturnTokenID(id uuid.UUID) (entities.Token, error)
+	ChangeBalance(accountOrigin, accountDestination entities.Account) error
 }

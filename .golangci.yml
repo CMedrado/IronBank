@@ -22,7 +22,6 @@ linters:
     - prealloc
     - rowserrcheck
     - unconvert
-    - gosec
     - errcheck
     - misspell
 

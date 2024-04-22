@@ -1,4 +1,4 @@
-package accounts
+package entries
 
 import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"

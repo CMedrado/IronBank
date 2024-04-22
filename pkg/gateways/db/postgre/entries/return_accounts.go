@@ -1,4 +1,4 @@
-package accounts
+package entries
 
 import (
 	"context"
@@ -6,12 +6,14 @@ import (
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
 
-func (a *Storage) ReturnAccounts() ([]entities.Account, error) {
+func (a Storage) ReturnAccounts() ([]entities.Account, error) {
 	statement := `SELECT * FROM accounts`
+
 	rows, err := a.pool.Query(context.Background(), statement)
 	if err != nil {
 		return []entities.Account{}, err
 	}
+
 	defer rows.Close()
 	var account entities.Account
 	var accounts []entities.Account
@@ -22,5 +24,6 @@ func (a *Storage) ReturnAccounts() ([]entities.Account, error) {
 		}
 		accounts = append(accounts, account)
 	}
+
 	return accounts, nil
 }

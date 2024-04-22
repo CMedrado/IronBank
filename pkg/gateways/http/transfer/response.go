@@ -17,7 +17,7 @@ type GetAccountsResponse struct {
 	Accounts []entities.Account `json:"accounts"`
 }
 
-type GetStatisticTransfersResponse struct {
+type GetCountTransferResponse struct {
 	Transfers int64 `json:"transfers_count"`
 }
 

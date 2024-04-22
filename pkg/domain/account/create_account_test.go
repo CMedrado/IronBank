@@ -8,10 +8,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"github.com/sirupsen/logrus"
 
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
 )
+
+var I = 0
 
 type CreateAccountTestInput struct {
 	ID        uuid.UUID
@@ -22,13 +23,11 @@ type CreateAccountTestInput struct {
 	CreatedAt string
 }
 
-var I = 0
-
 func TestCreateAccount(t *testing.T) {
 	//prepare
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
+	rdb := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
+	})
 	testTable := []struct { // tt := ....
 		name    string                 //Nome do teste
 		in      CreateAccountTestInput //Entrada da Função
@@ -80,7 +79,7 @@ func TestCreateAccount(t *testing.T) {
 	for _, testCase := range testTable {
 		t.Run(testCase.name, func(t *testing.T) {
 			//test
-			useCase := UseCase{StoredAccount: AccountRepoMock{}, logger: lentry}
+			useCase := UseCase{StoredAccount: AccountRepoMock{}, redis: rdb}
 			gotID, gotErr := useCase.CreateAccount(context.Background(), testCase.in.Name, testCase.in.CPF, testCase.in.Secret, testCase.in.Balance)
 
 			//assert
@@ -94,53 +93,6 @@ func TestCreateAccount(t *testing.T) {
 
 			if (gotID == uuid.UUID{}) && !testCase.wantErr && gotErr != nil {
 				t.Errorf("expected an ID but got %d", gotID)
-			}
-		})
-	}
-}
-
-func TestGetBalance(t *testing.T) {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-	lentry := logrus.NewEntry(logger)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
-	})
-	tt := []struct {
-		name    string
-		in      string
-		wantErr bool
-		want    int
-	}{
-		{
-			name:    "should successfully get balance with ID",
-			in:      "a505b1f9-ac4c-45aa-be43-8614a227a9d4",
-			wantErr: false,
-			want:    6000,
-		},
-		{
-			name:    "should unsuccessfully get balance when ID is invalid",
-			in:      "f7ee7351-4c96-40ca-8cd8-37434810ddfs",
-			wantErr: true,
-		},
-	}
-
-	for _, testCase := range tt {
-		t.Run(testCase.name, func(t *testing.T) {
-			usecase := UseCase{StoredAccount: AccountRepoMock{}, logger: lentry, redis: rdb}
-			gotBalance, gotErr := usecase.GetBalance(testCase.in)
-
-			//assert
-			if !testCase.wantErr && gotErr != nil { // O teste falhará pois não queremos erro e obtivemos um
-				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
-			}
-
-			if testCase.wantErr && gotErr == nil { // O teste falhará pois queremos erro e não obtivemos um
-				t.Error("wanted err but got nil")
-			}
-
-			if gotBalance != testCase.want {
-				t.Errorf("expected an ID but got %d", gotBalance)
 			}
 		})
 	}

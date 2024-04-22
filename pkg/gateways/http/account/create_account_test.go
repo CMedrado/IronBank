@@ -9,10 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
-
 	"github.com/CMedrado/DesafioStone/pkg/domain/entities"
+	"github.com/google/uuid"
 )
 
 var Aux = 0
@@ -71,10 +69,6 @@ func TestHandler_CreateAccount(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := new(Handler)
 			s.account = &AccountUsecaseMock{}
-			logger := logrus.New()
-			logger.SetFormatter(&logrus.TextFormatter{TimestampFormat: time.RFC3339})
-			Lentry := logrus.NewEntry(logger)
-			s.logger = Lentry
 			bodyBytes := []byte(tc.body)
 			request, _ := http.NewRequest(tc.method, tc.path, bytes.NewReader(bodyBytes))
 			responseRecorder := httptest.NewRecorder()
@@ -157,7 +151,7 @@ func (uc AccountUsecaseMock) GetAccounts() ([]entities.Account, error) {
 	}, nil
 }
 
-func (uc AccountUsecaseMock) SearchAccount(id uuid.UUID) (entities.Account, error) {
+func (uc AccountUsecaseMock) GetAccountID(id uuid.UUID) (entities.Account, error) {
 	account := entities.Account{}
 	accounts, _ := uc.GetAccounts()
 	for _, a := range accounts {

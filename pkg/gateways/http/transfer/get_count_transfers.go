@@ -10,15 +10,15 @@ import (
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
-func (s *Handler) GetRankTransfer(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) GetCountTransfer(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	l := logger.FromCtx(ctx).With(
 		zap.String("module", "handler"),
-		zap.String("method", "getRankTransfer"),
+		zap.String("method", "getCountTransfer"),
 	)
 
-	transfers, err := s.transfer.GetRankTransfer(r.Context())
+	transfers, err := s.transfer.GetCountTransfer(r.Context())
 	if err != nil {
 		ErrJson := http2.ErrorsResponse{Errors: err.Error()}
 		l.Error("failed to get rank transfer", zap.Error(err))
@@ -27,7 +27,7 @@ func (s *Handler) GetRankTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := GetRankTransfersResponse{Transfers: transfers}
+	response := GetCountTransferResponse{Transfers: transfers}
 
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)

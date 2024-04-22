@@ -9,7 +9,6 @@ import (
 
 	"github.com/CMedrado/DesafioStone/pkg/common/logger"
 	"github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
 
@@ -30,25 +29,7 @@ func (s *Handler) ListTransfers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountOriginID, tokenID, err := authentication.DecoderToken(token)
-	if err != nil {
-		e.errorList(err)
-		return
-	}
-
-	accountOrigin, err := s.account.GetAccountID(accountOriginID)
-	if err != nil {
-		e.errorList(err)
-		return
-	}
-
-	accountToken, err := s.login.GetTokenID(tokenID)
-	if err != nil {
-		e.errorList(err)
-		return
-	}
-
-	Transfers, err := s.transfer.GetTransfers(accountOrigin, accountToken, token)
+	Transfers, err := s.transfer.GetTransfers(token)
 	if err != nil {
 		e.errorList(err)
 		return

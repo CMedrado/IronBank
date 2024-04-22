@@ -9,4 +9,5 @@ import (
 type Repository interface {
 	SaveToken(token entities.Token) error
 	ReturnTokenID(id uuid.UUID) (entities.Token, error)
+	ReturnAccountCPF(cpf string) (entities.Account, error)
 }

@@ -16,9 +16,7 @@ import (
 	authentication2 "github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	transfer2 "github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/accounts"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/token"
-	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/transfer"
+	"github.com/CMedrado/DesafioStone/pkg/gateways/db/postgre/entries"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/account"
 	"github.com/CMedrado/DesafioStone/pkg/gateways/http/authentication"
@@ -50,17 +48,15 @@ func main() {
 		logger.Error("failed to get db connection pool", zap.Error(err))
 	}
 
-	accountStorage := accounts.NewStored(pool)
-	accountToken := token.NewStored(pool)
-	accountTransfer := transfer.NewStored(pool)
+	accountStorage := entries.NewStored(pool)
 
 	accountUseCase := account2.NewUseCase(accountStorage, client)
-	loginUseCase := authentication2.NewUseCase(accountToken)
-	transferUseCase := transfer2.NewUseCase(accountTransfer, client)
+	loginUseCase := authentication2.NewUseCase(accountStorage)
+	transferUseCase := transfer2.NewUseCase(accountStorage, client)
 
 	accountHandler := account.NewHandler(accountUseCase)
-	loginHandler := authentication.NewHandler(accountUseCase, loginUseCase)
-	transferHandler := transfer3.NewHandler(accountUseCase, loginUseCase, transferUseCase)
+	loginHandler := authentication.NewHandler(loginUseCase)
+	transferHandler := transfer3.NewHandler(transferUseCase)
 
 	server := http2.NewAPI(accountHandler, loginHandler, transferHandler, logger)
 

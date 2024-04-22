@@ -30,13 +30,7 @@ func (s *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	)
 	e := errorStruct{l: l, w: w}
 
-	account, err := s.account.GetAccountCPF(r.Context(), requestBody.CPF)
-	if err != nil {
-		e.errorLogin(err)
-		return
-	}
-
-	err, token := s.login.AuthenticatedLogin(requestBody.Secret, account)
+	err, token := s.login.AuthenticatedLogin(requestBody.Secret, requestBody.CPF)
 	if err != nil {
 		e.errorLogin(err)
 		return

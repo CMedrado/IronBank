@@ -14,13 +14,23 @@ type UseCase struct {
 }
 
 // AuthenticatedLogin authenticates the account and returns a token
-func (auc UseCase) AuthenticatedLogin(secret string, account entities.Account) (error, string) {
+func (auc UseCase) AuthenticatedLogin(secret string, cpf string) (error, string) {
+	err, cpf := domain.CheckCPF(cpf)
+	if err != nil {
+		return err, ""
+	}
+
+	account, err := auc.StoredToken.ReturnAccountCPF(cpf)
+	if err != nil {
+		return err, ""
+	}
+
 	secretHash := domain.CreateHash(secret)
 	now := domain.CreatedAt()
 	idToken, _ := domain.Random()
 	newLogin := entities.Login{CPF: account.CPF, Secret: secretHash}
 
-	err := CheckLogin(account, newLogin)
+	err = CheckLogin(account, newLogin)
 	if err != nil {
 		return ErrLogin, ""
 	}

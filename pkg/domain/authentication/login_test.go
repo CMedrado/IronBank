@@ -13,6 +13,8 @@ type CreateLoginInput struct {
 	Secret string
 }
 
+var I = 0
+
 func TestAuthenticatedLogin(t *testing.T) {
 	tt := []struct {
 		name    string
@@ -22,7 +24,7 @@ func TestAuthenticatedLogin(t *testing.T) {
 		{
 			name: "should successfully authenticated login with formatted CPF",
 			in: CreateLoginInput{
-				CPF:    "081.313.910-43",
+				CPF:    "081.313.920-43",
 				Secret: "lixo",
 			},
 			wantErr: false,
@@ -66,8 +68,7 @@ func TestAuthenticatedLogin(t *testing.T) {
 			usecase := UseCase{
 				StoredToken: LoginRepoMock{},
 			}
-			account := GetAccountCPF(testCase.in.CPF)
-			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.Secret, account)
+			gotErr, gotToken := usecase.AuthenticatedLogin(testCase.in.Secret, testCase.in.CPF)
 
 			if !testCase.wantErr && gotErr != nil {
 				t.Errorf("unexpected error, wantErr=%v; gotErr=%s", testCase.wantErr, gotErr)
@@ -132,4 +133,31 @@ func (rm LoginRepoMock) ReturnTokenID(id uuid.UUID) (entities.Token, error) {
 		}, nil
 	}
 	return entities.Token{}, nil
+}
+
+func (rm LoginRepoMock) ReturnAccountCPF(cpf string) (entities.Account, error) {
+	cpf2 := "08131392043"
+	cpf3 := "38453162093"
+	if cpf == cpf2 {
+		return entities.Account{
+			ID:        uuid.MustParse("f7ee7351-4c96-40ca-8cd8-37434810ddfa"),
+			Name:      "Lucas",
+			CPF:       "08131391043",
+			Secret:    "3cf4897608d8ae2d9ccd9e087be19fc7ba962b9ae38e784f1b770eea3394645f",
+			Balance:   5000,
+			CreatedAt: time.Now(),
+		}, nil
+	}
+	if cpf == cpf3 {
+		return entities.Account{
+			ID:        uuid.MustParse("a505b1f9-ac4c-45aa-be43-8614a227a9d4"),
+			Name:      "Rafael",
+			CPF:       "38453162093",
+			Secret:    "7edb360f06acaef2cc80dba16cf563f199d347db4443da04da0c8173e3f9e4ed",
+			Balance:   6000,
+			CreatedAt: time.Now(),
+		}, nil
+
+	}
+	return entities.Account{}, nil
 }

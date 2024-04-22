@@ -5,12 +5,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/CMedrado/DesafioStone/pkg/common/logger"
 	"github.com/CMedrado/DesafioStone/pkg/domain"
-	"github.com/CMedrado/DesafioStone/pkg/domain/authentication"
 	"github.com/CMedrado/DesafioStone/pkg/domain/transfer"
 	http2 "github.com/CMedrado/DesafioStone/pkg/gateways/http"
 )
@@ -40,51 +38,9 @@ func (s *Handler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountOriginID, tokenOriginID, err := authentication.DecoderToken(token)
+	err, id := s.transfer.CreateTransfers(r.Context(), token, requestBody.Amount, requestBody.AccountDestinationID)
 	if err != nil {
 		e.errorCreate(err)
-		l.Error("error decoder token", zap.Error(err))
-		return
-	}
-
-	accountOrigin, err := s.account.GetAccountID(accountOriginID)
-	if err != nil {
-		e.errorCreate(err)
-		l.Error("error get account id", zap.Error(err))
-		return
-	}
-
-	accountToken, err := s.login.GetTokenID(tokenOriginID)
-	if err != nil {
-		e.errorCreate(err)
-		l.Error("error get token id", zap.Error(err))
-		return
-	}
-
-	accountDestinationIdUUID, err := uuid.Parse(requestBody.AccountDestinationID)
-	if err != nil {
-		e.errorCreate(err)
-		l.Error("error parse", zap.Error(err))
-		return
-	}
-
-	accountDestination, err := s.account.GetAccountID(accountDestinationIdUUID)
-	if err != nil {
-		e.errorCreate(err)
-		l.Error("error search account, account destination id", zap.Error(err))
-		return
-	}
-
-	err, id, accountOrigin, accountDestination := s.transfer.CreateTransfers(r.Context(), accountOriginID, accountToken, token, accountOrigin, accountDestination, requestBody.Amount, accountDestinationIdUUID)
-	if err != nil {
-		e.errorCreate(err)
-		return
-	}
-
-	err = s.account.UpdateBalance(accountOrigin, accountDestination)
-	if err != nil {
-		e.errorCreate(err)
-		l.Error("error update balance", zap.Error(err))
 		return
 	}
 
